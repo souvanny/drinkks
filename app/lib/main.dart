@@ -31,7 +31,9 @@ void main() async {
           (ref) => ref.watch(persistentLocaleProvider),
         ),
       ],
-      child: const MyApp(),
+      child: MaterialApp(  // ← MaterialApp doit être ici
+        home: MyApp(),
+      ),
     ),
   );
 }
@@ -64,8 +66,8 @@ class MyApp extends ConsumerWidget {
     final locale = ref.watch(persistentLocaleProvider);
 
     return UpdateChecker(
-      autoPrompt: true,
-      enforceCriticalUpdates: true,
+      autoPrompt: false,
+      enforceCriticalUpdates: false,
       child: AccessibilityWrapper(
         child: MaterialApp.router(
           title: AppConstants.appName,

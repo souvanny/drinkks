@@ -5,6 +5,7 @@ import 'package:flutter_riverpod_clean_architecture/core/providers/localization_
 import 'package:flutter_riverpod_clean_architecture/core/router/locale_aware_router.dart';
 import 'package:flutter_riverpod_clean_architecture/examples/localization_assets_demo.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/presentation/screens/login_screen.dart';
+import 'package:flutter_riverpod_clean_architecture/features/social_login/presentation/screens/social_login_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/presentation/screens/register_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/home/presentation/screens/home_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/presentation/providers/auth_provider.dart';
@@ -13,6 +14,7 @@ import 'package:flutter_riverpod_clean_architecture/features/settings/presentati
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod_clean_architecture/features/chat/presentation/screens/chat_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/survey/presentation/screens/survey_screen.dart';
+
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -62,7 +64,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppConstants.loginRoute,
         name: 'login',
-        builder: (context, state) => const LoginScreen(),
+        // builder: (context, state) => const LoginScreen(),
+        builder: (context, state) => const SocialLoginScreen(),
       ),
 
       // Register route
