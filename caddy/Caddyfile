@@ -1,0 +1,20 @@
+{
+    log
+}
+
+lheritier.solar-flex.fr {
+    reverse_proxy localhost:8081
+}
+
+api.lheritier.solar-flex.fr {
+    reverse_proxy localhost:8091
+}
+
+lheritier-bo.solar-flex.fr {
+    reverse_proxy localhost:81
+}
+
+api.lheritier-bo.solar-flex.fr {
+    reverse_proxy localhost:91
+}
+

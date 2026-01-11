@@ -1,0 +1,7 @@
+{
+    log
+}
+
+api.drinkks.local {
+    reverse_proxy localhost:8101
+}
