@@ -102,7 +102,8 @@ flutter:
   assets:
     # Common assets
     - assets/images/
-    
+    - assets/images/logos/
+
     # Language-specific assets
     - assets/images/en/
     - assets/images/es/

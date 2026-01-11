@@ -25,11 +25,12 @@ class SocialLoginRemoteDataSourceImpl implements SocialLoginRemoteDataSource {
   Future<List<SocialLoginModel>> fetchSocialLogins() async {
     // final response = await _dio.get('/social_logins');
     // return (response.data as List).map((e) => SocialLoginModel.fromJson(e)).toList();
-    await Future.delayed(const Duration(seconds: 1));
-    return [
-      const SocialLoginModel(id: '1', name: 'Item 1'),
-      const SocialLoginModel(id: '2', name: 'Item 2'),
-    ];
+    // await Future.delayed(const Duration(seconds: 1));
+    // return [
+    //   const SocialLoginModel(id: '1', name: 'Item 1'),
+    //   const SocialLoginModel(id: '2', name: 'Item 2'),
+    // ];
+    return [];
   }
 
   @override
