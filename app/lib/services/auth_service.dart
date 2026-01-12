@@ -1,8 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  // Instance du stockage sécurisé
+  final _storage = const FlutterSecureStorage();
+
+  // Clé pour le stockage
+  static const _tokenKey = 'firebase_id_token';
 
   // final GoogleSignIn _googleSignIn = GoogleSignIn();
 
@@ -52,6 +59,11 @@ class AuthService {
         final UserCredential googleUserCredential = await FirebaseAuth.instance.signInWithCredential(googleCredential);
 
         IdTokenResult tokenResult = await FirebaseAuth.instance.currentUser!.getIdTokenResult();
+
+        if (tokenResult.token != null) {
+          await _storage.write(key: _tokenKey, value: tokenResult.token);
+        }
+
 
         // await fetchJwtToken(tokenResult.token);
       } catch (error) {
