@@ -32,24 +32,24 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
           .read(socialLoginControllerProvider.notifier)
           .signInWithGoogle();
 
-      if (user != null) {
-        print('✅ Connexion Google réussie: ${user.email}');
-
-        // Afficher un message de succès
-        _showSuccessMessage(user);
-
-        // Naviguer vers l'écran d'accueil après un délai
-        await Future.delayed(const Duration(seconds: 1));
-
-        // TODO: Décommenter pour la navigation
-        // Navigator.pushReplacementNamed(context, '/home');
-
-      } else {
-        print('⚠️ Connexion Google annulée par l\'utilisateur');
-        setState(() {
-          _errorMessage = 'Connexion annulée';
-        });
-      }
+      // if (user != null) {
+      //   print('✅ Connexion Google réussie: ${user.email}');
+      //
+      //   // Afficher un message de succès
+      //   _showSuccessMessage(user);
+      //
+      //   // Naviguer vers l'écran d'accueil après un délai
+      //   await Future.delayed(const Duration(seconds: 1));
+      //
+      //   // TODO: Décommenter pour la navigation
+      //   // Navigator.pushReplacementNamed(context, '/home');
+      //
+      // } else {
+      //   print('⚠️ Connexion Google annulée par l\'utilisateur');
+      //   setState(() {
+      //     _errorMessage = 'Connexion annulée';
+      //   });
+      // }
     } catch (e) {
       print('❌ Erreur Google Sign-In: $e');
       setState(() {

@@ -1,0 +1,9 @@
+- le projet doit être créé dans google clound console
+- serverClientId doit correspondre au client id du projet web
+- on parle bien de client web
+- verifier l'api People (pas sûr)
+- le sha1 est important
+- vérifier dans build.gradle le namespace et surtout applicationId
+- ./gradlew clean
+- ./gradlew signingReport
+- si ça va pas générer un nouveau sha1 pour ~/.android/debug.keystore

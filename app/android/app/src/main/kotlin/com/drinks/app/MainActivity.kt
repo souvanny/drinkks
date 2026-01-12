@@ -1,4 +1,4 @@
-package com.drinkks.main
+package com.drinks.app
 
 import io.flutter.embedding.android.FlutterActivity
 

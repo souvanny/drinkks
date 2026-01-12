@@ -16,36 +16,32 @@ import 'package:flutter_riverpod_clean_architecture/l10n/l10n.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
-  // Ensure Flutter binding is initialized
+  // 1. Initialisation obligatoire des bindings
   WidgetsFlutterBinding.ensureInitialized();
 
-  // INITIALISER FIREBASE AVANT TOUT
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // 2. INITIALISER FIREBASE avec sécurité contre les doublons
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
 
-  // Initialize shared preferences
+  // 3. Initialisation des préférences
   final sharedPreferences = await SharedPreferences.getInstance();
 
-  // Run the app with ProviderScope to enable Riverpod
   runApp(
     ProviderScope(
       overrides: [
-        // Override the shared preferences provider with the instance
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
-
-        // Override the default locale provider to use our persistent locale
         defaultLocaleProvider.overrideWith(
               (ref) => ref.watch(persistentLocaleProvider),
         ),
       ],
-      child: MaterialApp(  // ← MaterialApp doit être ici
-        home: const MyApp(), // <-- Ajouter const
-      ),
+      // SUPPRESSION du MaterialApp inutile ici qui entourait MyApp
+      child: const MyApp(),
     ),
   );
 }
-
 // Provider to manage theme mode
 class ThemeModeNotifier extends Notifier<ThemeMode> {
   @override

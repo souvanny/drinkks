@@ -50,21 +50,22 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAbwmhphxnLFZZhtI8v_gwXjMRQV7F5RTQ',
-    appId: '1:346927724774:android:5de674d31f4c70e7c3a327',
-    messagingSenderId: '346927724774',
-    projectId: 'drinkks-73f7a',
-    storageBucket: 'drinkks-73f7a.firebasestorage.app',
+    apiKey: 'AIzaSyD94bDe_49eyZaeeg0eWfyQlgkukHMF30s',
+    appId: '1:1084343369802:android:a73ebafd1ee568a881e6b3',
+    messagingSenderId: '1084343369802',
+    projectId: 'drinks-38bad',
+    storageBucket: 'drinks-38bad.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDPn3xnwe9YCBNjokIoPaSg4m7dbsWgrfA',
-    appId: '1:346927724774:ios:58a15848cd669593c3a327',
+    appId: '1:346927724774:ios:37ff49a73d2e57f3c3a327',
     messagingSenderId: '346927724774',
     projectId: 'drinkks-73f7a',
     storageBucket: 'drinkks-73f7a.firebasestorage.app',
     androidClientId: '346927724774-rv31g3jmfas8vnrp1p1h22ct1im5fobq.apps.googleusercontent.com',
-    iosBundleId: 'com.ssoad.flutterRiverpodCleanArchitecture',
+    iosClientId: '346927724774-fkgks7tvvvrfpdbpkpbdaf380396ilm5.apps.googleusercontent.com',
+    iosBundleId: 'com.drinks.app',
   );
 
 }

@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CLIENT_ID</key>
+	<string>346927724774-fkgks7tvvvrfpdbpkpbdaf380396ilm5.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.346927724774-fkgks7tvvvrfpdbpkpbdaf380396ilm5</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>346927724774-rv31g3jmfas8vnrp1p1h22ct1im5fobq.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -11,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.ssoad.flutterRiverpodCleanArchitecture</string>
+	<string>com.drinks.app</string>
 	<key>PROJECT_ID</key>
 	<string>drinkks-73f7a</string>
 	<key>STORAGE_BUCKET</key>
@@ -27,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:346927724774:ios:58a15848cd669593c3a327</string>
+	<string>1:346927724774:ios:37ff49a73d2e57f3c3a327</string>
 </dict>
 </plist>

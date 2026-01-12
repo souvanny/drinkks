@@ -1,0 +1,33 @@
+Pour l'APK
+
+keytool -keystore /Users/souvanny/upload-keystore.jks -list -v
+keytool -keystore ~/upload-keystore.jks -list -v
+
+mot de passe : android
+
+Pour l'aab ça l'existe pas il faut aller sur le Google play
+
+Home > APP > Tester et publier > Configuration > Signature d'application
+
+
+//
+
+keytool -genkey -v -keystore drinkks-upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+mdp : android
+
+cd android
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+
+keytool -keystore ~/drinkks-upload-keystore.jks -list -v
+keytool -keystore ~/upload-keystore.jks -list -v
+
+
+
+rm ~/.android/debug.keystore
+
+keytool -genkey -v -keystore ~/.android/debug.keystore \
+  -storepass android -keypass android \
+  -alias androiddebugkey -keyalg RSA \
+  -keysize 2048 -validity 10000
+
+

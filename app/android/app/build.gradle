@@ -7,6 +7,10 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+dependencies {
+    implementation platform('com.google.firebase:firebase-bom:34.7.0')
+}
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
@@ -26,7 +30,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.drinkks.main"
+    namespace "com.drinks.app"
     compileSdkVersion 36
 
     compileOptions {
@@ -43,19 +47,22 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.drinkks.main"
+        applicationId "com.drinks.app"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
 
         manifestPlaceholders = [
-                'applicationName': 'com.drinkks.main'
+                'applicationName': 'com.drinks.app'
         ]
     }
 
     buildTypes {
         release {
+            signingConfig signingConfigs.debug
+        }
+        debug {
             signingConfig signingConfigs.debug
         }
     }

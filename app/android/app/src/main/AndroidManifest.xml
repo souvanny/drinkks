@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools" package="com.drinks.app">
 
     <!-- Permissions minimales -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="drinkks"
+        android:label="drinks"
         android:icon="@mipmap/ic_launcher"
         tools:replace="android:label">
 
@@ -42,7 +42,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- VOTRE PACKAGE NAME ICI -->
-                <data android:scheme="com.drinkks.main" />
+                <data android:scheme="com.drinks.app" />
             </intent-filter>
 
         </activity>

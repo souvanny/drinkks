@@ -1,85 +1,42 @@
 {
   "project_info": {
-    "project_number": "346927724774",
-    "project_id": "drinkks-73f7a",
-    "storage_bucket": "drinkks-73f7a.firebasestorage.app"
+    "project_number": "1084343369802",
+    "project_id": "drinks-38bad",
+    "storage_bucket": "drinks-38bad.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:346927724774:android:5de674d31f4c70e7c3a327",
+        "mobilesdk_app_id": "1:1084343369802:android:a73ebafd1ee568a881e6b3",
         "android_client_info": {
-          "package_name": "com.drinkks.main"
+          "package_name": "com.drinks.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "346927724774-rv31g3jmfas8vnrp1p1h22ct1im5fobq.apps.googleusercontent.com",
+          "client_id": "1084343369802-ju6glrsj87do2hf4h3o7cp2u6ak7c8hr.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.drinkks.main",
-            "certificate_hash": "92aaf60f3675403a501ed9e966d9ee69e34ad47d"
+            "package_name": "com.drinks.app",
+            "certificate_hash": "dfacd52e60b186545b05c2c7bc47f1a8870340ec"
           }
         },
         {
-          "client_id": "346927724774-5i5ujgc290a373uhg7jfalq5644i6k6k.apps.googleusercontent.com",
+          "client_id": "1084343369802-36565dmgarm2gkos54eb6j9q6so0s9bf.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAbwmhphxnLFZZhtI8v_gwXjMRQV7F5RTQ"
+          "current_key": "AIzaSyD94bDe_49eyZaeeg0eWfyQlgkukHMF30s"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "346927724774-5i5ujgc290a373uhg7jfalq5644i6k6k.apps.googleusercontent.com",
+              "client_id": "1084343369802-36565dmgarm2gkos54eb6j9q6so0s9bf.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "346927724774-fkgks7tvvvrfpdbpkpbdaf380396ilm5.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.drinkks.main"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:346927724774:android:0ed9af8b6e48f207c3a327",
-        "android_client_info": {
-          "package_name": "com.example.drinkks"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "346927724774-5i5ujgc290a373uhg7jfalq5644i6k6k.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAbwmhphxnLFZZhtI8v_gwXjMRQV7F5RTQ"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "346927724774-5i5ujgc290a373uhg7jfalq5644i6k6k.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "346927724774-fkgks7tvvvrfpdbpkpbdaf380396ilm5.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.drinkks.main"
-              }
             }
           ]
         }
