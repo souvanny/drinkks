@@ -13,7 +13,6 @@ class SocialLoginController extends _$SocialLoginController {
 
   @override
   FutureOr<List<SocialLoginEntity>> build() {
-    // Initialiser le service d'authentification
     _authService = ref.read(authServiceProvider);
 
     print('🟡 SocialLoginController initialisé');
@@ -31,23 +30,7 @@ class SocialLoginController extends _$SocialLoginController {
 
     try {
       // Appeler le service d'authentification
-      final user = await _authService.signInWithGoogle();
-
-      // if (user != null) {
-      //   print('✅ Utilisateur connecté: ${user.email}');
-      //   print('✅ UID: ${user.uid}');
-      //   print('✅ Nom: ${user.displayName}');
-      //   print('✅ Photo: ${user.photoURL}');
-      //
-      //   // Vous pouvez émettre un événement ou mettre à jour un state ici
-      //   // Par exemple, naviguer vers l'écran d'accueil
-      //
-      //   return user;
-      // } else {
-      //   print('⚠️ L\'utilisateur a annulé la connexion');
-      //   return null;
-      // }
-
+      await _authService.signInWithGoogle();
     } catch (e, stack) {
       print('❌ Erreur dans signInWithGoogle: $e');
       print('Stack trace: $stack');

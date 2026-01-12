@@ -27,29 +27,7 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
     try {
       print('🔵 Début de la connexion Google...');
 
-      // Appeler la méthode signInWithGoogle du controller
-      final user = await ref
-          .read(socialLoginControllerProvider.notifier)
-          .signInWithGoogle();
-
-      // if (user != null) {
-      //   print('✅ Connexion Google réussie: ${user.email}');
-      //
-      //   // Afficher un message de succès
-      //   _showSuccessMessage(user);
-      //
-      //   // Naviguer vers l'écran d'accueil après un délai
-      //   await Future.delayed(const Duration(seconds: 1));
-      //
-      //   // TODO: Décommenter pour la navigation
-      //   // Navigator.pushReplacementNamed(context, '/home');
-      //
-      // } else {
-      //   print('⚠️ Connexion Google annulée par l\'utilisateur');
-      //   setState(() {
-      //     _errorMessage = 'Connexion annulée';
-      //   });
-      // }
+      await ref.read(socialLoginControllerProvider.notifier).signInWithGoogle();
     } catch (e) {
       print('❌ Erreur Google Sign-In: $e');
       setState(() {
@@ -95,10 +73,7 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
             const Icon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 10),
             Expanded(
-              child: Text(
-                'Bienvenue ${user.displayName ?? user.email} !',
-                style: const TextStyle(color: Colors.white),
-              ),
+              child: Text('Bienvenue ${user.displayName ?? user.email} !', style: const TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -143,42 +118,26 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
                 Container(
                   width: 120,
                   height: 120,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.local_drink,
-                    size: 60,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withOpacity(0.1), shape: BoxShape.circle),
+                  child: Icon(Icons.local_drink, size: 60, color: Theme.of(context).colorScheme.primary),
                 ),
                 const SizedBox(height: 32),
 
                 // Titre
                 Text(
                   'Bienvenue sur Drinkks',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
 
-                // Sous-titre
                 Text(
                   'Connectez-vous pour découvrir nos boissons',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 48),
 
-                // Bouton Google Sign-In
                 _buildGoogleSignInButton(),
 
                 // Message d'erreur
@@ -196,13 +155,7 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
                         Icon(Icons.error_outline, color: Colors.red.shade600),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: TextStyle(
-                              color: Colors.red.shade800,
-                              fontSize: 14,
-                            ),
-                          ),
+                          child: Text(_errorMessage!, style: TextStyle(color: Colors.red.shade800, fontSize: 14)),
                         ),
                       ],
                     ),
@@ -219,17 +172,11 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
                         _showMethods = true;
                       });
                     },
-                    child: Text(
-                      'Voir d\'autres méthodes',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
+                    child: Text('Voir d\'autres méthodes', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                   ),
 
                 // Liste des autres méthodes (seulement si showMethods = true)
-                if (_showMethods)
-                  _buildOtherMethodsSection(socialLoginState),
+                if (_showMethods) _buildOtherMethodsSection(socialLoginState),
               ],
             ),
           ),
@@ -256,79 +203,47 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
         ),
         child: _isGoogleSigningIn
             ? Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Connexion en cours...',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        )
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey.shade600)),
+                  const SizedBox(width: 12),
+                  const Text('Connexion en cours...', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                ],
+              )
             : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Icône Google depuis assets
-            Image.asset(
-              'assets/images/logos/google-signin-logo_100_100.png',
-              height: 24,
-              width: 24,
-              errorBuilder: (context, error, stackTrace) {
-                // Fallback si l'image n'est pas trouvée
-                return Icon(
-                  Icons.g_mobiledata,
-                  size: 24,
-                  color: Colors.red,
-                );
-              },
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Continuer avec Google',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Icône Google depuis assets
+                  Image.asset(
+                    'assets/images/logos/google-signin-logo_100_100.png',
+                    height: 24,
+                    width: 24,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Fallback si l'image n'est pas trouvée
+                      return Icon(Icons.g_mobiledata, size: 24, color: Colors.red);
+                    },
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Continuer avec Google', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
 
-  Widget _buildOtherMethodsSection(
-      AsyncValue<List<SocialLoginEntity>> socialLoginState) {
+  Widget _buildOtherMethodsSection(AsyncValue<List<SocialLoginEntity>> socialLoginState) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 32),
         const Divider(),
         const SizedBox(height: 24),
-        const Text(
-          'Autres méthodes de connexion',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        const Text('Autres méthodes de connexion', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
         const SizedBox(height: 16),
         socialLoginState.when(
           data: (socialLogins) {
             // Filtrer pour ne pas afficher Google si on veut
-            final otherMethods = socialLogins
-                .where((method) => method.id.toLowerCase() != 'google')
-                .toList();
+            final otherMethods = socialLogins.where((method) => method.id.toLowerCase() != 'google').toList();
 
             if (otherMethods.isEmpty) {
               return const Padding(
@@ -346,26 +261,15 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   elevation: 1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: ListTile(
                     leading: Container(
                       width: 40,
                       height: 40,
-                      decoration: BoxDecoration(
-                        color: _getColorForMethod(method.id).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        _getIconForMethod(method.id),
-                        color: _getColorForMethod(method.id),
-                      ),
+                      decoration: BoxDecoration(color: _getColorForMethod(method.id).withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                      child: Icon(_getIconForMethod(method.id), color: _getColorForMethod(method.id)),
                     ),
-                    title: Text(
-                      method.name,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
+                    title: Text(method.name, style: const TextStyle(fontWeight: FontWeight.w500)),
                     subtitle: Text('Connectez-vous avec ${method.name}'),
                     trailing: ElevatedButton(
                       onPressed: () {
@@ -374,13 +278,8 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _getColorForMethod(method.id),
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
                       child: const Text('Bientôt'),
                     ),
@@ -393,10 +292,7 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
             );
           },
           loading: () => const Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: CircularProgressIndicator(),
-            ),
+            child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
           ),
           error: (err, stack) => Container(
             padding: const EdgeInsets.all(16),
@@ -411,19 +307,13 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
                 const SizedBox(height: 12),
                 Text(
                   'Impossible de charger les autres méthodes',
-                  style: TextStyle(
-                    color: Colors.orange.shade800,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(color: Colors.orange.shade800, fontWeight: FontWeight.w500),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   err.toString(),
-                  style: TextStyle(
-                    color: Colors.orange.shade600,
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.orange.shade600, fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
               ],

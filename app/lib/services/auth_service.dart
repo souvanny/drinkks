@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
   // final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Get current user
@@ -14,7 +15,6 @@ class AuthService {
   bool _isSignInInitialized = false;
 
   //
-
 
   // GOOGLE SIGNIN
 
@@ -29,11 +29,7 @@ class AuthService {
   ];
   final GoogleSignIn signIn = GoogleSignIn.instance;
 
-
   Future<void> _handleAuthenticationEvent(GoogleSignInAuthenticationEvent event) async {
-
-    print("#### TEST 1");
-
     final GoogleSignInAccount? user = switch (event) {
       GoogleSignInAuthenticationEventSignIn() => event.user,
       GoogleSignInAuthenticationEventSignOut() => null,
@@ -44,43 +40,28 @@ class AuthService {
     final GoogleSignInClientAuthorization? authorization = await user?.authorizationClient.authorizationForScopes(scopes);
     // #enddocregion CheckAuthorization
 
-    print("#### TEST 2");
-
     if (user != null && authorization != null) {
       print(user);
 
       try {
-
         final OAuthCredential googleCredential = GoogleAuthProvider.credential(
           accessToken: authorization.accessToken,
           idToken: user.authentication.idToken,
         );
 
-        final UserCredential googleUserCredential =
-        await FirebaseAuth.instance.signInWithCredential(googleCredential);
+        final UserCredential googleUserCredential = await FirebaseAuth.instance.signInWithCredential(googleCredential);
 
-        IdTokenResult tokenResult =
-        await FirebaseAuth.instance.currentUser!.getIdTokenResult();
+        IdTokenResult tokenResult = await FirebaseAuth.instance.currentUser!.getIdTokenResult();
 
         // await fetchJwtToken(tokenResult.token);
-
-
       } catch (error) {
-
-        print("#### TEST 3");
-
         print(error);
         print('error');
-
       }
-
     }
   }
 
   Future<void> _handleAuthenticationError(Object e) async {
-
-    print("#### TEST 4");
-
     print(e);
   }
 
@@ -90,18 +71,12 @@ class AuthService {
     _isSignInInitialized = true;
 
     await signIn.initialize(clientId: clientId, serverClientId: serverClientId).then((_) async {
-
-      signIn.authenticationEvents
-          .listen(_handleAuthenticationEvent)
-          .onError(_handleAuthenticationError);
-
+      signIn.authenticationEvents.listen(_handleAuthenticationEvent).onError(_handleAuthenticationError);
     });
-
   }
 
   // Connexion avec Google
   Future<User?> signInWithGoogle() async {
-
     await initGoogleSignIn();
 
     if (GoogleSignIn.instance.supportsAuthenticate()) {
@@ -111,16 +86,10 @@ class AuthService {
         print("Erreur Google Sign-In : $e");
       }
     }
-
-    print("#### TEST 5");
-
-
   }
 
   // Déconnexion
-  Future<void> signOut() async {
-
-  }
+  Future<void> signOut() async {}
 
   // Vérifier si l'utilisateur est connecté
   bool isLoggedIn() {
