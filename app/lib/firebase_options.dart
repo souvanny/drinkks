@@ -63,7 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '346927724774',
     projectId: 'drinkks-73f7a',
     storageBucket: 'drinkks-73f7a.firebasestorage.app',
-    iosClientId: '346927724774-3077iahhudrtjrrlieq58gt1bih1sooe.apps.googleusercontent.com',
+    androidClientId: '346927724774-rv31g3jmfas8vnrp1p1h22ct1im5fobq.apps.googleusercontent.com',
     iosBundleId: 'com.ssoad.flutterRiverpodCleanArchitecture',
   );
+
 }

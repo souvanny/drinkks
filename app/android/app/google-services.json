@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "346927724774-vrfmi1qpr6k84r032mf4b7m5d5ri53k6.apps.googleusercontent.com",
+          "client_id": "346927724774-rv31g3jmfas8vnrp1p1h22ct1im5fobq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.drinkks.main",
+            "certificate_hash": "92aaf60f3675403a501ed9e966d9ee69e34ad47d"
+          }
+        },
+        {
+          "client_id": "346927724774-5i5ujgc290a373uhg7jfalq5644i6k6k.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +35,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "346927724774-vrfmi1qpr6k84r032mf4b7m5d5ri53k6.apps.googleusercontent.com",
+              "client_id": "346927724774-5i5ujgc290a373uhg7jfalq5644i6k6k.apps.googleusercontent.com",
               "client_type": 3
             },
             {
@@ -50,7 +58,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "346927724774-vrfmi1qpr6k84r032mf4b7m5d5ri53k6.apps.googleusercontent.com",
+          "client_id": "346927724774-5i5ujgc290a373uhg7jfalq5644i6k6k.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -63,7 +71,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "346927724774-vrfmi1qpr6k84r032mf4b7m5d5ri53k6.apps.googleusercontent.com",
+              "client_id": "346927724774-5i5ujgc290a373uhg7jfalq5644i6k6k.apps.googleusercontent.com",
               "client_type": 3
             },
             {

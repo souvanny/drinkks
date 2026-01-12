@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:firebase_core/firebase_core.dart'; // <-- Ajouter Firebase
+import 'firebase_options.dart'; // <-- Fichier généré par flutterfire
+
 import 'package:flutter_riverpod_clean_architecture/core/accessibility/accessibility_providers.dart';
 import 'package:flutter_riverpod_clean_architecture/core/constants/app_constants.dart';
 import 'package:flutter_riverpod_clean_architecture/core/providers/localization_providers.dart';
@@ -16,6 +19,11 @@ void main() async {
   // Ensure Flutter binding is initialized
   WidgetsFlutterBinding.ensureInitialized();
 
+  // INITIALISER FIREBASE AVANT TOUT
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   // Initialize shared preferences
   final sharedPreferences = await SharedPreferences.getInstance();
 
@@ -28,17 +36,16 @@ void main() async {
 
         // Override the default locale provider to use our persistent locale
         defaultLocaleProvider.overrideWith(
-          (ref) => ref.watch(persistentLocaleProvider),
+              (ref) => ref.watch(persistentLocaleProvider),
         ),
       ],
       child: MaterialApp(  // ← MaterialApp doit être ici
-        home: MyApp(),
+        home: const MyApp(), // <-- Ajouter const
       ),
     ),
   );
 }
 
-// Provider to manage theme mode
 // Provider to manage theme mode
 class ThemeModeNotifier extends Notifier<ThemeMode> {
   @override
