@@ -1,0 +1,82 @@
+{
+  "project_info": {
+    "project_number": "346927724774",
+    "project_id": "drinkks-73f7a",
+    "storage_bucket": "drinkks-73f7a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346927724774:android:5de674d31f4c70e7c3a327",
+        "android_client_info": {
+          "package_name": "com.drinkks.main"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346927724774-vrfmi1qpr6k84r032mf4b7m5d5ri53k6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbwmhphxnLFZZhtI8v_gwXjMRQV7F5RTQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346927724774-vrfmi1qpr6k84r032mf4b7m5d5ri53k6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "346927724774-fkgks7tvvvrfpdbpkpbdaf380396ilm5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.drinkks.main"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346927724774:android:0ed9af8b6e48f207c3a327",
+        "android_client_info": {
+          "package_name": "com.example.drinkks"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346927724774-vrfmi1qpr6k84r032mf4b7m5d5ri53k6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAbwmhphxnLFZZhtI8v_gwXjMRQV7F5RTQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346927724774-vrfmi1qpr6k84r032mf4b7m5d5ri53k6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "346927724774-fkgks7tvvvrfpdbpkpbdaf380396ilm5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.drinkks.main"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
