@@ -12,7 +12,7 @@ class TablesScreen extends ConsumerWidget {
     super.key,
     required this.venueId,
   });
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tablesState = ref.watch(tablesControllerProvider);
@@ -66,7 +66,7 @@ class TablesScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: SafeArea( // ← Ajout de SafeArea pour éviter l'overflow
+      body: SafeArea(
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -115,7 +115,7 @@ class TablesScreen extends ConsumerWidget {
                                 'Le Lounge Étoilé',
                                 style: TextStyle(
                                   color: textPrimary,
-                                  fontSize: 20, // ← Taille réduite
+                                  fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                 ),
                                 maxLines: 1,
@@ -151,7 +151,7 @@ class TablesScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  // Légende (optionnel, vous pouvez le retirer si ça prend trop de place)
+                  // Légende
                   Container(
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -184,8 +184,8 @@ class TablesScreen extends ConsumerWidget {
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 1.1, // ← Légèrement plus haut
+                          mainAxisSpacing: 24, // ← Plus d'espace vertical pour le nom
+                          childAspectRatio: 1,
                         ),
                         itemCount: tablesData.length,
                         itemBuilder: (context, index) {
@@ -251,159 +251,186 @@ class TablesScreen extends ConsumerWidget {
     final isFull = occupiedSeats == totalSeats;
     final availableSeats = totalSeats - occupiedSeats;
 
-    return InkWell(
-      onTap: () {
-        if (!isFull) {
-          // Rejoindre la table
-          print('Rejoindre la table: ${table['name']}');
-        }
-      },
-      borderRadius: BorderRadius.circular(16),
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        color: Colors.white.withOpacity(0.05),
-        child: Container(
-          decoration: BoxDecoration(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Carte de la table
+        Expanded(
+          child: InkWell(
+            onTap: () {
+              if (!isFull) {
+                // Rejoindre la table
+                print('Rejoindre la table: ${table['name']}');
+              }
+            },
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isFull ? Colors.red.withOpacity(0.3) : primaryColor.withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: Stack(
-            children: [
-              // SVG de la table au centre
-              Center(
-                child: SvgPicture.string(
-                  '''
-                  <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Plateau de table -->
-                    <circle cx="50" cy="50" r="35" fill="#2D3748" stroke="#4A5568" stroke-width="2"/>
-                    
-                    <!-- Pied de table -->
-                    <rect x="48" y="70" width="4" height="20" fill="#4A5568" rx="2"/>
-                    
-                    <!-- Détails du plateau -->
-                    <circle cx="50" cy="50" r="30" fill="none" stroke="#6366F1" stroke-width="1" stroke-dasharray="4 4"/>
-                  </svg>
-                  ''',
-                  width: 80,
-                  height: 80,
-                ),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-
-              // Places autour de la table
-              Positioned.fill(
-                child: _buildSeats(
-                  occupiedSeats,
-                  totalSeats,
-                  occupiedColor,
-                  emptyColor,
-                ),
-              ),
-
-              // Nom de la table
-              Positioned(
-                top: 12,
-                left: 0,
-                right: 0,
-                child: Text(
-                  table['name'],
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+              color: Colors.white.withOpacity(0.05),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isFull ? Colors.red.withOpacity(0.3) : primaryColor.withOpacity(0.3),
+                    width: 1,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-
-              // Badge des places disponibles (en haut à droite)
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: isFull
-                        ? Colors.red.withOpacity(0.3)
-                        : primaryColor.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isFull ? Colors.red : primaryColor,
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.chair,
-                        color: isFull ? Colors.red : primaryColor,
-                        size: 12,
+                child: Stack(
+                  children: [
+                    // SVG de la table au centre
+                    Center(
+                      child: SvgPicture.string(
+                        '''
+                        <svg width="80" height="80" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                          <!-- Plateau de table -->
+                          <circle cx="50" cy="50" r="35" fill="#2D3748" stroke="#4A5568" stroke-width="2"/>
+                          
+                          <!-- Pied de table -->
+                          <rect x="48" y="70" width="4" height="20" fill="#4A5568" rx="2"/>
+                          
+                          <!-- Détails du plateau -->
+                          <circle cx="50" cy="50" r="30" fill="none" stroke="#6366F1" stroke-width="1" stroke-dasharray="4 4"/>
+                        </svg>
+                        ''',
+                        width: 80,
+                        height: 80,
                       ),
-                      const SizedBox(width: 2),
-                      Text(
-                        '$availableSeats',
-                        style: TextStyle(
-                          color: isFull ? Colors.redAccent : primaryColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                    ),
+
+                    // Places autour de la table
+                    Positioned.fill(
+                      child: _buildSeats(
+                        occupiedSeats,
+                        totalSeats,
+                        occupiedColor,
+                        emptyColor,
+                      ),
+                    ),
+
+                    // Badge des places disponibles (en bas à droite)
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+                        decoration: BoxDecoration(
+                          // color: isFull
+                          //     ? Colors.red.withOpacity(0.2)
+                          //     : primaryColor.withOpacity(0.2),
+                          // borderRadius: BorderRadius.circular(12),
+                          // border: Border.all(
+                          //   color: isFull ? Colors.red : primaryColor,
+                          //   width: 1.5,
+                          // ),
+                          // boxShadow: [
+                          //   BoxShadow(
+                          //     color: Colors.black.withOpacity(0.2),
+                          //     blurRadius: 4,
+                          //     offset: const Offset(0, 2),
+                          //   ),
+                          // ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.chair,
+                              color: isFull ? Colors.red : primaryColor,
+                              size: 10,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$availableSeats',
+                              style: TextStyle(
+                                color: isFull ? Colors.redAccent : primaryColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+
+                    // Icône de verre (si occupé) - en haut à gauche
+                    if (occupiedSeats > 0)
+                      Positioned(
+                        top: 4,
+                        left: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            // color: Colors.amber.withOpacity(0.3),
+                            // borderRadius: BorderRadius.circular(8),
+                            // boxShadow: [
+                            //   BoxShadow(
+                            //     color: Colors.black.withOpacity(0.2),
+                            //     blurRadius: 3,
+                            //     offset: const Offset(0, 1),
+                            //   ),
+                            // ],
+                          ),
+                          child: Icon(
+                            Icons.local_drink,
+                            color: Colors.amber,
+                            size: 16,
+                          ),
+                        ),
+                      ),
+
+                    // Indicateur "Complet" au centre de la table
+                    if (isFull)
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'COMPLET',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-
-              // Icône de verre (si occupé)
-              if (occupiedSeats > 0)
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Icon(
-                      Icons.local_drink,
-                      color: Colors.amber,
-                      size: 14,
-                    ),
-                  ),
-                ),
-
-              // Indicateur "Complet" (plus discret)
-              if (isFull)
-                Positioned(
-                  bottom: 12,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    child: Text(
-                      'COMPLET',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+            ),
           ),
         ),
-      ),
+
+        // Nom de la table en dehors du cadre (en bas)
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Text(
+            table['name'],
+            style: TextStyle(
+              color: textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 
@@ -412,7 +439,7 @@ class TablesScreen extends ConsumerWidget {
       builder: (context, constraints) {
         final centerX = constraints.maxWidth / 2;
         final centerY = constraints.maxHeight / 2;
-        final radius = 50.0; // ← Rayon réduit
+        final radius = 48.0;
 
         return Stack(
           children: List.generate(total, (index) {
@@ -422,7 +449,7 @@ class TablesScreen extends ConsumerWidget {
             final isOccupied = index < occupied;
 
             return Positioned(
-              left: x - 18, // ← Ajusté pour être plus petit
+              left: x - 18,
               top: y - 18,
               child: Container(
                 width: 36,
@@ -433,15 +460,41 @@ class TablesScreen extends ConsumerWidget {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.3),
-                      blurRadius: 3,
-                      offset: const Offset(0, 1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
                     ),
                   ],
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.1),
+                    width: 1,
+                  ),
                 ),
-                child: Icon(
-                  isOccupied ? Icons.person : Icons.person_outline,
-                  color: Colors.white,
-                  size: 18,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      isOccupied ? Icons.person : Icons.person_outline,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    if (isOccupied)
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             );
@@ -463,7 +516,7 @@ class _StarsPainter extends CustomPainter {
     for (int i = 0; i < 30; i++) {
       final x = random.nextDouble() * size.width;
       final y = random.nextDouble() * size.height;
-      final radius = random.nextDouble() * 1.2 + 0.3; // ← Plus petites étoiles
+      final radius = random.nextDouble() * 1.2 + 0.3;
 
       canvas.drawCircle(Offset(x, y), radius, paint);
     }
