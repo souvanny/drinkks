@@ -24,7 +24,15 @@ class SocialLoginController extends _$SocialLoginController {
     state = await AsyncValue.guard(() => ref.refresh(getSocialLoginsProvider.future));
   }
 
-  // NOUVELLE MÉTHODE : Connexion avec Google
+  Future<void> handleGoogleAuthenticationEvent() async {
+  }
+
+  Future<void> handleGoogleAuthenticationError() async {
+  }
+
+
+
+    // NOUVELLE MÉTHODE : Connexion avec Google
   Future<User?> signInWithGoogle() async {
     print('🔵 SocialLoginController.signInWithGoogle() appelé');
 

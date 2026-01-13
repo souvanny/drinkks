@@ -11,6 +11,16 @@ class AuthService {
   // Clé pour le stockage
   static const _tokenKey = 'firebase_id_token';
 
+
+  // Callbacks injectés
+  final Future<void> Function(GoogleSignInAuthenticationEvent)? onAuthenticationEvent;
+  final Future<void> Function(Object)? onAuthenticationError;
+
+  AuthService({
+    this.onAuthenticationEvent,
+    this.onAuthenticationError,
+  });
+
   // final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Get current user
@@ -25,10 +35,9 @@ class AuthService {
 
   // GOOGLE SIGNIN
 
-  String? clientId = '1084343369802-ju6glrsj87do2hf4h3o7cp2u6ak7c8hr.apps.googleusercontent.com';
+  // String? clientId = '1084343369802-ju6glrsj87do2hf4h3o7cp2u6ak7c8hr.apps.googleusercontent.com';
+  String? clientId;
   String? serverClientId = '1084343369802-36565dmgarm2gkos54eb6j9q6so0s9bf.apps.googleusercontent.com';
-
-  // String? serverClientId = '347370813567-6lj7snvup33n9nbt43r7iedrluo1mk6s.apps.googleusercontent.com';
   List<String> scopes = <String>[
     // 'https://www.googleapis.com/auth/contacts.readonly',
     'https://www.googleapis.com/auth/userinfo.email',
@@ -62,19 +71,36 @@ class AuthService {
 
         if (tokenResult.token != null) {
           await _storage.write(key: _tokenKey, value: tokenResult.token);
+
+          // Appeler le callback injecté si présent
+          if (onAuthenticationEvent != null) {
+            await onAuthenticationEvent!(event);
+          }
+
+
         }
 
 
-        // await fetchJwtToken(tokenResult.token);
       } catch (error) {
         print(error);
         print('error');
+
+        // Appeler le callback d'erreur
+        if (onAuthenticationError != null) {
+          await onAuthenticationError!(error);
+        }
+
       }
     }
   }
 
   Future<void> _handleAuthenticationError(Object e) async {
     print(e);
+
+    // Appeler le callback injecté si présent
+    if (onAuthenticationError != null) {
+      await onAuthenticationError!(e);
+    }
   }
 
   Future<void> initGoogleSignIn() async {

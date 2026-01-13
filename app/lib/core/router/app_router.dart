@@ -15,6 +15,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod_clean_architecture/features/chat/presentation/screens/chat_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/survey/presentation/screens/survey_screen.dart';
 
+import 'package:flutter_riverpod_clean_architecture/features/venues/presentation/screens/venues_screen.dart';
+
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -117,6 +119,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => authState.isAuthenticated
             ? AppConstants.homeRoute
             : AppConstants.loginRoute,
+      ),
+
+      GoRoute(
+        path: AppConstants.venuesRoute,
+        name: 'venues',
+        builder: (context, state) => const VenuesScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

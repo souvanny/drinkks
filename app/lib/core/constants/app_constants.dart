@@ -31,6 +31,7 @@ class AppConstants {
   static const String languageSettingsRoute = '/settings/language';
   static const String localizationDemoRoute = '/demo/localization';
   static const String localizationAssetsDemoRoute = '/demo/localization/assets';
+  static const String venuesRoute = '/venues';
 
   // Hive box names
   static const String settingsBox = 'settings';
