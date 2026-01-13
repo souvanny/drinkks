@@ -35,7 +35,7 @@ final class SocialLoginControllerProvider
 }
 
 String _$socialLoginControllerHash() =>
-    r'82d698f3d28c8df6fe87dff1a1c82b30d5dba4b4';
+    r'e3178f3ea74973899bbe78ccffb397d264b46adf';
 
 abstract class _$SocialLoginController
     extends $AsyncNotifier<List<SocialLoginEntity>> {

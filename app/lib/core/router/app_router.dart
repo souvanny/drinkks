@@ -17,6 +17,8 @@ import 'package:flutter_riverpod_clean_architecture/features/survey/presentation
 
 import 'package:flutter_riverpod_clean_architecture/features/venues/presentation/screens/venues_screen.dart';
 
+import '../../features/tables/presentation/screens/tables_screen.dart';
+
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -31,12 +33,10 @@ final routerProvider = Provider<GoRouter>((ref) {
     // Add the observer for locale awareness
     observers: [ref.read(localizationRouterObserverProvider)],
     redirect: (context, state) {
-
-      // TEMPORAIRE: Permettre l'accès à /venues sans authentification
-      if (state.matchedLocation == AppConstants.venuesRoute) {
+      // Permettre l'accès à /venues et /venues/* sans authentification
+      if (state.matchedLocation.startsWith('/venues')) {
         return null; // Pas de redirection, autoriser l'accès
       }
-
 
       // Get the authentication status
       final isLoggedIn = authState.isAuthenticated;
@@ -73,7 +73,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppConstants.loginRoute,
         name: 'login',
-        // builder: (context, state) => const LoginScreen(),
         builder: (context, state) => const SocialLoginScreen(),
       ),
 
@@ -119,6 +118,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SurveyScreen(),
       ),
 
+      // Venues route (écran des bars)
+      GoRoute(
+        path: AppConstants.venuesRoute,
+        name: 'venues',
+        builder: (context, state) => const VenuesScreen(),
+        routes: [
+          // Sous-route pour les tables d'un bar spécifique
+          GoRoute(
+            path: ':venueId/tables',
+            name: 'tables',
+            builder: (context, state) {
+              final venueId = state.pathParameters['venueId']!;
+              // Vous pouvez passer l'ID du bar à votre écran
+              return TablesScreen(venueId: venueId);
+            },
+          ),
+        ],
+      ),
+
       // Initial route - redirects based on auth state
       GoRoute(
         path: AppConstants.initialRoute,
@@ -126,12 +144,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => authState.isAuthenticated
             ? AppConstants.homeRoute
             : AppConstants.loginRoute,
-      ),
-
-      GoRoute(
-        path: AppConstants.venuesRoute,
-        name: 'venues',
-        builder: (context, state) => const VenuesScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

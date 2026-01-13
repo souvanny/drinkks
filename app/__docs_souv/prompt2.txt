@@ -1,8 +1,69 @@
+Pour rappel je crée une application qui permet aux gens de boire un verre ensemble, virtuellement, par visio.
+L'applications s'appelle Drinkks.
+Elle permet à des gens de faire de la visio.
+Une fois connecté, une liste d'endroits vituels est affiché (VenuesScreen).
+Quand on clique sur un endroit, on a liste de tables (de 4 max), et on peut s'assoir sur une table.
+Quand on clique sur une table, on participe à une visio à 4, et on discute en visio.
+
+VenuesScreen est fait.
+
+Je voudrais maintenant un screen représentant l'intérieur d'un bar virtuel.
+Ambiance feutrée.
+J'ai une liste de table de 4 personnes.
+Il faudrait représenter si les places sont occupés (quelqu'un s'est connecté) ou si la place est vide.
+Je voudrais quelque chose de visuel et et joli.
+En utilisant du svg pour les tables, et des icones material pour le d'autres choses, comme des verres.
+Il faudrait un bouton de retour à la liste des bars (/venues)
+La liste des tables et leur occupations sont dans un tableau statiques.
+
+Voici le screen à modifier :
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controllers/tables_controller.dart';
+
+class TablesScreen extends ConsumerWidget {
+  const TablesScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tablesState = ref.watch(tablesControllerProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tables Feature'),
+      ),
+      body: tablesState.when(
+        data: (items) => ListView.builder(
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return ListTile(
+              title: Text(item.name),
+              subtitle: Text(item.id),
+            );
+          },
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          ref.read(tablesControllerProvider.notifier).refresh(); // Or specialized method
+        },
+        child: const Icon(Icons.refresh),
+      ),
+    );
+  }
+}
+
+
+Et pour rappel VenuesScreen déjà. Faire juste en sorte, très simple, avec Inkweel seulement, que lorsue l'on clique sur un endroit, n'importe lequel, on est redirigé vers la route /tables.
+
 // features/venues/presentation/screens/venues_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 class VenuesScreen extends ConsumerStatefulWidget {
   const VenuesScreen({super.key});
@@ -88,9 +149,8 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       color: backgroundColor,
       child: InkWell(
         onTap: () {
-          // Navigation vers l'écran des tables avec GoRouter
-          final venueId = venue['id'] ?? 'default'; // Assurez-vous d'avoir un ID
-          context.go('/venues/$venueId/tables');
+          // TODO: Naviguer vers l'écran des tables
+          print('Sélectionné: ${venue['name']}');
         },
         borderRadius: BorderRadius.circular(16),
         child: Column(
@@ -183,42 +243,36 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
 
   final List<Map<String, dynamic>> _venues = [
     {
-      'id': 'lounge',
       'name': 'Le Lounge Étoilé',
       'description': 'Ambiance lounge avec vue sur les étoiles',
       'image': 'assets/images/venues/lounge.png',
       'activeUsers': 24,
     },
     {
-      'id': 'port',
       'name': 'Le Bar du Port',
       'description': 'Son des vagues et cocktails fruités',
       'image': 'assets/images/venues/port.png',
       'activeUsers': 18,
     },
     {
-      'id': 'rooftop',
       'name': 'Le Rooftop Urbain',
       'description': 'Vue panoramique sur la skyline',
       'image': 'assets/images/venues/rooftop.png',
       'activeUsers': 32,
     },
     {
-      'id': 'jazz',
       'name': 'La Cave Jazz',
       'description': 'Ambiance intime et musique live',
       'image': 'assets/images/venues/jazz.png',
       'activeUsers': 12,
     },
     {
-      'id': 'garden',
       'name': 'Le Garden Tropical',
       'description': 'Jardin virtuel avec cocktails exotiques',
       'image': 'assets/images/venues/garden.png',
       'activeUsers': 28,
     },
     {
-      'id': 'club',
       'name': 'Le Club Privé',
       'description': 'Accès exclusif, ambiance feutrée',
       'image': 'assets/images/venues/club.png',
@@ -226,3 +280,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
     },
   ];
 }
+
+
+

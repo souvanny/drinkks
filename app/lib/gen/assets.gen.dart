@@ -48,6 +48,9 @@ class $AssetsImagesGen {
   /// Directory path: assets/images/logos
   $AssetsImagesLogosGen get logos => const $AssetsImagesLogosGen();
 
+  /// Directory path: assets/images/venues
+  $AssetsImagesVenuesGen get venues => const $AssetsImagesVenuesGen();
+
   /// List of all assets
   List<String> get values => [logoPng];
 }
@@ -124,6 +127,37 @@ class $AssetsImagesLogosGen {
 
   /// List of all assets
   List<dynamic> get values => [googleSigninLogo, googleSigninLogo100100];
+}
+
+class $AssetsImagesVenuesGen {
+  const $AssetsImagesVenuesGen();
+
+  /// File path: assets/images/venues/club.png
+  AssetGenImage get club =>
+      const AssetGenImage('assets/images/venues/club.png');
+
+  /// File path: assets/images/venues/garden.png
+  AssetGenImage get garden =>
+      const AssetGenImage('assets/images/venues/garden.png');
+
+  /// File path: assets/images/venues/jazz.png
+  AssetGenImage get jazz =>
+      const AssetGenImage('assets/images/venues/jazz.png');
+
+  /// File path: assets/images/venues/lounge.png
+  AssetGenImage get lounge =>
+      const AssetGenImage('assets/images/venues/lounge.png');
+
+  /// File path: assets/images/venues/port.png
+  AssetGenImage get port =>
+      const AssetGenImage('assets/images/venues/port.png');
+
+  /// File path: assets/images/venues/rooftop.png
+  AssetGenImage get rooftop =>
+      const AssetGenImage('assets/images/venues/rooftop.png');
+
+  /// List of all assets
+  List<AssetGenImage> get values => [club, garden, jazz, lounge, port, rooftop];
 }
 
 class Assets {
