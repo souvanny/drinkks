@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 import '../../domain/entities/social_login_entity.dart';
 import '../controllers/social_login_controller.dart';
 
@@ -143,68 +144,77 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
     );
   }
 
+
   Widget _buildLogoHeader(Color primaryColor, Color accentColor) {
     return Column(
       children: [
-        // Logo animé (cercle avec effet de vague)
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              colors: [
-                primaryColor.withOpacity(0.3),
-                primaryColor.withOpacity(0.1),
-                Colors.transparent,
-              ],
-              stops: const [0.1, 0.5, 1.0],
+        // Logo animé (cercle avec effet de vague) - CLIQUEZ ICI !
+        InkWell(
+          onTap: () {
+            // Navigation temporaire vers /venues
+            print('🎬 Clic sur logo - Accès temporaire à /venues');
+            context.go('/venues');
+          },
+          borderRadius: BorderRadius.circular(60),
+          child: Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                colors: [
+                  primaryColor.withOpacity(0.3),
+                  primaryColor.withOpacity(0.1),
+                  Colors.transparent,
+                ],
+                stops: const [0.1, 0.5, 1.0],
+              ),
             ),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Effet de vague extérieur
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: primaryColor.withOpacity(0.3),
-                    width: 2,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Effet de vague extérieur
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: primaryColor.withOpacity(0.3),
+                      width: 2,
+                    ),
                   ),
                 ),
-              ),
 
-              // Cercle intérieur avec icône
-              Container(
-                width: 80,
-                height: 80,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      primaryColor,
-                      accentColor,
+                // Cercle intérieur avec icône
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        primaryColor,
+                        accentColor,
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.4),
+                        blurRadius: 20,
+                        spreadRadius: 2,
+                      ),
                     ],
                   ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: primaryColor.withOpacity(0.4),
-                      blurRadius: 20,
-                      spreadRadius: 2,
-                    ),
-                  ],
+                  child: const Icon(
+                    Icons.videocam,
+                    size: 40,
+                    color: Colors.white,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.videocam,
-                  size: 40,
-                  color: Colors.white,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
 

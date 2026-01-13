@@ -31,6 +31,13 @@ final routerProvider = Provider<GoRouter>((ref) {
     // Add the observer for locale awareness
     observers: [ref.read(localizationRouterObserverProvider)],
     redirect: (context, state) {
+
+      // TEMPORAIRE: Permettre l'accès à /venues sans authentification
+      if (state.matchedLocation == AppConstants.venuesRoute) {
+        return null; // Pas de redirection, autoriser l'accès
+      }
+
+
       // Get the authentication status
       final isLoggedIn = authState.isAuthenticated;
 
