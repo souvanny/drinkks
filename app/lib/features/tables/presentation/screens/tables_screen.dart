@@ -23,6 +23,7 @@ class TablesScreen extends ConsumerWidget {
     const textPrimary = Colors.white;
     const occupiedColor = Color(0xFF10B981);
     const emptyColor = Color(0xFF6B7280);
+    const barColor = Color(0xFF8B4513); // Couleur bois du bar
 
     // Données statiques pour les tables
     final tablesData = [
@@ -151,7 +152,7 @@ class TablesScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  // Légende
+                  // Légende avec option pour le bar
                   Container(
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -172,32 +173,86 @@ class TablesScreen extends ConsumerWidget {
                           label: 'Libre',
                           icon: Icons.person_outline,
                         ),
+                        _buildLegendItem(
+                          color: barColor,
+                          label: 'Bar',
+                          icon: Icons.local_bar,
+                        ),
                       ],
                     ),
                   ),
 
-                  // Liste des tables
+                  // Contenu principal avec le bar au centre
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: GridView.builder(
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 24, // ← Plus d'espace vertical pour le nom
-                          childAspectRatio: 1,
-                        ),
-                        itemCount: tablesData.length,
-                        itemBuilder: (context, index) {
-                          final table = tablesData[index];
-                          return _buildTableCard(
-                            table,
-                            occupiedColor,
-                            emptyColor,
-                            primaryColor,
-                            textPrimary,
-                          );
-                        },
+                      child: CustomScrollView(
+                        slivers: [
+                          // Sliver pour les tables (première rangée)
+                          SliverGrid(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 24,
+                              childAspectRatio: 1,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                if (index < 2) {
+                                  final table = tablesData[index];
+                                  return _buildTableCard(
+                                    table,
+                                    occupiedColor,
+                                    emptyColor,
+                                    primaryColor,
+                                    textPrimary,
+                                  );
+                                }
+                                return null;
+                              },
+                              childCount: 2,
+                            ),
+                          ),
+
+                          // Sliver pour le bar central
+                          SliverToBoxAdapter(
+                            child: Container(
+                              height: 180,
+                              margin: const EdgeInsets.symmetric(vertical: 20),
+                              child: _buildBarIsland(  // ← Ici, il faut appeler la fonction
+                                barColor,
+                                primaryColor,
+                                textPrimary,
+                              ),
+                            ),
+                          ),
+
+                          // Sliver pour les autres tables
+                          SliverGrid(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 24,
+                              childAspectRatio: 1,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                if (index < tablesData.length - 2) {
+                                  final table = tablesData[index + 2];
+                                  return _buildTableCard(
+                                    table,
+                                    occupiedColor,
+                                    emptyColor,
+                                    primaryColor,
+                                    textPrimary,
+                                  );
+                                }
+                                return null;
+                              },
+                              childCount: tablesData.length - 2,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -236,6 +291,247 @@ class TablesScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBarIsland(Color barColor, Color primaryColor, Color textPrimary) {
+    return InkWell(
+      onTap: () {
+        // Lancer une visio avec le barman
+        print('Démarrer une visio avec le barman');
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: double.infinity, // Prend toute la largeur disponible
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              barColor.withOpacity(0.8),
+              barColor.withOpacity(0.6),
+            ],
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+          border: Border.all(
+            color: Colors.amber.withOpacity(0.5),
+            width: 2,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center, // Centre horizontalement
+          children: [
+            // Barman
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.3),
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Avatar du barman
+                  Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Color(0xFF2D3748),
+                      border: Border.all(
+                        color: Colors.amber,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+
+                  // Badge "En ligne"
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.green,
+                        border: Border.all(
+                          color: Colors.white,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 10,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Nom du barman
+            SizedBox(
+              width: double.infinity, // Prend toute la largeur
+              child: Text(
+                'Marc, le Barman',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center, // Centre le texte
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            const SizedBox(height: 2),
+
+            // Description
+            SizedBox(
+              width: double.infinity, // Prend toute la largeur
+              child: Text(
+                'Spécialiste cocktails • Disponible',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.9),
+                  fontSize: 10,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center, // Centre le texte
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Bouton pour rejoindre
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.amber,
+                    Colors.orange,
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.orange.withOpacity(0.4),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min, // S'adapte au contenu
+                children: [
+                  const Icon(
+                    Icons.video_call,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Discuter au bar',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Compteur de personnes au bar
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min, // S'adapte au contenu
+                children: [
+                  const Icon(
+                    Icons.group,
+                    color: Colors.amber,
+                    size: 12,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '3 personnes au bar',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.9),
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+// Mettez à jour la fonction _buildBottleIcon pour accepter une taille
+  Widget _buildBottleIcon(IconData icon, Color color, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: color.withOpacity(0.5),
+          width: 1,
+        ),
+      ),
+      child: Icon(
+        icon,
+        color: color,
+        size: size * 0.6,
+      ),
     );
   }
 
@@ -316,23 +612,6 @@ class TablesScreen extends ConsumerWidget {
                       right: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-                        decoration: BoxDecoration(
-                          // color: isFull
-                          //     ? Colors.red.withOpacity(0.2)
-                          //     : primaryColor.withOpacity(0.2),
-                          // borderRadius: BorderRadius.circular(12),
-                          // border: Border.all(
-                          //   color: isFull ? Colors.red : primaryColor,
-                          //   width: 1.5,
-                          // ),
-                          // boxShadow: [
-                          //   BoxShadow(
-                          //     color: Colors.black.withOpacity(0.2),
-                          //     blurRadius: 4,
-                          //     offset: const Offset(0, 2),
-                          //   ),
-                          // ],
-                        ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -362,17 +641,6 @@ class TablesScreen extends ConsumerWidget {
                         left: 4,
                         child: Container(
                           padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            // color: Colors.amber.withOpacity(0.3),
-                            // borderRadius: BorderRadius.circular(8),
-                            // boxShadow: [
-                            //   BoxShadow(
-                            //     color: Colors.black.withOpacity(0.2),
-                            //     blurRadius: 3,
-                            //     offset: const Offset(0, 1),
-                            //   ),
-                            // ],
-                          ),
                           child: Icon(
                             Icons.local_drink,
                             color: Colors.amber,
@@ -519,6 +787,39 @@ class _StarsPainter extends CustomPainter {
       final radius = random.nextDouble() * 1.2 + 0.3;
 
       canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _WoodGrainPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final basePaint = Paint()
+      ..color = Color(0xFF8B4513)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), basePaint);
+
+    // Effet de grain de bois
+    final grainPaint = Paint()
+      ..color = Color(0xFF5D2906)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.5;
+
+    final random = Random(123);
+    for (int i = 0; i < 50; i++) {
+      final startY = random.nextDouble() * size.height;
+      final endY = startY + random.nextDouble() * 20;
+      final x = random.nextDouble() * size.width;
+
+      canvas.drawLine(
+        Offset(x, startY),
+        Offset(x + random.nextDouble() * 50, endY),
+        grainPaint,
+      );
     }
   }
 
