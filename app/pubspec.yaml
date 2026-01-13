@@ -113,6 +113,7 @@ flutter:
     # Common assets
     - assets/images/
     - assets/images/logos/
+    - assets/images/venues/
 
     # Language-specific assets
     - assets/images/en/
