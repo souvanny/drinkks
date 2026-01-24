@@ -1,0 +1,10 @@
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --dev --config /etc/livekit.yaml
+    ports:
+      - "7880:7880" # API & Signal
+      - "7881:7881" # WebRTC over TCP
+      - "7882:7882/udp" # WebRTC over UDP
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
