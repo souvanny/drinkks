@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  livekit:
+    image: livekit/livekit:latest
+    container_name: livekit
+    restart: unless-stopped
+    ports:
+      - "7880:7880"  # WebRTC ports
+      - "7881:7881"  # HTTP/WebSocket
+      - "7882:7882"  # gRPC (optionnel)
+    environment:
+      - LIVEKIT_KEYS_API_KEY=devkey
+      - LIVEKIT_KEYS_API_SECRET=devsecret
+      - LIVEKIT_KEYS_SET=1
+      - LIVEKIT_NODE_IP=127.0.0.1
+      - LIVEKIT_RTC_TCP_PORT=7880
+      - LIVEKIT_RTC_UDP_PORT=7880
+      - LIVEKIT_PORT=7881
+    volumes:
+      - ./data:/data
+    command: sh -c "livekit-server --dev --bind 0.0.0.0"
+
+  # Redis (optionnel pour développement)
+  redis:
+    image: redis:7-alpine
+    container_name: livekit-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"

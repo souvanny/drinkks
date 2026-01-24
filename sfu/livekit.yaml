@@ -1,0 +1,16 @@
+port: 7881
+rtc:
+  tcp_port: 7880
+  udp_port: 7880
+  port_range_start: 0
+  port_range_end: 0
+keys:
+  APInbB7QvDE9h6dZ: nqZ6zHJJk8omZ0KIxhaZ4DpMuG4sx7t0cF9kMEXz9MU
+redis:
+  address: redis:6379
+  username: ""
+  password: ""
+  db: 0
+logging:
+  json: false
+  level: debug

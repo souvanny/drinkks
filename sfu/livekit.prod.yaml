@@ -1,0 +1,36 @@
+# livekit.prod.yaml
+port: 443
+rtc:
+  tcp_port: 443
+  udp_port: 443
+  port_range_start: 50000
+  port_range_end: 60000
+  use_external_ip: true
+  enable_loopback_candidate: false
+
+keys:
+  # Générez avec : livekit-server generate-keys
+  YOUR_API_KEY: YOUR_API_SECRET
+
+redis:
+  address: redis:6379
+  password: "votre-mot-de-passe-redis"
+  db: 0
+
+turn:
+  enabled: true
+  domain: "votre-domaine.com"
+  tls_port: 5349
+  udp_port: 3478
+  external_tls: true
+  cert_file: "/certs/cert.pem"
+  key_file: "/certs/key.pem"
+
+logging:
+  level: info
+  json: true
+
+# Monitoring
+prometheus:
+  enabled: true
+  port: 9090

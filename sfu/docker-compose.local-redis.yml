@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  livekit:
+    image: livekit/livekit:latest
+    container_name: livekit
+    restart: unless-stopped
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882"
+    volumes:
+      - ./livekit.yaml:/livekit.yaml
+    command: livekit-server --config /livekit.yaml --dev
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: livekit-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - ./redis-data:/data

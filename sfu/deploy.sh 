@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Variables
+DOMAIN="votre-domaine.com"
+EMAIL="admin@votre-domaine.com"
+
+# Mettre à jour la configuration
+sed -i "s/votre-domaine.com/$DOMAIN/g" livekit.prod.yaml
+sed -i "s/votre-mot-de-passe-redis/$REDIS_PASSWORD/g" livekit.prod.yaml
+
+# Arrêter les containers existants
+docker-compose -f docker-compose.prod.yml down
+
+# Nettoyer les anciens volumes (optionnel)
+# docker volume prune -f
+
+# Démarrer
+docker-compose -f docker-compose.prod.yml up -d --build
+
+# Vérifier le statut
+sleep 10
+docker ps
+docker logs livekit-prod --tail 50

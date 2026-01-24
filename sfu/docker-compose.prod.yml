@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  livekit:
+    image: livekit/livekit:latest
+    container_name: livekit-prod
+    restart: always
+    ports:
+      - "443:443"
+      - "443:443/udp"
+      - "3478:3478/udp"  # TURN UDP
+      - "5349:5349"      # TURN TLS
+      - "9090:9090"      # Prometheus (optionnel)
+    volumes:
+      - ./livekit.prod.yaml:/livekit.yaml
+      - ./certs:/certs:ro
+    environment:
+      - LIVEKIT_CONFIG=/livekit.yaml
+      - TZ=Europe/Paris
+    networks:
+      - livekit-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7880/rtc"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: livekit-redis-prod
+    restart: always
+    command: redis-server --requirepass votre-mot-de-passe-complexe --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - livekit-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx comme reverse proxy (optionnel)
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - livekit
+    networks:
+      - livekit-network
+
+volumes:
+  redis-data:
+
+networks:
+  livekit-network:
+    driver: bridge
