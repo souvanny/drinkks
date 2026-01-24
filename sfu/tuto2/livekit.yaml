@@ -1,3 +1,19 @@
+#port: 7880
+#keys:
+#  devkey: secret
+#rtc:
+#  external_ip: 192.168.1.43
+#  port_range:
+#    start: 50000
+#    end: 50050
+#  use_external_ip: true
+
+
 port: 7880
 keys:
-  devkey: secret  # Vos identifiants de test
+  devkey: secret
+rtc:
+  # On définit l'IP que le serveur va "crier" au réseau
+  use_external_ip: true
+  # Note le changement ici :
+  udp_port: 7882
