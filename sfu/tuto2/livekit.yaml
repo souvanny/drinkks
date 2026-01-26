@@ -9,11 +9,31 @@
 #  use_external_ip: true
 
 
+#port: 7880
+#keys:
+#  devkey: secret
+#rtc:
+#  # On définit l'IP que le serveur va "crier" au réseau
+#  use_external_ip: true
+#  # Note le changement ici :
+#  udp_port: 7882
+
+#port: 7880
+#keys:
+#  devkey: secret
+#rtc:
+#  tcp_port: 7881
+#  udp_port: 7882
+#  use_external_ip: true
+#  node_ip: 192.168.1.43
+
 port: 7880
 keys:
   devkey: secret
 rtc:
-  # On définit l'IP que le serveur va "crier" au réseau
   use_external_ip: true
-  # Note le changement ici :
-  udp_port: 7882
+  # On utilise l'adresse de ngrok (SANS le https://)
+  node_ip: 147401cfd300.ngrok-free.app
+  # On force le passage par le port 443 (HTTPS) car ngrok gère le tunnel
+  udp_port: 443
+
