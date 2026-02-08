@@ -1,0 +1,117 @@
+Voici mon projet pour le lequel je voudrais créer des présentations visuellement agréables, afin de le présenter à des investisseurs.
+Si tu pouvais ajouter des choses qui rendent la partie INFRA très sexy, avec d'autres outils non cités par exemple, c'est la partie la plus importante pour moi.
+
+Je voudrais faire ces présentation dans un format HTML.
+Ne pas créer de SVG ou BITMAPS.
+Utiliser Bootstrap et Fontawesome, css.
+Faire une belle présentation.
+Penser que cette présentation va être imprimée, donc faire plusiurs pages HTML, page1.html, page2.html etc...
+A fin je voudrais aussi que tu me réécrive ce prompt pour que je puisse le réutiliser.
+
+
+Plusieurs projets existent déjà, et sont déjà soit en phase pilote, soit déjà avec des utlisateurs actifs.
+Nous sommes dans le domaines de l'énergie.
+Nous créons des applications web pour permettres à des professionnels de visualiser leur consommation d'énergie ou leur production d'énergie.
+
+Ces professionnels ou institutions sont des usines, des entreprôts, des hôpitaux, des établissement scolaires etc... qui comme tout le monde,
+consomment de l'électricité, de l'eau, du gaz...
+Mais ça peut être aussi des producteurs d'énergie solaire, avec des parcs de panneaux qui produise de l'électricité.
+J'ai donc différents outils qui permettent de visualiser des index en kwh de consommation d'léctricité, de gaz, d'eau...
+Mais aussi, des index de production d'électricité.
+J'ai aussi des courbes de température qui m'affiche l'évolution des températures, pour montrer l'influence de la météo sur la consommation.
+J'ai aussi la possibilité de renseigner des horaires d'occupation de bâtiments, pour que je puisse voir justement à quel moment les bâtiment sont occupés.
+Ainsi, je corréler la consommation, avec aussi la météo, le jour de la semaine, les périodes de vacances (pour les écoles) etc...
+
+J'ai plusieurs produits (briques logicielles)
+
+1 - Portail public (à concevoir complètement)
+
+C'est un site où un professionnel peut s'inscrire, c'est facile.
+Une fois inscrit, il a ccès à son espace personnel où il va pouvoiry gérer bâtiment.
+Pour chaque bâtiment il peut y associer un PDL, c'est un numéro de compteur fourni par Enedis le fournisseur d'électricité nationale.
+Grâce à cela nous avons la possibilité d'accéder aux API d'enedis pour lui afficher ses consommations avec un tableau de bord.
+Sa consommation sera se visible via des charts (timeseries...), des jauges etc...
+Ce portail est multiclient.
+On pourra y faire du reporting, gérer des alarmes
+
+2 - Un solution complète (développement déjà avancé)
+
+Collecte des données énergétique, stockage, dashboard, contrôle commande, alarmes, reporting
+
+La valeur des compteurs est accessible via des API.
+C'est quoi un compteur ?
+- un compteur qu'on aura posé dans un bâtiment et qui donne en temps réel l'index de l'électricité
+- un capteur de température qui donne en temps réel la température courante d'une pièce
+- des températures disponible dans un site fournisseur de données météo
+- un compteur de gaz
+- un compteur d'eau
+- un compteur hygrométrique
+
+2.1 La partie DATAS (en partie commencée)
+
+Une tâche CRON va lire et récupérer ces données toutes les 10 minutes.
+Ca se fait donc de manière centralisée.
+Le CRON va récupérer des données à divers endoits. Les compteurs sont dans bâtiment différents, situés géographique à des endroits distincts.
+Elles sont ensuite stockées en base de données relationnelle (postgres ou mysql ou mariadb)
+Cette partie comportera aussi des outils pour afficher, via un dashboard si tout se passe bien.
+Elle aura des fonctionnalités de récupérer à nouveau les données si c'est possible : 
+- souvent ça ne l'est pas (possible) car ce sont des données en temps réel
+- parfois ce sont des données qui proviennt de sources tiers, par exemple, les panneaux solaires sont déjà fournis avec une solutions complète de monitoring (que l'on trouve insuffisant), et le stockage des données est déjà fait par le fournisseur de solution, et donc on peut récupérer à loisir les données pour les mettre chez nous.
+- Les données seront exposées via une API 
+
+
+2.2 La partie dashboard, client HTML ou Flutter
+
+C'est là où la partie visuelle (HTML) est la plus importante.
+Elle est destinée au client.
+On y présente un dashboard qui exploite des données provenant de la brique DATAS (via des APIs, depuis la brique API). Mais pas que. 
+Ca peut aussi provenir de station météo externe etc...
+
+
+2.3 La partie INFRA (à concevoir complètement)
+
+Pour cette solution complète, on considère qu'il faut un serveur par client, contrairement au portail.
+On aura Gitlabs et Gitlabs Runner pour la CI/CD.
+On fonctionnera avec Docker, et éventuellement avec Kubernetes.
+
+2.4 Les tools (à concevoir complètement)
+
+C'est ici qu'il y a différentes choses : 
+- On aura la suite ELK pour monitorer les logs d'où qu'elles viennent
+- RabbitMq pour certaines tâches 
+- C'est ici qu'on va héberger les CRONs citée plus haut.
+- Cette partie comportera des outils pour monitorer le bon fonctionnement global.
+- On y gèrera aussi des choses comme les utilisateurs de façon centralisée (Active Directory ?).
+- cette partie testera les données et pourra lever des alertes en cas de défaut de données (coupure internet, disfonctionnement...)
+
+2.5 Api de contrôle action sécurisée (à concevoir complètement)
+
+Dans cette partie bien séparée, et bien sécurisée, on va traiter les requêtes destinées à controller les automates et autres compteurs sensibles.
+Exemple, depuis l'interface, 
+- on voudrait éteindre le chauffage de l'école.
+- on voudrait augmenter la température
+- on voudrait éteindre la lumière de tout le magasin
+
+Des appareils que l'on voudrait commander (changer l'état), ou juste des appareils sensibles dont on voudrait lire les données.
+On ne les mélange pas avec juste des données de consommations moins sensible.
+Ici on appliquera des process plus stricts.
+
+
+3 - Composants divers (à concevoir complètement)
+
+Ici on développera divers composants.
+Ces composant sont destinés à être inclus dans des iframes dans les différentes parties.
+Exemple :
+- composants Notes, où on pourra saisir des notes, des commentaires
+- composant Signaler, pour signaler d'autres composants si on voit un soucis
+- composant appel support
+etc ...
+
+
+
+
+
+
+
+
+

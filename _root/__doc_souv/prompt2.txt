@@ -1,0 +1,52 @@
+Je voudrais maintenant décrire les ressources nécessaires pour réaliser ces briques.
+
+- Portail public (à concevoir complètement)
+    - Walid (dév confirmé)
+    - 1 alternant
+
+- Un solution complète (développement déjà avancé)
+    - Souvanny
+    - 1 dév confirmé (A)
+    - 2 alternants
+
+- INFRA (à concevoir complètement)
+    - Souvanny
+    - 1 dév confirmé (A) le même
+    - 1 alternant
+
+- IA (à concevoir complètement)
+    - 5 jours de consulting
+    - Souvanny
+    - 1 dév confirmé (A) le même
+
+- Tests / Support (à concevoir complètement)
+    - Souvanny
+    - 1 dév confirmé (A) le même
+    - 2 profils un peu chef de projet, un peu technique
+
+
+Total :
+Souvanny : Responsable projet
+Walid
+1 dév confirmé
+3 ou 4 alternants
+5 jours de consulting pour l'IA
+2 testeurs / cdp
+
+Roadmap :
+
+- En même temps (Tout de suite)
+    - Début Portail public
+    - Suite de la solution complète
+    - Début de l'INFRA
+
+- Plus tard (6 mois plus tard)
+    - Début de l'IA
+
+- Un peu plus tard encore (6 mois plus tard)
+    - Début des tests
+    - Mise en place d'une équipe de CDP
+
+Je voudrais le budget prévisionnel pour le première année et la deuxième année.
+Faire une présntation html à montrer aux décideurs.
+

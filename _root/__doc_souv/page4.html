@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnergyVisio - Dashboard et Visualisation - Page 4</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #0d6efd;
+            --secondary: #20c997;
+            --dark: #1a1d3e;
+            --light: #f8f9fa;
+            --accent: #ff6b35;
+            --energy-blue: #2a9df4;
+            --dashboard-color: #20c997;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #fff;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            .no-print-break {
+                page-break-inside: avoid;
+            }
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .header {
+            border-bottom: 3px solid var(--dashboard-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            color: var(--energy-blue);
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .hero-dashboard {
+            background: linear-gradient(135deg, #f0f9f6 0%, #e0f3ee 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--dashboard-color);
+        }
+
+        .section-title {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background-color: var(--dashboard-color);
+        }
+
+        .dashboard-card {
+            border-radius: 12px;
+            overflow: hidden;
+            border: none;
+            transition: all 0.3s ease;
+            height: 100%;
+            border-top: 4px solid var(--dashboard-color);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(32, 201, 151, 0.15);
+        }
+
+        .dashboard-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--dashboard-color) 0%, #3dd4a9 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .mockup-dashboard {
+            background: linear-gradient(135deg, #1a1d3e 0%, #2a2f5c 100%);
+            border-radius: 12px;
+            padding: 25px;
+            color: white;
+            margin: 30px 0;
+        }
+
+        .mockup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .mockup-widget {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .widget-bar {
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .widget-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--dashboard-color) 0%, #3dd4a9 100%);
+            border-radius: 5px;
+        }
+
+        .chart-mockup {
+            height: 150px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 80%;
+            background: linear-gradient(to top, rgba(32, 201, 151, 0.3) 0%, rgba(32, 201, 151, 0) 100%);
+        }
+
+        .chart-point {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: var(--dashboard-color);
+            border-radius: 50%;
+            bottom: 40%;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list i {
+            color: var(--dashboard-color);
+            margin-right: 10px;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+
+        .platform-comparison {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .platform-box {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            width: 45%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .footer-note {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-nav {
+            background-color: var(--dashboard-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav:hover {
+            background-color: var(--dark);
+            color: white;
+        }
+
+        .page-number {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .gauge-mockup {
+            width: 120px;
+            height: 60px;
+            border-radius: 120px 120px 0 0;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto 10px;
+        }
+
+        .gauge-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 70%;
+            background: linear-gradient(to top, var(--dashboard-color) 0%, #3dd4a9 100%);
+            border-radius: 120px 120px 0 0;
+        }
+
+        .gauge-center {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+<div class="container" style="max-width: 1200px;">
+    <!-- Header -->
+    <div class="header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="logo"><i class="fas fa-tachometer-alt"></i> Energy<span>Visio</span></div>
+                <p class="mb-0 text-muted">Dashboard et Expérience Utilisateur</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <h4 class="mb-0">Visualisation et Analytics</h4>
+                <p class="text-muted mb-0">Page 4 sur 5</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-dashboard no-print-break">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="mb-3">Visualisations Intelligentes et Actionnables</h1>
+                <p class="lead">Des dashboards personnalisés qui transforment des données complexes en insights clairs pour une prise de décision éclairée.</p>
+
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex">
+                            <div class="dashboard-icon me-3" style="width: 50px; height: 50px;">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <h5>Time Series</h5>
+                                <p class="small mb-0">Évolution des consommations/productions</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex">
+                            <div class="dashboard-icon me-3" style="width: 50px; height: 50px;">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <div>
+                                <h5>Jauges Intéractives</h5>
+                                <p class="small mb-0">Visualisation instantanée des niveaux</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex">
+                            <div class="dashboard-icon me-3" style="width: 50px; height: 50px;">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <h5>Corrélations Multi-sources</h5>
+                                <p class="small mb-0">Météo, occupation, calendrier</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="dashboard-icon mx-auto" style="width: 100px; height: 100px;">
+                    <i class="fas fa-eye" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="mt-3">Data Visualization</h4>
+                <p>Transformez vos données en décisions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Mockup -->
+    <h2 class="section-title">Dashboard de Référence</h2>
+    <p>Interface moderne et intuitive permettant aux professionnels de suivre et comprendre leurs flux énergétiques en temps réel.</p>
+
+    <div class="mockup-dashboard no-print-break">
+        <div class="mockup-header">
+            <div>
+                <h4 class="mb-0"><i class="fas fa-building me-2"></i> Usine de Production - Tableau de Bord Énergétique</h4>
+                <p class="mb-0 small opacity-75">Dernière mise à jour: Aujourd'hui, 14:30</p>
+            </div>
+            <div>
+                <span class="badge bg-success me-2">En ligne</span>
+                <span class="badge bg-info">Mode réel</span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="mockup-widget text-center">
+                    <div class="widget-header">
+                        <h6 class="mb-0">Électricité</h6>
+                        <i class="fas fa-bolt text-warning"></i>
+                    </div>
+                    <h3 class="mb-2">1,450 kW</h3>
+                    <p class="small opacity-75">Consommation actuelle</p>
+                    <div class="gauge-mockup">
+                        <div class="gauge-fill"></div>
+                        <div class="gauge-center"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="mockup-widget text-center">
+                    <div class="widget-header">
+                        <h6 class="mb-0">Gaz</h6>
+                        <i class="fas fa-fire text-danger"></i>
+                    </div>
+                    <h3 class="mb-2">320 m³</h3>
+                    <p class="small opacity-75">Consommation journalière</p>
+                    <div class="widget-bar">
+                        <div class="widget-fill" style="width: 65%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="mockup-widget text-center">
+                    <div class="widget-header">
+                        <h6 class="mb-0">Température</h6>
+                        <i class="fas fa-thermometer-half text-danger"></i>
+                    </div>
+                    <h3 class="mb-2">19.5°C</h3>
+                    <p class="small opacity-75">Moyenne bâtiment</p>
+                    <div class="chart-mockup">
+                        <div class="chart-line"></div>
+                        <div class="chart-point" style="left: 10%"></div>
+                        <div class="chart-point" style="left: 30%"></div>
+                        <div class="chart-point" style="left: 50%"></div>
+                        <div class="chart-point" style="left: 70%"></div>
+                        <div class="chart-point" style="left: 90%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="mockup-widget text-center">
+                    <div class="widget-header">
+                        <h6 class="mb-0">Production Solaire</h6>
+                        <i class="fas fa-solar-panel text-warning"></i>
+                    </div>
+                    <h3 class="mb-2">850 kW</h3>
+                    <p class="small opacity-75">Production actuelle</p>
+                    <div class="widget-bar">
+                        <div class="widget-fill" style="width: 85%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-md-8">
+                <div class="mockup-widget">
+                    <div class="widget-header">
+                        <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i> Consommation Électrique - 7 derniers jours</h6>
+                        <div>
+                            <span class="badge bg-dark me-2">Usine A</span>
+                            <span class="badge bg-secondary">Usine B</span>
+                        </div>
+                    </div>
+                    <div class="chart-mockup" style="height: 200px;">
+                        <div class="chart-line" style="height: 60%"></div>
+                    </div>
+                    <div class="row mt-3 text-center">
+                        <div class="col-3">
+                            <p class="small mb-1">Lun</p>
+                            <p class="mb-0 fw-bold">1,240 kW</p>
+                        </div>
+                        <div class="col-3">
+                            <p class="small mb-1">Mar</p>
+                            <p class="mb-0 fw-bold">1,310 kW</p>
+                        </div>
+                        <div class="col-3">
+                            <p class="small mb-1">Mer</p>
+                            <p class="mb-0 fw-bold">1,280 kW</p>
+                        </div>
+                        <div class="col-3">
+                            <p class="small mb-1">Jeu</p>
+                            <p class="mb-0 fw-bold">1,450 kW</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="mockup-widget h-100">
+                    <div class="widget-header">
+                        <h6 class="mb-0"><i class="fas fa-bell me-2"></i> Alertes Récentes</h6>
+                        <span class="badge bg-danger">3</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="d-flex mb-3">
+                            <div class="me-3">
+                                <div class="dashboard-icon" style="width: 40px; height: 40px; background: rgba(255, 107, 53, 0.2);">
+                                    <i class="fas fa-exclamation-triangle" style="color: var(--accent); font-size: 1rem;"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="mb-1 small">Pic consommation électrique</p>
+                                <p class="mb-0 small opacity-75">14:20 - Usine A</p>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-3">
+                            <div class="me-3">
+                                <div class="dashboard-icon" style="width: 40px; height: 40px; background: rgba(255, 193, 7, 0.2);">
+                                    <i class="fas fa-info-circle" style="color: #ffc107; font-size: 1rem;"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="mb-1 small">Température basse détectée</p>
+                                <p class="mb-0 small opacity-75">11:45 - Bâtiment Ouest</p>
+                            </div>
+                        </div>
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <div class="dashboard-icon" style="width: 40px; height: 40px; background: rgba(32, 201, 151, 0.2);">
+                                    <i class="fas fa-check-circle" style="color: var(--secondary); font-size: 1rem;"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="mb-1 small">Données météo mises à jour</p>
+                                <p class="mb-0 small opacity-75">10:30 - Système</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Features -->
+    <h2 class="section-title mt-5">Fonctionnalités Avancées</h2>
+
+    <div class="row no-print-break">
+        <div class="col-lg-6 mb-4">
+            <div class="dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="dashboard-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h4>Visualisations Multi-formats</h4>
+                    <p>Adaptez l'affichage à vos besoins avec différents types de visualisations.</p>
+
+                    <ul class="feature-list mt-4">
+                        <li>
+                            <i class="fas fa-chart-line"></i>
+                            <div>
+                                <h6>Time Series Avancées</h6>
+                                <p class="small mb-0">Zoom, comparaison de périodes, superposition de données</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-tachometer-alt"></i>
+                            <div>
+                                <h6>Jauges et Indicateurs</h6>
+                                <p class="small mb-0">Visualisation instantanée avec seuils et alertes</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-chart-pie"></i>
+                            <div>
+                                <h6>Répartition par Usage</h6>
+                                <p class="small mb-0">Analyse de la consommation par poste ou bâtiment</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-map-marked-alt"></i>
+                            <div>
+                                <h6>Cartographie Thermique</h6>
+                                <p class="small mb-0">Visualisation spatiale des températures et consommations</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="dashboard-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="dashboard-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h4>Analytics Intelligents</h4>
+                    <p>Des outils d'analyse qui vont au-delà de la simple visualisation.</p>
+
+                    <ul class="feature-list mt-4">
+                        <li>
+                            <i class="fas fa-cloud-sun"></i>
+                            <div>
+                                <h6>Corrélation Météo</h6>
+                                <p class="small mb-0">Analyse de l'impact des conditions climatiques</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-calendar-alt"></i>
+                            <div>
+                                <h6>Analyse Temporelle</h6>
+                                <p class="small mb-0">Comparaisons jour/nuit, semaine/week-end, saisons</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <h6>Détection d'Anomalies</h6>
+                                <p class="small mb-0">Alertes intelligentes basées sur l'historique</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fas fa-chart-area"></i>
+                            <div>
+                                <h6>Prévisions et Tendances</h6>
+                                <p class="small mb-0">Projections basées sur l'historique et modèles ML</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Platform Comparison -->
+    <h2 class="section-title">Expérience Multi-Plateformes</h2>
+
+    <div class="platform-comparison no-print-break">
+        <div class="platform-box">
+            <div class="dashboard-icon mx-auto mb-3">
+                <i class="fab fa-html5"></i>
+            </div>
+            <h4>Dashboard Web</h4>
+            <p>Application HTML5 responsive avec Bootstrap 5</p>
+
+            <div class="mt-4">
+                <h6>Avantages</h6>
+                <ul class="text-start small">
+                    <li>Accessible depuis tout navigateur</li>
+                    <li>Interface responsive adaptative</li>
+                    <li>Pas d'installation requise</li>
+                    <li>Mises à jour transparentes</li>
+                </ul>
+            </div>
+
+            <div class="mt-3">
+                <span class="badge bg-success me-2">En production</span>
+                <span class="badge bg-info">Développement avancé</span>
+            </div>
+        </div>
+
+        <div class="platform-box">
+            <div class="dashboard-icon mx-auto mb-3">
+                <i class="fab fa-flutter"></i>
+            </div>
+            <h4>Application Mobile</h4>
+            <p>Application Flutter pour iOS et Android</p>
+
+            <div class="mt-4">
+                <h6>Avantages</h6>
+                <ul class="text-start small">
+                    <li>Notifications push en temps réel</li>
+                    <li>Accès hors ligne aux données</li>
+                    <li>Expérience mobile optimisée</li>
+                    <li>Rapports PDF intégrés</li>
+                </ul>
+            </div>
+
+            <div class="mt-3">
+                <span class="badge bg-warning">En développement</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Integration & Customization -->
+    <div class="row mt-5">
+        <div class="col-lg-12">
+            <div class="dashboard-card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h3><i class="fas fa-puzzle-piece me-2"></i>Intégration et Personnalisation</h3>
+                            <p class="mb-0">Notre solution s'adapte à votre écosystème existant grâce à des APIs ouvertes et des composants modulaires.</p>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-code me-2"></i>APIs RESTful</h6>
+                                    <p class="small">Intégration avec vos systèmes existants (ERP, GMAO, etc.)</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-cube me-2"></i>Composants iFrame</h6>
+                                    <p class="small">Intégration dans vos portails existants via iframes sécurisées</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-palette me-2"></i>Personnalisation</h6>
+                                    <p class="small">Thèmes couleurs, logos, terminologie adaptée à votre secteur</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6><i class="fas fa-language me-2"></i>Internationalisation</h6>
+                                    <p class="small">Support multi-langues pour vos filiales internationales</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <div class="dashboard-icon mx-auto" style="width: 100px; height: 100px;">
+                                <i class="fas fa-cogs" style="font-size: 3rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Real-time Data -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <h4><i class="fas fa-bolt me-2"></i>Données en Temps Réel</h4>
+                            <p class="mb-0">Notre système collecte et traite les données toutes les 10 minutes, garantissant une vision à jour de votre consommation énergétique.</p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="display-4 text-energy-blue">10 min</div>
+                            <p class="small mb-0">Fréquence de collecte</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer & Navigation -->
+    <div class="footer-note no-print-break">
+        <div class="page-navigation">
+            <div>
+                <a href="page3.html" class="btn-nav">
+                    <i class="fas fa-arrow-left"></i> Précédent
+                </a>
+            </div>
+            <div class="page-number">
+                Page 4 sur 5
+            </div>
+            <div>
+                <a href="page5.html" class="btn-nav">
+                    Suivant <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        <p class="mb-0">© 2023 EnergyVisio. Tous droits réservés. Document confidentiel.</p>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Function to handle print styles
+    function beforePrint() {
+        document.querySelectorAll('.btn-nav').forEach(el => el.style.display = 'none');
+    }
+
+    function afterPrint() {
+        document.querySelectorAll('.btn-nav').forEach(el => el.style.display = 'inline-flex');
+    }
+
+    // Add event listeners for print
+    if (window.matchMedia) {
+        const mediaQueryList = window.matchMedia('print');
+        mediaQueryList.addListener(mql => {
+            if (mql.matches) {
+                beforePrint();
+            } else {
+                afterPrint();
+            }
+        });
+    }
+
+    window.onbeforeprint = beforePrint;
+    window.onafterprint = afterPrint;
+</script>
+</body>
+</html>

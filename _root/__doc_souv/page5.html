@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnergyVisio - Avantages et Perspectives - Page 5</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #0d6efd;
+            --secondary: #20c997;
+            --dark: #1a1d3e;
+            --light: #f8f9fa;
+            --accent: #ff6b35;
+            --energy-blue: #2a9df4;
+            --conclusion-color: #ff6b35;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #fff;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            .no-print-break {
+                page-break-inside: avoid;
+            }
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .header {
+            border-bottom: 3px solid var(--conclusion-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            color: var(--energy-blue);
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .hero-conclusion {
+            background: linear-gradient(135deg, #fff5f0 0%, #ffe8db 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--conclusion-color);
+        }
+
+        .section-title {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background-color: var(--conclusion-color);
+        }
+
+        .advantage-card {
+            border-radius: 12px;
+            overflow: hidden;
+            border: none;
+            transition: all 0.3s ease;
+            height: 100%;
+            border-top: 4px solid var(--conclusion-color);
+        }
+
+        .advantage-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.15);
+        }
+
+        .advantage-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--conclusion-color) 0%, #ff8b5c 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .advantage-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .roi-calculator {
+            background: linear-gradient(135deg, #1a1d3e 0%, #2a2f5c 100%);
+            border-radius: 12px;
+            padding: 25px;
+            color: white;
+            margin: 30px 0;
+        }
+
+        .roi-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .roi-item:last-child {
+            border-bottom: none;
+        }
+
+        .roi-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .roadmap-timeline {
+            position: relative;
+            padding-left: 30px;
+            margin-top: 30px;
+        }
+
+        .roadmap-timeline:before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--conclusion-color);
+        }
+
+        .roadmap-item {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .roadmap-item:before {
+            content: '';
+            position: absolute;
+            left: -36px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: white;
+            border: 3px solid var(--conclusion-color);
+            z-index: 1;
+        }
+
+        .roadmap-item.completed:before {
+            background-color: var(--secondary);
+        }
+
+        .roadmap-item.current:before {
+            background-color: var(--conclusion-color);
+        }
+
+        .team-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: center;
+            height: 100%;
+        }
+
+        .team-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--energy-blue) 0%, #2a9df4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .investment-ask {
+            background: linear-gradient(135deg, rgba(32, 201, 151, 0.1) 0%, rgba(32, 201, 151, 0.05) 100%);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--conclusion-color) 0%, #ff8b5c 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+            color: white;
+        }
+
+        .footer-note {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-nav {
+            background-color: var(--conclusion-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav:hover {
+            background-color: var(--dark);
+            color: white;
+        }
+
+        .page-number {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--conclusion-color);
+            line-height: 1;
+        }
+
+        .contact-info {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .contact-info li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .contact-info li:last-child {
+            border-bottom: none;
+        }
+
+        .contact-info i {
+            color: var(--conclusion-color);
+            margin-right: 10px;
+            width: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container" style="max-width: 1200px;">
+    <!-- Header -->
+    <div class="header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="logo"><i class="fas fa-bolt"></i> Energy<span>Visio</span></div>
+                <p class="mb-0 text-muted">Conclusion et Perspectives</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <h4 class="mb-0">Avantages Concurrenciels et ROI</h4>
+                <p class="text-muted mb-0">Page 5 sur 5</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-conclusion no-print-break">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="mb-3">Transformer la Gestion Énergétique avec une Solution Digitale Innovante</h1>
+                <p class="lead">EnergyVisio combine expertise énergétique et excellence technologique pour offrir une plateforme unique sur le marché.</p>
+
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <div class="stat-number">30%</div>
+                            <p class="mb-0 small">Réduction moyenne de la consommation</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <div class="stat-number">12-18</div>
+                            <p class="mb-0 small">Mois pour un retour sur investissement</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <div class="stat-number">99.9%</div>
+                            <p class="mb-0 small">Disponibilité de la plateforme</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="advantage-icon mx-auto" style="width: 100px; height: 100px;">
+                    <i class="fas fa-trophy" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="mt-3">Positionnement Unique</h4>
+                <p>Expertise énergétique + excellence technologique</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Competitive Advantages -->
+    <h2 class="section-title">Avantages Concurrenciels</h2>
+
+    <div class="row no-print-break">
+        <div class="col-lg-4 mb-4">
+            <div class="advantage-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="advantage-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h4>Solution Complète Intégrée</h4>
+                    <p>De la collecte de données au contrôle des équipements, en passant par l'analyse et le reporting.</p>
+
+                    <div class="mt-4">
+                        <h6>Différenciation</h6>
+                        <ul class="mb-0 small">
+                            <li>Pas de solution fragmentée</li>
+                            <li>Intégration transparente</li>
+                            <li>Interface utilisateur unifiée</li>
+                            <li>Support single-vendor</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="advantage-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="advantage-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <h4>Architecture Cloud-Native</h4>
+                    <p>Infrastructure moderne conçue pour l'évolutivité, la résilience et la sécurité.</p>
+
+                    <div class="mt-4">
+                        <h6>Différenciation</h6>
+                        <ul class="mb-0 small">
+                            <li>Scalabilité horizontale illimitée</li>
+                            <li>Temps de déploiement réduit</li>
+                            <li>Coûts d'infrastructure optimisés</li>
+                            <li>Mises à jour transparentes</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="advantage-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="advantage-icon">
+                        <i class="fas fa-chart-network"></i>
+                    </div>
+                    <h4>Analytics Avancés</h4>
+                    <p>Des insights actionnables grâce à la corrélation de données multiples et l'IA.</p>
+
+                    <div class="mt-4">
+                        <h6>Différenciation</h6>
+                        <ul class="mb-0 small">
+                            <li>Corrélations météo/occupation</li>
+                            <li>Détection d'anomalies intelligente</li>
+                            <li>Recommandations personnalisées</li>
+                            <li>Prévisions précises</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROI Calculator -->
+    <div class="roi-calculator no-print-break">
+        <h3 class="text-center mb-4"><i class="fas fa-calculator me-2"></i>Retour sur Investissement</h3>
+        <p class="text-center mb-4">Économies réalisables par un client industriel moyen (consommation annuelle: 2,5 GWh)</p>
+
+        <div class="roi-item">
+            <div>
+                <h5 class="mb-1">Réduction consommation</h5>
+                <p class="small mb-0">Optimisation basée sur les analytics</p>
+            </div>
+            <div class="roi-value">15-30%</div>
+        </div>
+
+        <div class="roi-item">
+            <div>
+                <h5 class="mb-1">Économies annuelles</h5>
+                <p class="small mb-0">Sur une facture de 250 000€/an</p>
+            </div>
+            <div class="roi-value">37 500 - 75 000€</div>
+        </div>
+
+        <div class="roi-item">
+            <div>
+                <h5 class="mb-1">ROI moyen</h5>
+                <p class="small mb-0">Temps de retour sur investissement</p>
+            </div>
+            <div class="roi-value">12-18 mois</div>
+        </div>
+
+        <div class="roi-item">
+            <div>
+                <h5 class="mb-1">Gain sur 5 ans</h5>
+                <p class="small mb-0">Économies cumulées</p>
+            </div>
+            <div class="roi-value">187 500 - 375 000€</div>
+        </div>
+
+        <div class="text-center mt-4">
+            <div class="advantage-icon d-inline-flex">
+                <i class="fas fa-euro-sign"></i>
+            </div>
+            <h4 class="mt-3">Investissement rapidement amorti</h4>
+            <p class="mb-0">Notre solution se paye d'elle-même en moins de 2 ans.</p>
+        </div>
+    </div>
+
+    <!-- Market Opportunity -->
+    <h2 class="section-title mt-5">Opportunité de Marché</h2>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <p>Le marché de l'efficacité énergétique pour les professionnels est en forte croissance, porté par plusieurs facteurs clés :</p>
+
+            <ul class="mb-4">
+                <li><strong>Hausse des prix de l'énergie</strong> - Nécessité de mieux contrôler les consommations</li>
+                <li><strong>Transition énergétique</strong> - Obligations réglementaires et objectifs RSE</li>
+                <li><strong>Digitalisation</strong> - Adoption croissante des solutions SaaS par les industriels</li>
+                <li><strong>Subventions et aides</strong> - Programmes gouvernementaux pour l'efficacité énergétique</li>
+            </ul>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5><i class="fas fa-chart-line me-2"></i>Taille du Marché Adressable</h5>
+                    <div class="row text-center mt-3">
+                        <div class="col-6">
+                            <div class="stat-number">40 000+</div>
+                            <p class="small mb-0">Sites industriels en France</p>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-number">500M€+</div>
+                            <p class="small mb-0">Marché annuel en France</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5><i class="fas fa-road me-2"></i>Roadmap Produit</h5>
+
+                    <div class="roadmap-timeline">
+                        <div class="roadmap-item completed">
+                            <h6>Phase 1 - Lancement (2023)</h6>
+                            <p class="small mb-0">Solution complète avec dashboard web, collecte de données, monitoring basique</p>
+                        </div>
+
+                        <div class="roadmap-item current">
+                            <h6>Phase 2 - Expansion (2024)</h6>
+                            <p class="small mb-0">Application mobile Flutter, modules analytics avancés, intégrations sectorielles</p>
+                        </div>
+
+                        <div class="roadmap-item">
+                            <h6>Phase 3 - Intelligence (2025)</h6>
+                            <p class="small mb-0">IA pour optimisation prédictive, marketplace d'applications, expansion européenne</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team & Expertise -->
+    <h2 class="section-title mt-5">Équipe et Expertise</h2>
+
+    <div class="row no-print-break">
+        <div class="col-md-4 mb-4">
+            <div class="team-card">
+                <div class="team-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h5>Expertise Énergétique</h5>
+                <p class="small">15+ ans dans l'énergie, certifications sectorielles, connaissance approfondie des réglementations.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="team-card">
+                <div class="team-avatar">
+                    <i class="fas fa-code"></i>
+                </div>
+                <h5>Expertise Technologique</h5>
+                <p class="small">Architectes cloud, DevOps, data scientists avec expérience dans des scale-ups technologiques.</p>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="team-card">
+                <div class="team-avatar">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h5>Expertise Commerciale</h5>
+                <p class="small">Équipe commerciale avec réseau dans l'industrie et le secteur public, expérience en scale-up.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investment Ask -->
+    <div class="investment-ask no-print-break">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h3><i class="fas fa-handshake me-2"></i>Opportunité d'Investissement</h3>
+                <p class="mb-0">Nous recherchons des partenaires stratégiques pour accélérer notre croissance et renforcer notre position de leader sur le marché des solutions digitales pour l'énergie.</p>
+
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h6>Utilisation des fonds</h6>
+                        <ul class="small mb-0">
+                            <li>Renforcement de l'équipe technique</li>
+                            <li>Développement de nouvelles fonctionnalités</li>
+                            <li>Marketing et acquisition clients</li>
+                            <li>Expansion à l'international</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Notre offre</h6>
+                        <ul class="small mb-0">
+                            <li>Équipe expérimentée et complémentaire</li>
+                            <li>Produit déjà validé par des clients</li>
+                            <li>Marché en forte croissance</li>
+                            <li>Positionnement unique</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <a href="#contact" class="cta-button mt-3">
+                    <i class="fas fa-comments"></i> Discutons-en
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact & Next Steps -->
+    <div class="row mt-5">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <h3 id="contact"><i class="fas fa-envelope me-2"></i>Contact et Prochaines Étapes</h3>
+                            <p>Nous serions ravis de vous présenter notre solution en détail et de discuter des opportunités de collaboration.</p>
+
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h6>Informations de contact</h6>
+                                    <ul class="contact-info">
+                                        <li><i class="fas fa-user"></i> Directeur Général</li>
+                                        <li><i class="fas fa-envelope"></i> contact@energyvisio.fr</li>
+                                        <li><i class="fas fa-phone"></i> +33 1 XX XX XX XX</li>
+                                        <li><i class="fas fa-map-marker-alt"></i> Paris, France</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Prochaines étapes proposées</h6>
+                                    <ul class="contact-info">
+                                        <li><i class="fas fa-play-circle"></i> Démonstration complète de la plateforme</li>
+                                        <li><i class="fas fa-chart-bar"></i> Présentation détaillée du business plan</li>
+                                        <li><i class="fas fa-users"></i> Rencontre avec l'équipe fondatrice</li>
+                                        <li><i class="fas fa-handshake"></i> Discussion sur les termes d'investissement</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <div class="advantage-icon mx-auto mt-4" style="width: 100px; height: 100px;">
+                                <i class="fas fa-rocket" style="font-size: 3rem;"></i>
+                            </div>
+                            <h4 class="mt-3">Prêt pour le décollage</h4>
+                            <p>Rejoignez-nous dans cette aventure.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final Summary -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="hero-conclusion">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <h3><i class="fas fa-check-circle me-2"></i>Pourquoi Investir dans EnergyVisio ?</h3>
+                        <p class="mb-0">EnergyVisio combine une expertise énergétique unique avec une plateforme technologique de pointe pour adresser un marché en forte croissance. Avec des produits déjà validés par des clients, une équipe expérimentée et une architecture scalable, nous sommes parfaitement positionnés pour devenir le leader européen des solutions digitales pour l'énergie.</p>
+                    </div>
+                    <div class="col-lg-3 text-center">
+                        <div class="logo" style="font-size: 2.5rem;">
+                            <i class="fas fa-bolt"></i> Energy<span>Visio</span>
+                        </div>
+                        <p class="mb-0 mt-2">Solutions intelligentes pour l'énergie de demain</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer & Navigation -->
+    <div class="footer-note no-print-break">
+        <div class="page-navigation">
+            <div>
+                <a href="page4.html" class="btn-nav">
+                    <i class="fas fa-arrow-left"></i> Précédent
+                </a>
+            </div>
+            <div class="page-number">
+                Page 5 sur 5
+            </div>
+            <div>
+                <a href="page1.html" class="btn-nav">
+                    <i class="fas fa-redo"></i> Recommencer
+                </a>
+            </div>
+        </div>
+        <p class="mb-0">© 2023 EnergyVisio. Tous droits réservés. Document confidentiel.</p>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Function to handle print styles
+    function beforePrint() {
+        document.querySelectorAll('.btn-nav').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.cta-button').forEach(el => el.style.display = 'none');
+    }
+
+    function afterPrint() {
+        document.querySelectorAll('.btn-nav').forEach(el => el.style.display = 'inline-flex');
+        document.querySelectorAll('.cta-button').forEach(el => el.style.display = 'inline-flex');
+    }
+
+    // Add event listeners for print
+    if (window.matchMedia) {
+        const mediaQueryList = window.matchMedia('print');
+        mediaQueryList.addListener(mql => {
+            if (mql.matches) {
+                beforePrint();
+            } else {
+                afterPrint();
+            }
+        });
+    }
+
+    window.onbeforeprint = beforePrint;
+    window.onafterprint = afterPrint;
+</script>
+</body>
+</html>
