@@ -230,6 +230,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            font-family: 'Open Sans', sans-serif;
         }
 
         .budget-table th {
@@ -238,11 +239,13 @@
             text-align: left;
             font-weight: 600;
             border-bottom: 3px solid var(--primary);
+            font-family: 'Montserrat', sans-serif;
         }
 
         .budget-table td {
             padding: 15px;
             border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
         }
 
         .budget-table tr:hover {
@@ -259,12 +262,17 @@
             font-family: 'Courier New', monospace;
             font-weight: 600;
             text-align: right;
+            white-space: nowrap;
         }
 
         .budget-note {
             font-size: 0.85rem;
             color: #666;
             font-style: italic;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
         }
 
         .roadmap-timeline {
@@ -524,9 +532,9 @@
             </div>
         </div>
         <div style="margin-top: 20px;">
-            <span class="stat-badge"><i class="fas fa-users me-2"></i>Équipe: 7-8 personnes</span>
+            <span class="stat-badge"><i class="fas fa-users me-2"></i>Équipe: 6-7 personnes</span>
             <span class="stat-badge"><i class="fas fa-calendar-alt me-2"></i>Horizon: 23 mois</span>
-            <span class="stat-badge"><i class="fas fa-euro-sign me-2"></i>Budget: 502k€</span>
+            <span class="stat-badge"><i class="fas fa-euro-sign me-2"></i>Budget: 497k€</span>
             <span class="stat-badge"><i class="fas fa-cubes me-2"></i>5 briques fonctionnelles</span>
         </div>
     </div>
@@ -934,28 +942,38 @@
                     <div class="mb-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Souvanny (Responsable)</span>
+                            <strong>100%</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>1 Product owner</span>
+                            <strong>Mois 8-24</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Walid (Dév confirmé)</span>
+                            <strong>100%</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Dév confirmé</span>
+                            <strong>Mois 4-24</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Dév intermédiaire</span>
+                            <strong>Mois 4-24</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>2 Alternants</span>
+                            <strong>Mois 8-24</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Consultant IA</span>
+                            <strong>10 jours</strong>
                         </div>
                     </div>
 
-
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> Équipe de 6-7 personnes avec intégration progressive sur 23 mois.
+                    </div>
                 </div>
             </div>
         </div>
@@ -1089,32 +1107,6 @@
                                 </div>
                             </div>
                         </div>
-<!--                        <div class="col-md-4 mb-3">-->
-<!--                            <div class="card border-0 shadow-sm h-100">-->
-<!--                                <div class="card-body">-->
-<!--                                    <h5><i class="fas fa-user-tie text-success me-2"></i>Équipe CDP</h5>-->
-<!--                                    <p class="small mb-0">Structuration complète équipe projet</p>-->
-<!--                                    <ul class="mt-2 mb-0 small">-->
-<!--                                        <li>Gestion projets clients</li>-->
-<!--                                        <li>Relation client</li>-->
-<!--                                        <li>Déploiements</li>-->
-<!--                                    </ul>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                        <div class="col-md-4 mb-3">-->
-<!--                            <div class="card border-0 shadow-sm h-100">-->
-<!--                                <div class="card-body">-->
-<!--                                    <h5><i class="fas fa-chart-line text-warning me-2"></i>Évolution Produit</h5>-->
-<!--                                    <p class="small mb-0">Améliorations continues et nouvelles fonctionnalités</p>-->
-<!--                                    <ul class="mt-2 mb-0 small">-->
-<!--                                        <li>Feedback clients</li>-->
-<!--                                        <li>Nouveaux connecteurs</li>-->
-<!--                                        <li>Évolutions IA</li>-->
-<!--                                    </ul>-->
-<!--                                </div>-->
-<!--                            </div>-->
-<!--                        </div>-->
                     </div>
 
                     <div class="alert alert-primary mt-3">
@@ -1126,7 +1118,7 @@
         </div>
     </div>
 
-    <!-- Slide 4: Budget Prévisionnel -->
+    <!-- Slide 4: Budget Prévisionnel RECALCULÉ -->
     <div class="slide" data-aos="fade-up">
         <h2 class="slide-title">Budget Prévisionnel 2024-2025 (23 mois)</h2>
 
@@ -1148,79 +1140,119 @@
                             </thead>
                             <tbody>
                             <tr>
-                                <td><strong>Salaires - Cadres</strong></td>
-                                <td class="budget-value">137 500€</td>
-                                <td class="budget-value">180 000€</td>
-                                <td class="budget-value">317 500€</td>
+                                <td><strong>Salaires - Développeurs</strong></td>
+                                <td class="budget-value">95 000 €</td>
+                                <td class="budget-value">139 000 €</td>
+                                <td class="budget-value">234 000 €</td>
                             </tr>
                             <tr>
-                                <td>&nbsp;&nbsp;• Souvanny (Responsable)</td>
-                                <td class="budget-value">64 167€</td>
-                                <td class="budget-value">84 000€</td>
-                                <td class="budget-value">148 167€</td>
+                                <td>&nbsp;&nbsp;• Souvanny</td>
+                                <td class="budget-value">44 000 €</td>
+                                <td class="budget-value">44 000 €</td>
+                                <td class="budget-value">88 000 €</td>
                             </tr>
                             <tr>
-                                <td>&nbsp;&nbsp;• Walid (Dév confirmé)</td>
-                                <td class="budget-value">45 833€</td>
-                                <td class="budget-value">48 000€</td>
-                                <td class="budget-value">93 833€</td>
+                                <td>&nbsp;&nbsp;• Walid</td>
+                                <td class="budget-value">35 000 €</td>
+                                <td class="budget-value">35 000 €</td>
+                                <td class="budget-value">70 000 €</td>
                             </tr>
                             <tr>
-                                <td>&nbsp;&nbsp;• Dév confirmé (A) - Même salaire</td>
-                                <td class="budget-value">27 500€</td>
-                                <td class="budget-value">48 000€</td>
-                                <td class="budget-value">75 500€</td>
+                                <td>&nbsp;&nbsp;• 1 Dév confirmé (mois 4)</td>
+                                <td class="budget-value">16 000 €</td>
+                                <td class="budget-value">32 000 €</td>
+                                <td class="budget-value">48 000 €</td>
                             </tr>
                             <tr>
-                                <td><strong>Salaires - Alternants</strong></td>
-                                <td class="budget-value">41 667€</td>
-                                <td class="budget-value">60 000€</td>
-                                <td class="budget-value">101 667€</td>
+                                <td>&nbsp;&nbsp;• 1 Dév intermédiaire (mois 4)</td>
+                                <td class="budget-value">14 000 €</td>
+                                <td class="budget-value">28 000 €</td>
+                                <td class="budget-value">42 000 €</td>
                             </tr>
                             <tr>
-                                <td>&nbsp;&nbsp;• 4 alternants × 10 mois (an 1)</td>
-                                <td class="budget-value">41 667€</td>
-                                <td class="budget-value">-</td>
-                                <td class="budget-value">41 667€</td>
+                                <td><strong>Salaires - Métier</strong></td>
+                                <td class="budget-value">12 000 €</td>
+                                <td class="budget-value">36 000 €</td>
+                                <td class="budget-value">48 000 €</td>
                             </tr>
                             <tr>
-                                <td>&nbsp;&nbsp;• 4 alternants × 12 mois (an 2)</td>
-                                <td class="budget-value">-</td>
-                                <td class="budget-value">60 000€</td>
-                                <td class="budget-value">60 000€</td>
+                                <td>&nbsp;&nbsp;• 1 Product Owner (mois 8)</td>
+                                <td class="budget-value">12 000 €</td>
+                                <td class="budget-value">36 000 €</td>
+                                <td class="budget-value">48 000 €</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Coûts Salariaux (×1.42)</strong></td>
+                                <td class="budget-value">171 820 €</td>
+                                <td class="budget-value">248 500 €</td>
+                                <td class="budget-value">420 320 €</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Alternants</strong></td>
+                                <td class="budget-value">12 000 €</td>
+                                <td class="budget-value">36 000 €</td>
+                                <td class="budget-value">48 000 €</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;&nbsp;• 2 alternants (mois 8)</td>
+                                <td class="budget-value">12 000 €</td>
+                                <td class="budget-value">36 000 €</td>
+                                <td class="budget-value">48 000 €</td>
                             </tr>
                             <tr>
                                 <td><strong>Consultant IA</strong></td>
-                                <td class="budget-value">5 000€</td>
+                                <td class="budget-value">5 000 €</td>
                                 <td class="budget-value">-</td>
-                                <td class="budget-value">5 000€</td>
+                                <td class="budget-value">5 000 €</td>
                             </tr>
                             <tr>
-                                <td><strong>Testeurs/CDP</strong></td>
-                                <td class="budget-value">30 000€</td>
-                                <td class="budget-value">48 000€</td>
-                                <td class="budget-value">78 000€</td>
+                                <td><strong>Matériel & Infrastructure</strong></td>
+                                <td class="budget-value">12 800 €</td>
+                                <td class="budget-value">10 800 €</td>
+                                <td class="budget-value">23 600 €</td>
                             </tr>
                             <tr>
-                                <td>&nbsp;&nbsp;• 2 testeurs/CDP × 6 mois (an 1)</td>
-                                <td class="budget-value">30 000€</td>
+                                <td>&nbsp;&nbsp;• Matériel Souvanny</td>
+                                <td class="budget-value">2 000 €</td>
                                 <td class="budget-value">-</td>
-                                <td class="budget-value">30 000€</td>
+                                <td class="budget-value">2 000 €</td>
                             </tr>
                             <tr>
-                                <td>&nbsp;&nbsp;• 2 testeurs/CDP × 12 mois (an 2)</td>
-                                <td class="budget-value">-</td>
-                                <td class="budget-value">48 000€</td>
-                                <td class="budget-value">48 000€</td>
+                                <td>&nbsp;&nbsp;• Déplacement Souvanny</td>
+                                <td class="budget-value">6 000 €</td>
+                                <td class="budget-value">6 000 €</td>
+                                <td class="budget-value">12 000 €</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;&nbsp;• Serveurs VPS</td>
+                                <td class="budget-value">1 200 €</td>
+                                <td class="budget-value">1 200 €</td>
+                                <td class="budget-value">2 400 €</td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;&nbsp;• Logiciels divers</td>
+                                <td class="budget-value">3 600 €</td>
+                                <td class="budget-value">3 600 €</td>
+                                <td class="budget-value">7 200 €</td>
                             </tr>
                             <tr class="budget-total">
-                                <td><strong>TOTAL BUDGET</strong></td>
-                                <td class="budget-value"><strong>214 167€</strong></td>
-                                <td class="budget-value"><strong>288 000€</strong></td>
-                                <td class="budget-value"><strong>502 167€</strong></td>
+                                <td><strong>TOTAL GÉNÉRAL</strong></td>
+                                <td class="budget-value"><strong>201 620 €</strong></td>
+                                <td class="budget-value"><strong>295 300 €</strong></td>
+                                <td class="budget-value"><strong>496 920 €</strong></td>
                             </tr>
                             </tbody>
                         </table>
+                        <div class="p-3">
+                            <p class="budget-note">
+                                <i class="fas fa-info-circle me-1"></i>
+                                <strong>Notes:</strong>
+                                • Coûts salariaux calculés avec coefficient 1.42 (charges patronales).<br>
+                                • Développeurs: intégration progressive (mois 4 pour D1 et D2).<br>
+                                • Product Owner et alternants: intégration mois 8.<br>
+                                • Consultant IA: 10 jours d'expertise.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1229,61 +1261,71 @@
                 <div class="budget-summary h-100">
                     <h4 class="mb-4"><i class="fas fa-chart-pie me-2"></i>Répartition du Budget</h4>
 
-                    <div class="budget-figures">
-                        <div class="budget-year">
-                            <div class="budget-amount">214k€</div>
-                            <div class="budget-label">Année 1 (11 mois)</div>
-                            <div class="mt-3 small">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Salaires cadres</span>
-                                    <span>64%</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Alternants</span>
-                                    <span>19%</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Testeurs/CDP</span>
-                                    <span>14%</span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span>Consultant IA</span>
-                                    <span>2%</span>
+                    <div class="text-center mb-4">
+                        <div class="budget-amount">497k€</div>
+                        <div class="budget-label">Budget total sur 23 mois</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5><i class="fas fa-users me-2"></i>Répartition par année</h5>
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="display-6 text-primary">202k€</div>
+                                    <div class="small">Année 1</div>
+                                    <div class="mt-2 small">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Salaires</span>
+                                            <span>85%</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Alternants</span>
+                                            <span>6%</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Autres</span>
+                                            <span>9%</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="budget-divider"></div>
-
-                        <div class="budget-year">
-                            <div class="budget-amount">288k€</div>
-                            <div class="budget-label">Année 2 (12 mois)</div>
-                            <div class="mt-3 small">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Salaires cadres</span>
-                                    <span>63%</span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Alternants</span>
-                                    <span>21%</span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span>Testeurs/CDP</span>
-                                    <span>17%</span>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <div class="display-6 text-success">295k€</div>
+                                    <div class="small">Année 2</div>
+                                    <div class="mt-2 small">
+                                        <div class="d-flex justify-content-between">
+                                            <span>Salaires</span>
+                                            <span>84%</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Alternants</span>
+                                            <span>12%</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span>Autres</span>
+                                            <span>4%</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-5">
-                        <h5><i class="fas fa-lightbulb me-2"></i>Notes Budgetaires</h5>
-                        <ul class="mt-3">
-                            <li class="mb-2"><strong>Salaires égaux:</strong> Walid et Dév confirmé (A) au même salaire</li>
-                            <li class="mb-2"><strong>Alternants:</strong> Tous sur 23 mois (mois 2-24) = 101 667€</li>
-                            <li class="mb-2"><strong>Testeurs/CDP:</strong> Démarrage mois 7 année 1 = 30k€ an 1, 48k€ an 2</li>
-                            <li class="mb-2"><strong>Consultant IA:</strong> 5 000€ intégrés année 1 (mois 7)</li>
-                            <li><strong>Budget hors:</strong> Infrastructure cloud, formations, outils (à budgéter ultérieurement)</li>
+                    <div class="mt-4">
+                        <h5><i class="fas fa-lightbulb me-2"></i>Points Clés du Budget</h5>
+                        <ul class="mt-3 small">
+                            <li class="mb-2"><strong>Équipe optimisée:</strong> 6-7 personnes avec intégration progressive</li>
+                            <li class="mb-2"><strong>Salaires réalistes:</strong> 44k€ Souvanny, 35k€ Walid, progression interne</li>
+                            <li class="mb-2"><strong>Alternants économiques:</strong> 24k€/an pour 2 profils sur 16 mois</li>
+                            <li class="mb-2"><strong>Infrastructure maîtrisée:</strong> 2.4k€/an pour serveurs VPS</li>
+                            <li><strong>Consultant IA ciblé:</strong> 5k€ pour 10 jours d'expertise</li>
                         </ul>
+                    </div>
+
+                    <div class="alert alert-success mt-4">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <strong>Budget réaliste:</strong> Coûts salariaux détaillés avec charges, infrastructure optimisée, intégration progressive de l'équipe.
                     </div>
                 </div>
             </div>
@@ -1293,9 +1335,24 @@
             <div class="col-lg-12">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body">
-                        <div class="alert alert-success mt-3">
-                            <i class="fas fa-euro-sign me-2"></i>
-                            <strong>Budget optimisé:</strong> Focus sur les ressources humaines, coûts infrastructure et outils exclus pour phase de planification.
+                        <h5><i class="fas fa-handshake me-2"></i>Retour sur Investissement Anticipé</h5>
+                        <div class="row mt-3">
+                            <div class="col-md-4 text-center">
+                                <div class="display-4 text-success">12-18</div>
+                                <p class="mb-0">Mois pour ROI client</p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="display-4 text-primary">30%</div>
+                                <p class="mb-0">Réduction consommation client</p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="display-4 text-warning">50+</div>
+                                <p class="mb-0">Clients potentiels année 2</p>
+                            </div>
+                        </div>
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-chart-line me-2"></i>
+                            <strong>Perspectives:</strong> Budget maîtrisé permettant un ROI rapide avec une équipe complète et infrastructure optimisée.
                         </div>
                     </div>
                 </div>
@@ -1313,17 +1370,17 @@
                     <h4 class="mb-4"><i class="fas fa-check-circle text-success me-2"></i>Points Forts de l'Approche</h4>
 
                     <div class="mb-4">
-                        <h6><i class="fas fa-users text-primary me-2"></i>Équipe Équilibrée</h6>
-                        <p class="small mb-3">Salaires alignés pour développeurs confirmés, équité interne préservée.</p>
+                        <h6><i class="fas fa-users text-primary me-2"></i>Équipe Progressive</h6>
+                        <p class="small mb-3">Intégration échelonnée sur 23 mois avec budget maîtrisé et montée en charge progressive.</p>
 
-                        <h6><i class="fas fa-calendar-alt text-success me-2"></i>Planning Progressif</h6>
-                        <p class="small mb-3">Démarrage échelonné: alternants mois 2, IA et tests mois 7.</p>
+                        <h6><i class="fas fa-euro-sign text-warning me-2"></i>Budget Réaliste</h6>
+                        <p class="small mb-3">497k€ sur 23 mois avec salaires alignés marché et charges incluses.</p>
 
-                        <h6><i class="fas fa-euro-sign text-warning me-2"></i>Budget Transparent</h6>
-                        <p class="small mb-3">Focus sur coûts RH, coûts infrastructure séparés pour flexibilité.</p>
+                        <h6><i class="fas fa-calendar-alt text-success me-2"></i>Planning Pragmatique</h6>
+                        <p class="small mb-3">Phases adaptées aux ressources disponibles et délais réalistes.</p>
 
-                        <h6><i class="fas fa-cubes text-info me-2"></i>Approche Agile</h6>
-                        <p class="small mb-0">Phases qui se chevauchent permettant adaptation aux retours clients.</p>
+                        <h6><i class="fas fa-cubes text-info me-2"></i>Architecture Évolutive</h6>
+                        <p class="small mb-0">Briques modulaires permettant développement parallèle et évolutions futures.</p>
                     </div>
                 </div>
             </div>
@@ -1334,21 +1391,21 @@
 
                     <div class="mb-4">
                         <div class="alert alert-warning mb-3">
-                            <h6 class="alert-heading"><i class="fas fa-user-clock me-2"></i>Démarrage Décalé Alternants</h6>
-                            <p class="small mb-0">Début alternants mois 2 peut retarder certains développements.</p>
-                            <p class="small mb-0 mt-1"><strong>Mitigation:</strong> Focus développement cadres sur architecture mois 1.</p>
+                            <h6 class="alert-heading"><i class="fas fa-user-clock me-2"></i>Intégration Progressive</h6>
+                            <p class="small mb-0">Démarrage décalé des ressources peut créer déséquilibre charge.</p>
+                            <p class="small mb-0 mt-1"><strong>Mitigation:</strong> Priorisation stricte et suivi hebdomadaire.</p>
                         </div>
 
                         <div class="alert alert-warning mb-3">
-                            <h6 class="alert-heading"><i class="fas fa-brain me-2"></i>Chevauchement IA/Tests</h6>
-                            <p class="small mb-0">Démarrage simultané IA et tests mois 7 peut créer surcharge Souvanny.</p>
-                            <p class="small mb-0 mt-1"><strong>Mitigation:</strong> Délégation renforcée et consultant IA pour expertise.</p>
+                            <h6 class="alert-heading"><i class="fas fa-brain me-2"></i>Dépendance Consultant IA</h6>
+                            <p class="small mb-0">Expertise externe nécessaire pour module IA.</p>
+                            <p class="small mb-0 mt-1"><strong>Mitigation:</strong> Transfert de compétences planifié avec D2.</p>
                         </div>
 
                         <div class="alert alert-warning">
-                            <h6 class="alert-heading"><i class="fas fa-cloud me-2"></i>Infrastructure Non-budgétée</h6>
-                            <p class="small mb-0">Coûts cloud et outils à budgéter ultérieurement.</p>
-                            <p class="small mb-0 mt-1"><strong>Mitigation:</strong> Estimation séparée à réaliser mois 3-4.</p>
+                            <h6 class="alert-heading"><i class="fas fa-graduation-cap me-2"></i>Formation Alternants</h6>
+                            <p class="small mb-0">Courbe d'apprentissage et besoin d'encadrement important.</p>
+                            <p class="small mb-0 mt-1"><strong>Mitigation:</strong> Plan de formation structuré et pairing systématique.</p>
                         </div>
                     </div>
                 </div>
@@ -1362,8 +1419,8 @@
                 <div class="col-md-4 mb-3">
                     <div class="text-center p-3 border rounded">
                         <div class="display-4 text-primary mb-2">1</div>
-                        <h5>Valider le Budget RH</h5>
-                        <p class="small mb-0">Approuver budget 502k€ pour ressources humaines sur 23 mois.</p>
+                        <h5>Valider le Budget</h5>
+                        <p class="small mb-0">Approuver budget 497k€ pour développement sur 23 mois.</p>
                     </div>
                 </div>
 
@@ -1371,15 +1428,15 @@
                     <div class="text-center p-3 border rounded">
                         <div class="display-4 text-success mb-2">2</div>
                         <h5>Lancer Recrutement</h5>
-                        <p class="small mb-0">Démarrer recrutement alternants immédiatement pour début mois 2.</p>
+                        <p class="small mb-0">Démarrer recrutement devs confirmés pour intégration mois 4.</p>
                     </div>
                 </div>
 
                 <div class="col-md-4 mb-3">
                     <div class="text-center p-3 border rounded">
                         <div class="display-4 text-warning mb-2">3</div>
-                        <h5>Planifier Infrastructure</h5>
-                        <p class="small mb-0">Démarrer estimation coûts cloud/outils pour budget complémentaire.</p>
+                        <h5>Planifier Intégration</h5>
+                        <p class="small mb-0">Préparer onboarding PO et alternants pour mois 8.</p>
                     </div>
                 </div>
             </div>
@@ -1389,7 +1446,7 @@
                     <i class="fas fa-rocket fa-2x me-3"></i>
                     <div>
                         <h5 class="mb-1">Feu Vert Recommandé</h5>
-                        <p class="mb-0">Le plan révisé avec démarrage progressif et salaires alignés permet un lancement rapide avec équipe équilibrée et budget maîtrisé.</p>
+                        <p class="mb-0">Le plan révisé avec budget réaliste et équipe progressive permet un lancement rapide avec risque maîtrisé et ROI anticipé.</p>
                     </div>
                 </div>
             </div>
@@ -1404,8 +1461,8 @@
                 <p class="mb-0">Document confidentiel destiné aux décideurs</p>
             </div>
             <div class="col-md-6 text-md-end">
-                <p class="mb-0">Version 1.2 - Octobre 2023<br>
-                    Budget RH sur 23 mois: <strong>502 167€</strong><br>
+                <p class="mb-0">Version 1.3 - Octobre 2023<br>
+                    Budget total sur 23 mois: <strong>496 920 €</strong><br>
                     Durée totale: 23 mois (11 + 12)</p>
             </div>
         </div>
