@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philosophie de Management | Axelia-Flux</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-blue: #1a5f7a;
+            --secondary-blue: #2a8cbd;
+            --accent-teal: #2cc4b8;
+            --accent-green: #4caf50;
+            --light-bg: #f8f9fa;
+            --dark-text: #333;
+            --light-text: #666;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+
+        .print-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        @media print {
+            .print-container {
+                padding: 20px;
+            }
+            .no-print {
+                display: none;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+            padding: 40px 0;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .philosophy-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .management-principle {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid var(--accent-teal);
+            transition: transform 0.3s ease;
+        }
+
+        .management-principle:hover {
+            transform: translateY(-5px);
+        }
+
+        .principle-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-blue);
+            margin-bottom: 15px;
+        }
+
+        .principle-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+        }
+
+        .quote-section {
+            background-color: var(--light-bg);
+            border-left: 5px solid var(--accent-green);
+            padding: 25px;
+            margin: 40px 0;
+            font-style: italic;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .quote-author {
+            text-align: right;
+            margin-top: 15px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .process-diagram {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 40px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .diagram-step {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            border-radius: 50%;
+            background-color: var(--secondary-blue);
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+        }
+
+        .step-arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--accent-teal);
+            margin: 10px 0;
+        }
+
+        .key-points {
+            background-color: var(--light-bg);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .key-points ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .key-points li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .key-points li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .footer-section {
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+        }
+
+        .company-name {
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-size: 1.5rem;
+        }
+
+        .lead-name {
+            font-weight: 600;
+            color: var(--dark-text);
+            margin-top: 10px;
+        }
+
+        h2 {
+            color: var(--primary-blue);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-teal);
+        }
+    </style>
+</head>
+<body>
+<div class="print-container">
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center">
+                    <i class="fas fa-users fa-4x"></i>
+                </div>
+                <div class="col-md-10">
+                    <h1 class="philosophie-title">Philosophie de Management</h1>
+                    <p class="tagline">Axelia-Flux - L'agilité au service de l'innovation énergétique</p>
+                    <p>Une approche start-up pour libérer le potentiel de chaque collaborateur tout en maintenant un cap clair vers nos objectifs stratégiques.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Introduction -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h2>Vision du Management</h2>
+            <p>À la tête d'Axelia-Flux, je m'engage à créer un environnement où l'innovation technique et l'agilité opérationnelle se rencontrent. Notre secteur des solutions SaaS pour la gestion énergétique évolue rapidement, et notre structure organisationnelle doit refléter cette dynamique.</p>
+            <p>Ma philosophie repose sur un équilibre entre l'autonomie des développeurs et la nécessité d'une coordination efficace pour atteindre nos objectifs ambitieux.</p>
+        </div>
+    </div>
+
+    <!-- Principes de Management -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <h2>Principes Fondamentaux</h2>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="management-principle">
+                <div class="principle-icon">
+                    <i class="fas fa-cubes"></i>
+                </div>
+                <h3 class="principle-title">Organisation par Briques</h3>
+                <p>L'équipe sera structurée en briques fonctionnelles alignées avec nos produits. Chaque développeur pourra participer à plusieurs briques, favorisant la polyvalence et la compréhension transverse du système.</p>
+                <p>Des "super-briques" émergeront naturellement avec un lead dev dédié pour assurer la cohérence technique.</p>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="management-principle">
+                <div class="principle-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3 class="principle-title">Esprit Start-up</h3>
+                <p>Je privilégie l'agilité et la réactivité aux processus rigides. Chaque développeur doit se sentir indépendant et responsabilisé, capable de prendre des initiatives alignées avec notre vision.</p>
+                <p>Les cadres que je fixerai seront souples : des lignes rouges essentielles, mais pas de micro-management.</p>
+            </div>
+        </div>
+
+        <div class="col-lg-4 col-md-6">
+            <div class="management-principle">
+                <div class="principle-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <h3 class="principle-title">Amélioration Continue</h3>
+                <p>Je préfère réagir et améliorer quelque chose qui existe plutôt que de chercher la perfection avant de lancer. Cette approche pragmatique nous permet d'avancer rapidement et de nous adapter en temps réel.</p>
+                <p>L'erreur est permise si elle est source d'apprentissage et de progression.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quote Section -->
+    <div class="quote-section">
+        <p>"En gestion de projet comme en gestion d'énergie, l'efficacité ne vient pas du contrôle absolu mais de l'optimisation des flux. Notre rôle est de créer les conditions pour que chaque talent puisse s'exprimer pleinement tout en contribuant à une vision commune."</p>
+        <div class="quote-author">— Philosophie de direction Axelia-Flux</div>
+    </div>
+
+    <!-- Process Diagram -->
+    <div class="process-diagram">
+        <h2 class="text-center mb-4">Notre Cycle d'Amélioration Continue</h2>
+        <div class="row">
+            <div class="col-md-4 diagram-step">
+                <div class="step-number">1</div>
+                <div class="step-title">DÉPLOYER</div>
+                <p>Mettre en production rapidement, même avec une version minimale. Agir plutôt que perfectionner.</p>
+            </div>
+
+            <div class="col-md-4 step-arrow">
+                <i class="fas fa-arrow-right"></i>
+            </div>
+
+            <div class="col-md-4 diagram-step">
+                <div class="step-number">2</div>
+                <div class="step-title">OBSERVER / ÉVALUER</div>
+                <p>Analyser les résultats, écouter les retours utilisateurs, mesurer l'impact réel.</p>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-4 offset-md-2 step-arrow">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+
+            <div class="col-md-4 step-arrow">
+                <i class="fas fa-arrow-left"></i>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-md-4 offset-md-4 diagram-step">
+                <div class="step-number">3</div>
+                <div class="step-title">AJUSTER</div>
+                <p>Affiner, corriger, améliorer en fonction des observations. Puis recommencer le cycle.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Points -->
+    <div class="key-points">
+        <h3>Points Clés de Notre Approche</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <ul>
+                    <li>Organisation par briques fonctionnelles avec chevauchement des compétences</li>
+                    <li>Lead devs sur les super-briques stratégiques</li>
+                    <li>Adaptation des méthodologies (Scrum, Spotify Model, etc.) à nos besoins</li>
+                    <li>Cadres souples avec lignes rouges claires mais peu de contraintes inutiles</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul>
+                    <li>Culture start-up favorisant l'initiative et l'autonomie</li>
+                    <li>Préférence pour l'action et l'ajustement plutôt que la planification exhaustive</li>
+                    <li>Focus sur l'impact produit plutôt que sur le suivi des processus</li>
+                    <li>Transparence et communication horizontale encouragées</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-section">
+        <div class="company-name">Axelia-Flux</div>
+        <div>Solutions SaaS pour la gestion énergétique des professionnels</div>
+        <div class="lead-name">Directeur Technique</div>
+        <div class="mt-3">
+            <i class="fas fa-industry mx-2"></i>
+            <i class="fas fa-warehouse mx-2"></i>
+            <i class="fas fa-hospital mx-2"></i>
+            <i class="fas fa-school mx-2"></i>
+            <i class="fas fa-sun mx-2"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

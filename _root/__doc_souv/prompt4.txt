@@ -1,0 +1,58 @@
+Je voudrais pour la nouvelle structure Axelia-Flux que je vais diriger présenter ma philosophie de management.
+Peux me le mettre en forme stp, au format HTML
+
+Je voudrais maintenant une page dédié à présenter ma façon de voir côté management.
+Peux tu me synthétiser ce que je vais dire.
+
+- il y aura des briques fonctionnelles
+- une personne pourra participer à plusieurs briques
+- l'idée est tout de même à un moment à définir des super-briques avec un lead dev dans chaque
+- l'idée est d'aller vers du scrum ou du spotify ou autre
+- j'ai un esprit start-up
+- pas trop de process pour que chaque dév se sente indépendant, tout en respectant des cadres que je vais fixer
+- ces cadres seront souples, ce sera de grosses lignes rouges c'est tout
+- je préfère réagir et venir corriger ou améliorer quelque chose qui existe que quelque chose qui n'existe pas
+- DEPLOYER -> OBSERVER / EVALUER -> AJUSTER
+
+
+Voici le prompt original concernant le projet (dans une autre discussion)
+
+
+
+Je souhaite créer une série de présentations HTML visuellement attractives pour présenter un projet technologique à des investisseurs.
+
+**Contexte du projet :**
+- Domaine : Solutions SaaS pour la gestion énergétique des professionnels
+- Clients cibles : Industries, entrepôts, hôpitaux, établissements scolaires, producteurs d'énergie solaire
+- Données gérées : Consommations (électricité, gaz, eau), productions d'énergie, températures, hygrométrie
+- Phase actuelle : Plusieurs projets en phase pilote avec utilisateurs actifs
+
+**Spécifications techniques :**
+- Format : Plusieurs pages HTML séparées (page1.html, page2.html, etc.)
+- Technologies : Bootstrap 5, Font Awesome, CSS custom
+- Contraintes : Pas de SVG ou bitmaps externes, conception adaptée à l'impression
+- Style : Professionnel, moderne, avec une palette de couleurs énergétique (bleus, verts, accents dynamiques)
+
+**Structure de contenu demandée :**
+1. Page d'introduction avec vision, problématique et chiffres clés
+2. Présentation détaillée des produits et solutions
+3. Focus sur l'architecture et l'infrastructure (partie à rendre "sexy" avec outils modernes)
+4. Démonstration des dashboards et visualisations
+5. Avantages concurrentiels et perspectives de croissance
+
+**Éléments à mettre en avant :**
+- Architecture cloud moderne et scalable
+- Stack technologique attractive (conteneurs, orchestration, monitoring)
+- Approche multi-clients avec isolation des données
+- Intégrations avec systèmes existants (API Enedis, solutions de monitoring tierces)
+- Fonctionnalités avancées (analyses de corrélation, alertes intelligentes, contrôle à distance)
+
+**Points d'attention :**
+- Inclure des icônes et visuels via Font Awesome uniquement
+- Utiliser des composants Bootstrap pour un rendu professionnel
+- Prévoir des espaces pour l'impression (page-break, marges)
+- Créer une navigation entre les pages
+- Rendre la partie infrastructure particulièrement attractive pour les investisseurs techniques
+
+**Ton de la présentation :** Professionnel, convaincant, mettant en avant l'expertise technique et le potentiel de croissance.
+
