@@ -1,0 +1,19 @@
+{
+	"sans": [
+		"livekit-turn.project-takagi.fr"
+	],
+	"issuer_data": {
+		"url": "https://acme-v02.api.letsencrypt.org/acme/cert/059a4cf0b570e2d590557969bb4e996f7314",
+		"ca": "https://acme-v02.api.letsencrypt.org/directory",
+		"account": "https://acme-v02.api.letsencrypt.org/acme/acct/3047479916",
+		"renewal_info": {
+			"suggestedWindow": {
+				"start": "2026-04-10T00:08:23Z",
+				"end": "2026-04-11T19:19:12Z"
+			},
+			"_uniqueIdentifier": "jw0TovYuftFQbDMYOF1ZjiNykco.BZpM8LVw4tWQVXlpu06Zb3MU",
+			"_retryAfter": "2026-02-10T03:42:02.034154899Z",
+			"_selectedTime": "2026-04-11T05:37:49Z"
+		}
+	}
+}
