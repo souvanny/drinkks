@@ -1,0 +1,314 @@
+Voici mon projet livekit.
+Tous les fichiers ci-dessous ont été générés par :
+
+docker pull livekit/generate
+docker run --rm -it -v$PWD:/output livekit/generate
+
+Et quand je docker-compose up je vois ce message :
+
+livekitproject-takagifr_caddy_1 exited with code 1
+caddy_1    | {"level":"info","ts":1770675343.4302819,"msg":"maxprocs: Leaving GOMAXPROCS=8: CPU quota undefined"}
+caddy_1    | {"level":"info","ts":1770675343.4305694,"msg":"GOMEMLIMIT is updated","package":"github.com/KimMachineGun/automemlimit/memlimit","GOMEMLIMIT":30190996684,"previous":9223372036854775807}
+caddy_1    | {"level":"info","ts":1770675343.4306037,"msg":"using config from file","file":"/etc/caddy.yaml"}
+caddy_1    | {"level":"info","ts":1770675343.4310315,"msg":"adapted config to JSON","adapter":"yaml"}
+caddy_1    | {"level":"info","ts":1770675343.4321556,"logger":"admin","msg":"admin endpoint started","address":"localhost:2019","enforce_origin":false,"origins":["//[::1]:2019","//127.0.0.1:2019","//localhost:2019"]}
+caddy_1    | {"level":"info","ts":1770675343.4326732,"logger":"tls.cache.maintenance","msg":"started background certificate maintenance","cache":"0xc000465880"}
+caddy_1    | {"level":"info","ts":1770675343.432843,"logger":"tls.cache.maintenance","msg":"stopped background certificate maintenance","cache":"0xc000465880"}
+caddy_1    | {"level":"info","ts":1770675343.4328632,"msg":"maxprocs: No GOMAXPROCS change to reset"}
+caddy_1    | Error: loading initial config: loading new config: layer4 app module: start: listen tcp :443: bind: address already in use
+
+Mon container caddy n'arrête pas de redémarrer. Pourquoi ?
+
+
+-- caddy.yaml --
+
+logging:
+  logs:
+    default:
+      level: INFO
+storage:
+  "module": "file_system"
+  "root": "/data"
+apps:
+  tls:
+    certificates:
+      automate:
+        - livekit.project-takagi.fr
+        - livekit-turn.project-takagi.fr
+  layer4:
+    servers:
+      main:
+        listen: [":443"]
+        routes:
+          - match:
+            - tls:
+                sni:
+                  - "livekit-turn.project-takagi.fr"
+            handle:
+              - handler: tls
+              - handler: proxy
+                upstreams:
+                  - dial: ["localhost:5349"]
+          - match:
+              - tls:
+                  sni:
+                    - "livekit.project-takagi.fr"
+            handle:
+              - handler: tls
+                connection_policies:
+                  - alpn: ["http/1.1"]
+              - handler: proxy
+                upstreams:
+                  - dial: ["localhost:7880"]
+
+
+-- docker-compose.yaml --
+
+# This docker-compose requires host networking, which is only available on Linux
+# This compose will not function correctly on Mac or Windows
+services:
+  caddy:
+    image: livekit/caddyl4
+    command: run --config /etc/caddy.yaml --adapter yaml
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./caddy.yaml:/etc/caddy.yaml
+      - ./caddy_data:/data
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+  redis:
+    image: redis:7-alpine
+    command: redis-server /etc/redis.conf
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./redis.conf:/etc/redis.conf
+
+
+-- init_script.sh --
+
+#!/bin/sh
+# This script will write all of your configurations to /opt/livekit.
+# It'll also install LiveKit as a systemd service that will run at startup
+# LiveKit will be started automatically at machine startup.
+
+# create directories for LiveKit
+mkdir -p /opt/livekit/caddy_data
+mkdir -p /usr/local/bin
+
+# Docker & Docker Compose will need to be installed on the machine
+curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+sh /tmp/get-docker.sh
+curl -L "https://github.com/docker/compose/releases/download/v5.0.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod 755 /usr/local/bin/docker-compose
+
+sudo systemctl enable docker
+
+# livekit config
+cat << EOF > /opt/livekit/livekit.yaml
+port: 7880
+bind_addresses:
+    - ""
+rtc:
+    tcp_port: 7881
+    port_range_start: 50000
+    port_range_end: 60000
+    use_external_ip: true
+    enable_loopback_candidate: false
+redis:
+    address: localhost:6379
+    username: ""
+    password: ""
+    db: 0
+    use_tls: false
+    sentinel_master_name: ""
+    sentinel_username: ""
+    sentinel_password: ""
+    sentinel_addresses: []
+    cluster_addresses: []
+    max_redirects: null
+turn:
+    enabled: true
+    domain: livekit-turn.project-takagi.fr
+    tls_port: 5349
+    udp_port: 3478
+    external_tls: true
+keys:
+    APITCL53pSLyZaR: G2qNPc1PjNjfhdGGzwORQ7v4aLDhsNovnFN36PMXeho
+
+
+EOF
+
+# caddy config
+cat << EOF > /opt/livekit/caddy.yaml
+logging:
+  logs:
+    default:
+      level: INFO
+storage:
+  "module": "file_system"
+  "root": "/data"
+apps:
+  tls:
+    certificates:
+      automate:
+        - livekit.project-takagi.fr
+        - livekit-turn.project-takagi.fr
+  layer4:
+    servers:
+      main:
+        listen: [":443"]
+        routes:
+          - match:
+            - tls:
+                sni:
+                  - "livekit-turn.project-takagi.fr"
+            handle:
+              - handler: tls
+              - handler: proxy
+                upstreams:
+                  - dial: ["localhost:5349"]
+          - match:
+              - tls:
+                  sni:
+                    - "livekit.project-takagi.fr"
+            handle:
+              - handler: tls
+                connection_policies:
+                  - alpn: ["http/1.1"]
+              - handler: proxy
+                upstreams:
+                  - dial: ["localhost:7880"]
+
+
+EOF
+
+# update ip script
+cat << "EOF" > /opt/livekit/update_ip.sh
+#!/usr/bin/env bash
+ip=`ip addr show |grep "inet " |grep -v 127.0.0. |head -1|cut -d" " -f6|cut -d/ -f1`
+sed -i.orig -r "s/\\\"(.+)(\:5349)/\\\"$ip\2/" /opt/livekit/caddy.yaml
+
+
+EOF
+
+# docker compose
+cat << EOF > /opt/livekit/docker-compose.yaml
+# This docker-compose requires host networking, which is only available on Linux
+# This compose will not function correctly on Mac or Windows
+services:
+  caddy:
+    image: livekit/caddyl4
+    command: run --config /etc/caddy.yaml --adapter yaml
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./caddy.yaml:/etc/caddy.yaml
+      - ./caddy_data:/data
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+  redis:
+    image: redis:7-alpine
+    command: redis-server /etc/redis.conf
+    restart: unless-stopped
+    network_mode: "host"
+    volumes:
+      - ./redis.conf:/etc/redis.conf
+
+
+EOF
+
+# systemd file
+cat << EOF > /etc/systemd/system/livekit-docker.service
+[Unit]
+Description=LiveKit Server Container
+After=docker.service
+Requires=docker.service
+
+[Service]
+LimitNOFILE=500000
+Restart=always
+WorkingDirectory=/opt/livekit
+# Shutdown container (if running) when unit is started
+ExecStartPre=/usr/local/bin/docker-compose -f docker-compose.yaml down
+ExecStart=/usr/local/bin/docker-compose -f docker-compose.yaml up
+ExecStop=/usr/local/bin/docker-compose -f docker-compose.yaml down
+
+[Install]
+WantedBy=multi-user.target
+
+
+EOF
+# redis config
+cat << EOF > /opt/livekit/redis.conf
+bind 127.0.0.1 ::1
+protected-mode yes
+port 6379
+timeout 0
+tcp-keepalive 300
+
+
+EOF
+
+chmod 755 /opt/livekit/update_ip.sh
+/opt/livekit/update_ip.sh
+
+systemctl enable livekit-docker
+systemctl start livekit-docker
+
+
+-- livekit.yaml --
+
+port: 7880
+bind_addresses:
+    - ""
+rtc:
+    tcp_port: 7881
+    port_range_start: 50000
+    port_range_end: 60000
+    use_external_ip: true
+    enable_loopback_candidate: false
+redis:
+    address: localhost:6379
+    username: ""
+    password: ""
+    db: 0
+    use_tls: false
+    sentinel_master_name: ""
+    sentinel_username: ""
+    sentinel_password: ""
+    sentinel_addresses: []
+    cluster_addresses: []
+    max_redirects: null
+turn:
+    enabled: true
+    domain: livekit-turn.project-takagi.fr
+    tls_port: 5349
+    udp_port: 3478
+    external_tls: true
+keys:
+    APITCL53pSLyZaR: G2qNPc1PjNjfhdGGzwORQ7v4aLDhsNovnFN36PMXeho
+
+
+
+-- redis.conf --
+
+bind 127.0.0.1 ::1
+protected-mode yes
+port 6379
+timeout 0
+tcp-keepalive 300
+
+
+
