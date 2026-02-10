@@ -1451,22 +1451,96 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Footer -->
-    <div class="footer">
-        <div class="row">
-            <div class="col-md-6 text-md-start">
-                <h5 class="mb-3">Axelia-Flux - Plan de Développement</h5>
-                <p class="mb-0">Document confidentiel destiné aux décideurs</p>
+
+        <!-- BLOC DE NAVIGATION FACILEMENT RÉUTILISABLE -->
+        <!-- Il suffit de copier-coller ce bloc en bas de chaque page HTML -->
+        <!-- Modifier les liens href et le numéro de page selon la page courante -->
+        <style>
+            /* STYLES POUR LA NAVIGATION */
+            .page-navigation {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 40px;
+                padding: 20px 0;
+                border-top: 1px solid #dee2e6;
+            }
+
+            .btn-nav {
+                background: linear-gradient(135deg, #2a9df4 0%, #2a9df4 100%);
+                color: white;
+                border: none;
+                padding: 10px 25px;
+                border-radius: 8px;
+                font-weight: 600;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(42, 157, 244, 0.2);
+            }
+
+            .btn-nav:hover {
+                background: linear-gradient(135deg, #1a1d3e 0%, #2a2f5c 100%);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(42, 157, 244, 0.3);
+            }
+
+            .btn-nav-prev {
+                background: linear-gradient(135deg, #6c757d 0%, #8a93a2 100%);
+            }
+
+            .btn-nav-prev:hover {
+                background: linear-gradient(135deg, #5a6268 0%, #6c757d 100%);
+            }
+
+            .page-number {
+                color: #1a1d3e;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                font-size: 1.1rem;
+            }
+
+            .page-number i {
+                color: #2a9df4;
+                margin: 0 10px;
+            }
+
+            @media print {
+                .page-navigation {
+                    display: none !important;
+                }
+            }
+            /* FIN DES STYLES POUR LA NAVIGATION */
+        </style>
+
+        <div class="page-navigation">
+            <div>
+                <a href="page1.html" class="btn-nav btn-nav-prev">
+                    <i class="fas fa-arrow-left"></i> Précédent
+                </a>
             </div>
-            <div class="col-md-6 text-md-end">
-                <p class="mb-0">Version 1.3 - Octobre 2023<br>
-                    Budget total sur 23 mois: <strong>496 920 €</strong><br>
-                    Durée totale: 23 mois (11 + 12)</p>
+
+            <div class="page-number">
+                <i class="fas fa-file-alt"></i> Page 2 sur 5
+            </div>
+
+            <div>
+                <a href="page3.html" class="btn-nav">
+                    Suivant <i class="fas fa-arrow-right"></i>
+                </a>
             </div>
         </div>
+        <!-- FIN DU BLOC DE NAVIGATION -->
+
     </div>
+
+
+
 </div>
 
 <!-- Print Button -->

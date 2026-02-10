@@ -1,138 +1,138 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Axelia Flux</title>
-    <style>
-      :root{
-        --bg1: #0b1020;
-        --bg2: #121a33;
-        --card: rgba(255,255,255,0.06);
-        --stroke: rgba(255,255,255,0.12);
-        --text: rgba(255,255,255,0.92);
-        --muted: rgba(255,255,255,0.70);
-        --shadow: 0 18px 60px rgba(0,0,0,0.45);
-        --radius: 18px;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Axelia Flux</title>
+  <style>
+    :root{
+      --bg1: #0b1020;
+      --bg2: #121a33;
+      --card: rgba(255,255,255,0.06);
+      --stroke: rgba(255,255,255,0.12);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.70);
+      --shadow: 0 18px 60px rgba(0,0,0,0.45);
+      --radius: 18px;
+    }
 
-      *{ box-sizing: border-box; }
-      body{
-        margin: 0;
-        min-height: 100vh;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-        color: var(--text);
-        background:
-          radial-gradient(1200px 700px at 20% 10%, rgba(120,160,255,0.22), transparent 55%),
-          radial-gradient(900px 600px at 80% 25%, rgba(120,255,220,0.14), transparent 55%),
-          linear-gradient(180deg, var(--bg1), var(--bg2));
-        display: grid;
-        place-items: center;
-        padding: 28px 18px;
-      }
+    *{ box-sizing: border-box; }
+    body{
+      margin: 0;
+      min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--text);
+      background:
+              radial-gradient(1200px 700px at 20% 10%, rgba(120,160,255,0.22), transparent 55%),
+              radial-gradient(900px 600px at 80% 25%, rgba(120,255,220,0.14), transparent 55%),
+              linear-gradient(180deg, var(--bg1), var(--bg2));
+      display: grid;
+      place-items: center;
+      padding: 28px 18px;
+    }
 
-      .wrap{
-        width: min(980px, 100%);
-        background: var(--card);
-        border: 1px solid var(--stroke);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        padding: 34px 22px 26px;
-        backdrop-filter: blur(10px);
-      }
+    .wrap{
+      width: min(980px, 100%);
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 34px 22px 26px;
+      backdrop-filter: blur(10px);
+    }
 
-      header{
-        text-align: center;
-        margin-bottom: 22px;
-      }
+    header{
+      text-align: center;
+      margin-bottom: 22px;
+    }
 
-      h1{
-        margin: 0;
-        font-size: clamp(26px, 3.6vw, 40px);
-        letter-spacing: 0.3px;
-      }
+    h1{
+      margin: 0;
+      font-size: clamp(26px, 3.6vw, 40px);
+      letter-spacing: 0.3px;
+    }
 
-      p{
-        margin: 10px 0 0;
-        color: var(--muted);
-        font-size: 15px;
-        line-height: 1.5;
-      }
+    p{
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
 
-      .grid{
-        margin-top: 26px;
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 14px;
-      }
+    .grid{
+      margin-top: 26px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
 
-      a.btn{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        padding: 16px 14px;
-        border-radius: 14px;
-        border: 1px solid rgba(255,255,255,0.14);
-        background: rgba(255,255,255,0.07);
-        color: var(--text);
-        font-weight: 600;
-        letter-spacing: 0.2px;
-        transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
-        min-height: 56px;
-      }
+    a.btn{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      padding: 16px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+      min-height: 56px;
+    }
 
-      a.btn:hover{
-        transform: translateY(-2px);
-        background: rgba(255,255,255,0.10);
-        border-color: rgba(255,255,255,0.22);
-      }
+    a.btn:hover{
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.22);
+    }
 
-      a.btn:active{
-        transform: translateY(0);
-      }
+    a.btn:active{
+      transform: translateY(0);
+    }
 
-      .hint{
-        text-align: center;
-        margin-top: 18px;
-        color: rgba(255,255,255,0.55);
-        font-size: 13px;
-      }
+    .hint{
+      text-align: center;
+      margin-top: 18px;
+      color: rgba(255,255,255,0.55);
+      font-size: 13px;
+    }
 
-      @media (max-width: 820px){
-        .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      }
+    @media (max-width: 820px){
+      .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
 
-      @media (max-width: 520px){
-        .grid{ grid-template-columns: 1fr; }
-      }
-    </style>
-  </head>
+    @media (max-width: 520px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
 
-  <body>
-    <main class="wrap">
-      <header>
-        <h1>Projets Numérique Axelia</h1>
-		        <!-- Logo sous le titre -->
-        <div class="logo">
-          <img src="logo.png" alt="Logo Axelia" />
-        </div>
-		
-        <p>Sections</p>
-      </header>
+<body>
+<main class="wrap">
+  <header>
+    <h1>Projets Numérique Axelia</h1>
+    <!-- Logo sous le titre -->
+    <div class="logo">
+      <img src="https://i.postimg.cc/xTvMf74t/logo.png" alt="Logo Axelia" />
+    </div>
 
-      <section class="grid" aria-label="Navigation Axelia">
-        <a class="btn" href="vision-axelia.html">Vision</a>
-        <a class="btn" href="etatdeslieux.html">Projet Axelia Flux</a>
-        <a class="btn" href="budget.html">Finances, budget</a>
-        <a class="btn" href="Revolutionner-g-energétique.html">Révolution de la gestion énergétique des pros</a>
-        <a class="btn" href="Portfolio-solutions.html">Portfolio de solutions</a>
-        <a class="btn" href="infrastructure.html">Infrastructure moderne scalable</a>
-      </section>
+    <p>Sections</p>
+  </header>
 
-      <div class="hint">
-        Relevant de la propriété de SABM
-      </div>
-    </main>
-  </body>
+  <section class="grid" aria-label="Navigation Axelia">
+    <a class="btn" href="https://codepen.io/axelia-flux/full/QwEzwMz" target="_top">Vision</a>
+    <a class="btn" href="https://codepen.io/axelia-flux/live/zxByxZx" target="_top">Projet Axelia Flux</a>
+    <a class="btn" href="https://codepen.io/axelia-flux/full/jErXErQ" target="_top">Finances, budget</a>
+    <a class="btn" href="https://codepen.io/axelia-flux/full/LEZMEjb" target="_top">Révolution de la gestion énergétique des pros</a>
+    <a class="btn" href="https://codepen.io/axelia-flux/full/bNeONRx" target="_top">Portfolio de solutions</a>
+    <a class="btn" href="https://codepen.io/axelia-flux/full/jErXEmX" target="_top">Infrastructure moderne scalable</a>
+  </section>
+
+  <div class="hint">
+    Relevant de la propriété de SABM
+  </div>
+</main>
+</body>
 </html>
