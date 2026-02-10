@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axelia-Flux - Infrastructure Technologique - Page 3</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #0d6efd;
+            --secondary: #20c997;
+            --dark: #1a1d3e;
+            --light: #f8f9fa;
+            --accent: #ff6b35;
+            --energy-blue: #2a9df4;
+            --infra-color: #6f42c1;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #fff;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            .no-print-break {
+                page-break-inside: avoid;
+            }
+            .page-navigation {
+                display: none !important;
+            }
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .header {
+            border-bottom: 3px solid var(--infra-color);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            color: var(--energy-blue);
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .hero-infra {
+            background: linear-gradient(135deg, #f8f5ff 0%, #e9e3ff 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--infra-color);
+        }
+
+        .section-title {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background-color: var(--infra-color);
+        }
+
+        .infra-badge {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background-color: rgba(111, 66, 193, 0.1);
+            color: var(--infra-color);
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .infra-card {
+            border-radius: 12px;
+            overflow: hidden;
+            border: none;
+            transition: all 0.3s ease;
+            height: 100%;
+            border-top: 4px solid var(--infra-color);
+        }
+
+        .infra-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(111, 66, 193, 0.15);
+        }
+
+        .infra-card-header {
+            background-color: rgba(111, 66, 193, 0.05);
+            padding: 20px;
+            border-bottom: 1px solid rgba(111, 66, 193, 0.1);
+        }
+
+        .infra-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--infra-color) 0%, #8a63d2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .infra-icon i {
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .tech-item {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tech-item i {
+            color: var(--infra-color);
+        }
+
+        .architecture-diagram {
+            background-color: #f9f9ff;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 1px dashed rgba(111, 66, 193, 0.3);
+        }
+
+        .server-node {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--infra-color);
+        }
+
+        .node-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .node-title i {
+            color: var(--infra-color);
+            margin-right: 10px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th {
+            background-color: rgba(111, 66, 193, 0.1);
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 2px solid var(--infra-color);
+        }
+
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:hover {
+            background-color: rgba(111, 66, 193, 0.03);
+        }
+
+        .benefit-box {
+            background: linear-gradient(135deg, rgba(32, 201, 151, 0.1) 0%, rgba(32, 201, 151, 0.05) 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .footer-note {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        /* BLOC DE NAVIGATION FACILEMENT RÉUTILISABLE */
+        .page-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-nav {
+            background-color: var(--infra-color);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-nav:hover {
+            background-color: var(--dark);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-nav-prev {
+            background-color: #6c757d;
+        }
+
+        .btn-nav-prev:hover {
+            background-color: #5a6268;
+        }
+
+        .page-number {
+            color: #666;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .page-number i {
+            color: var(--infra-color);
+            margin: 0 8px;
+        }
+        /* FIN DU BLOC DE NAVIGATION */
+    </style>
+</head>
+<body>
+<div class="container" style="max-width: 1200px;">
+    <!-- Header -->
+    <div class="header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="logo"><i class="fas fa-server"></i> Axelia-<span>Flux</span></div>
+                <p class="mb-0 text-muted">Infrastructure Technologique de Pointe</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <h4 class="mb-0">Architecture Cloud & DevOps</h4>
+                <p class="text-muted mb-0">Page 3 sur 5</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-infra no-print-break">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="mb-3">Infrastructure Moderne et Scalable</h1>
+                <p class="lead">Notre architecture cloud-native et nos pratiques DevOps assurent performance, sécurité et évolutivité pour nos clients.</p>
+
+                <div class="mt-4">
+                    <span class="infra-badge"><i class="fab fa-docker"></i> Conteneurisation</span>
+                    <span class="infra-badge"><i class="fab fa-kubernetes"></i> Orchestration</span>
+                    <span class="infra-badge"><i class="fab fa-gitlab"></i> CI/CD Automatisée</span>
+                    <span class="infra-badge"><i class="fas fa-code-branch"></i> GitOps</span>
+                    <span class="infra-badge"><i class="fas fa-shield-alt"></i> Sécurité renforcée</span>
+                    <span class="infra-badge"><i class="fas fa-expand-arrows-alt"></i> Auto-scaling</span>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="infra-icon mx-auto" style="width: 100px; height: 100px;">
+                    <i class="fas fa-cloud" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="mt-3">Cloud-Native</h4>
+                <p>Architecture conçue pour le cloud</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Architecture Overview -->
+    <h2 class="section-title">Architecture Cloud-Native</h2>
+    <p>Chaque client dispose d'une infrastructure dédiée pour garantir isolation des données, sécurité et performances optimales.</p>
+
+    <div class="architecture-diagram no-print-break">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="server-node">
+                    <div class="node-title">
+                        <i class="fas fa-code-branch"></i>
+                        <h5 class="mb-0">GitLab & CI/CD</h5>
+                    </div>
+                    <p class="small mb-0">Intégration et déploiement continus automatisés avec GitLab Runners et pipelines.</p>
+                    <div class="tech-stack mt-3">
+                        <div class="tech-item">
+                            <i class="fab fa-gitlab"></i> GitLab
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-running"></i> Runners
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-shipping-fast"></i> Auto-Deploy
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="server-node">
+                    <div class="node-title">
+                        <i class="fab fa-docker"></i>
+                        <h5 class="mb-0">Conteneurisation</h5>
+                    </div>
+                    <p class="small mb-0">Tous les services sont conteneurisés avec Docker pour isolation et reproductibilité.</p>
+                    <div class="tech-stack mt-3">
+                        <div class="tech-item">
+                            <i class="fab fa-docker"></i> Docker
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-box"></i> Registries
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-cube"></i> Microservices
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="server-node">
+                    <div class="node-title">
+                        <i class="fab fa-kubernetes"></i>
+                        <h5 class="mb-0">Orchestration</h5>
+                    </div>
+                    <p class="small mb-0">Kubernetes gère le déploiement, scaling et monitoring de tous les conteneurs.</p>
+                    <div class="tech-stack mt-3">
+                        <div class="tech-item">
+                            <i class="fab fa-kubernetes"></i> Kubernetes
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-expand-alt"></i> Helm
+                        </div>
+                        <div class="tech-item">
+                            <i class="fas fa-robot"></i> Operators
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-3 text-center">
+                <i class="fas fa-arrow-down" style="color: var(--infra-color); font-size: 1.5rem;"></i>
+            </div>
+            <div class="col-md-3 text-center">
+                <i class="fas fa-arrow-down" style="color: var(--infra-color); font-size: 1.5rem;"></i>
+            </div>
+            <div class="col-md-3 text-center">
+                <i class="fas fa-arrow-down" style="color: var(--infra-color); font-size: 1.5rem;"></i>
+            </div>
+            <div class="col-md-3 text-center">
+                <i class="fas fa-arrow-down" style="color: var(--infra-color); font-size: 1.5rem;"></i>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="server-node text-center">
+                    <div class="node-title justify-content-center">
+                        <i class="fas fa-cloud"></i>
+                        <h5 class="mb-0">Infrastructure as Code</h5>
+                    </div>
+                    <p class="mb-0">Terraform et Ansible pour provisionnement automatique et reproductible sur AWS, Azure ou GCP.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Infrastructure Components -->
+    <h2 class="section-title mt-5">Composants d'Infrastructure</h2>
+
+    <div class="row no-print-break">
+        <!-- Monitoring & Observability -->
+        <div class="col-lg-6 mb-4">
+            <div class="infra-card shadow-sm h-100">
+                <div class="infra-card-header">
+                    <div class="infra-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h4>Monitoring & Observability</h4>
+                    <p class="mb-0 small">Suite complète pour surveillance en temps réel</p>
+                </div>
+                <div class="card-body p-4">
+                    <h5><i class="fas fa-search me-2"></i>ELK Stack Évolué</h5>
+                    <p>Elasticsearch, Logstash, Kibana enrichis avec des dashboards custom pour monitorer les logs applicatifs et systèmes.</p>
+
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <h6>Outils additionnels</h6>
+                            <ul class="mb-0">
+                                <li class="small">Prometheus</li>
+                                <li class="small">Grafana</li>
+                                <li class="small">AlertManager</li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <h6>Surveillance</h6>
+                            <ul class="mb-0">
+                                <li class="small">APM Application</li>
+                                <li class="small">Infrastructure</li>
+                                <li class="small">Performances BDD</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="benefit-box">
+                        <h6><i class="fas fa-star me-2"></i>Valeur Ajoutée</h6>
+                        <p class="small mb-0">Détection proactive des anomalies, temps de résolution réduit de 70%, visibilité complète du stack.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message Queue & Event Bus -->
+        <div class="col-lg-6 mb-4">
+            <div class="infra-card shadow-sm h-100">
+                <div class="infra-card-header">
+                    <div class="infra-icon">
+                        <i class="fas fa-stream"></i>
+                    </div>
+                    <h4>Message Queue & Event Bus</h4>
+                    <p class="mb-0 small">Système de messagerie asynchrone robuste</p>
+                </div>
+                <div class="card-body p-4">
+                    <h5><i class="fas fa-rabbit me-2"></i>RabbitMQ Avancé</h5>
+                    <p>Message broker avec clustering, haute disponibilité et monitoring intégré pour les tâches asynchrones et découplage des services.</p>
+
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <h6>Fonctionnalités</h6>
+                            <ul class="mb-0">
+                                <li class="small">Exchanges & Queues</li>
+                                <li class="small">Clustering HA</li>
+                                <li class="small">DLX & Retry</li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <h6>Use Cases</h6>
+                            <ul class="mb-0">
+                                <li class="small">Tâches CRON</li>
+                                <li class="small">Notifications</li>
+                                <li class="small">Data Processing</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="benefit-box">
+                        <h6><i class="fas fa-star me-2"></i>Valeur Ajoutée</h6>
+                        <p class="small mb-0">Architecture résiliente, tolérance aux pannes, traitement asynchrone massif.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row no-print-break">
+        <!-- Security & Identity -->
+        <div class="col-lg-6 mb-4">
+            <div class="infra-card shadow-sm h-100">
+                <div class="infra-card-header">
+                    <div class="infra-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Sécurité & Identité</h4>
+                    <p class="mb-0 small">Gestion centralisée des identités et accès</p>
+                </div>
+                <div class="card-body p-4">
+                    <h5><i class="fas fa-user-shield me-2"></i>Keycloak & Active Directory</h5>
+                    <p>Solution IAM (Identity and Access Management) avec fédération d'identités, SSO, MFA et gestion fine des permissions.</p>
+
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <h6>Sécurité</h6>
+                            <ul class="mb-0">
+                                <li class="small">OAuth2 / OpenID</li>
+                                <li class="small">MFA (2FA)</li>
+                                <li class="small">RBAC & ABAC</li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <h6>Intégrations</h6>
+                            <ul class="mb-0">
+                                <li class="small">LDAP / AD</li>
+                                <li class="small">SSO Entreprise</li>
+                                <li class="small">Social Logins</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="benefit-box">
+                        <h6><i class="fas fa-star me-2"></i>Valeur Ajoutée</h6>
+                        <p class="small mb-0">Sécurité renforcée, expérience utilisateur unifiée, conformité RGPD et standards.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Pipeline & Processing -->
+        <div class="col-lg-6 mb-4">
+            <div class="infra-card shadow-sm h-100">
+                <div class="infra-card-header">
+                    <div class="infra-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h4>Data Pipeline & Processing</h4>
+                    <p class="mb-0 small">Traitement et analyse des données à grande échelle</p>
+                </div>
+                <div class="card-body p-4">
+                    <h5><i class="fas fa-code me-2"></i>Apache Airflow & Vector</h5>
+                    <p>Orchestration de workflows data avec monitoring, rejouabilité et alertes. Collecte de métriques haute performance.</p>
+
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <h6>Orchestration</h6>
+                            <ul class="mb-0">
+                                <li class="small">Apache Airflow</li>
+                                <li class="small">DAGs & Scheduling</li>
+                                <li class="small">Retry Policies</li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <h6>Observability</h6>
+                            <ul class="mb-0">
+                                <li class="small">Vector</li>
+                                <li class="small">OpenTelemetry</li>
+                                <li class="small">Jaeger</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="benefit-box">
+                        <h6><i class="fas fa-star me-2"></i>Valeur Ajoutée</h6>
+                        <p class="small mb-0">Data pipelines fiables, rejouabilité, monitoring des flux de données en temps réel.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Infrastructure Comparison -->
+    <h2 class="section-title">Approche Infrastructure par Client</h2>
+
+    <table class="comparison-table">
+        <thead>
+        <tr>
+            <th>Critère</th>
+            <th>Portail Public (Multi-tenant)</th>
+            <th>Solution Complète (Dédié)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><strong>Architecture</strong></td>
+            <td>Multi-tenant avec isolation logique</td>
+            <td>Single-tenant avec isolation physique</td>
+        </tr>
+        <tr>
+            <td><strong>Déploiement</strong></td>
+            <td>Cluster Kubernetes partagé</td>
+            <td>Cluster Kubernetes dédié par client</td>
+        </tr>
+        <tr>
+            <td><strong>Base de données</strong></td>
+            <td>Schémas séparés dans instance partagée</td>
+            <td>Instance PostgreSQL/MySQL dédiée</td>
+        </tr>
+        <tr>
+            <td><strong>Monitoring</strong></td>
+            <td>Namespace dédié dans cluster monitoring</td>
+            <td>Stack monitoring dédié</td>
+        </tr>
+        <tr>
+            <td><strong>Sécurité</strong></td>
+            <td>Isolation réseau au niveau Kubernetes</td>
+            <td>VPC/VNet complètement séparé</td>
+        </tr>
+        <tr>
+            <td><strong>Coût</strong></td>
+            <td>Économique - partage des ressources</td>
+            <td>Premium - ressources garanties</td>
+        </tr>
+        <tr>
+            <td><strong>Scalabilité</strong></td>
+            <td>Scalabilité horizontale limitée</td>
+            <td>Auto-scaling complet et indépendant</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Strategic Advantages -->
+    <div class="row mt-5">
+        <div class="col-lg-12">
+            <div class="benefit-box">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h3><i class="fas fa-trophy me-2"></i>Avantages Stratégiques de Notre Infrastructure</h3>
+                        <p class="mb-0">Notre stack technologique moderne nous positionne comme leader technique dans le domaine des solutions énergétiques digitales.</p>
+                    </div>
+                    <div class="col-lg-4 text-center">
+                        <div class="infra-icon mx-auto mt-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-rocket" style="font-size: 2.5rem;"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-expand-arrows-alt me-2"></i>Scalabilité</h5>
+                        <p class="small">Passez de 10 à 10 000 clients sans refonte grâce à notre architecture cloud-native.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-lock me-2"></i>Sécurité</h5>
+                        <p class="small">Isolation des données, chiffrement, conformité et audits de sécurité réguliers.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h5><i class="fas fa-bolt me-2"></i>Performance</h5>
+                        <p class="small">Temps de réponse < 200ms, disponibilité > 99.9%, traitement en temps réel.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BLOC DE NAVIGATION FACILEMENT RÉUTILISABLE -->
+    <!-- Il suffit de copier-coller ce bloc en bas de chaque page HTML -->
+    <!-- Modifier les liens href et le numéro de page selon la page courante -->
+    <div class="page-navigation no-print-break">
+        <div>
+            <a href="page2.html" class="btn-nav btn-nav-prev">
+                <i class="fas fa-arrow-left"></i> Précédent
+            </a>
+        </div>
+
+        <div class="page-number">
+            <i class="fas fa-file-alt"></i> Page 3 sur 5
+        </div>
+
+        <div>
+            <a href="page4.html" class="btn-nav">
+                Suivant <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    <!-- FIN DU BLOC DE NAVIGATION -->
+
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Function to handle print styles
+    function beforePrint() {
+        document.querySelectorAll('.btn-nav').forEach(el => el.style.display = 'none');
+    }
+
+    function afterPrint() {
+        document.querySelectorAll('.btn-nav').forEach(el => el.style.display = 'inline-flex');
+    }
+
+    // Add event listeners for print
+    if (window.matchMedia) {
+        const mediaQueryList = window.matchMedia('print');
+        mediaQueryList.addListener(mql => {
+            if (mql.matches) {
+                beforePrint();
+            } else {
+                afterPrint();
+            }
+        });
+    }
+
+    window.onbeforeprint = beforePrint;
+    window.onafterprint = afterPrint;
+</script>
+</body>
+</html>

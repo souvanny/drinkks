@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axelia-Flux - Présentation Investisseurs - Page 1</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #0d6efd;
+            --secondary: #20c997;
+            --dark: #1a1d3e;
+            --light: #f8f9fa;
+            --accent: #d3ff35;
+            --energy-blue: #2a9df4;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #fff;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        @media print {
+            body {
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+            .no-print-break {
+                page-break-inside: avoid;
+            }
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .header {
+            border-bottom: 3px solid var(--energy-blue);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            color: var(--energy-blue);
+            font-weight: 700;
+            font-size: 1.8rem;
+        }
+
+        .logo span {
+            color: var(--secondary);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #f5f9ff 0%, #e6f0ff 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--energy-blue);
+        }
+
+        .section-title {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background-color: var(--secondary);
+        }
+
+        .icon-box {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(42, 157, 244, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .icon-box i {
+            font-size: 1.8rem;
+            color: var(--energy-blue);
+        }
+
+        .highlight {
+            background-color: rgba(32, 201, 151, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .tech-badge {
+            background-color: #e9f7fe;
+            color: var(--energy-blue);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .footer-note {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .page-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn-nav {
+            background-color: var(--energy-blue);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav:hover {
+            background-color: var(--dark);
+            color: white;
+        }
+
+        .page-number {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .energy-icon {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+<div class="container" style="max-width: 1200px;">
+    <!-- Header -->
+    <div class="header">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="logo"><i class="fas fa-bolt energy-icon"></i> Axelia-<span>Flux</span></div>
+                <p class="mb-0 text-muted">Solutions intelligentes de gestion énergétique</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <h4 class="mb-0">Présentation Investisseurs</h4>
+                <p class="text-muted mb-0">Confidentiel</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section no-print-break">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="mb-3">Révolutionner la gestion énergétique des professionnels</h1>
+                <p class="lead">Plateforme SaaS complète de visualisation, analyse et contrôle des consommations et productions d'énergie pour les industries, établissements publics et producteurs d'énergie renouvelable.</p>
+
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex">
+                            <div class="icon-box me-3">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div>
+                                <h5>Analyses avancées</h5>
+                                <p class="small mb-0">Corrélation météo, occupation, consommations</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex">
+                            <div class="icon-box me-3">
+                                <i class="fas fa-industry"></i>
+                            </div>
+                            <div>
+                                <h5>Multi-secteurs</h5>
+                                <p class="small mb-0">Usines, entrepôts, hôpitaux, écoles, producteurs solaires</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex">
+                            <div class="icon-box me-3">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                            <div>
+                                <h5>Solutions Cloud</h5>
+                                <p class="small mb-0">Architecture moderne et scalable</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="icon-box mx-auto" style="width: 120px; height: 120px;">
+                    <i class="fas fa-leaf" style="font-size: 3.5rem;"></i>
+                </div>
+                <h4 class="mt-3">Efficacité énergétique</h4>
+                <p>Réduction jusqu'à 30% des consommations</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row no-print-break">
+        <div class="col-lg-8">
+            <h2 class="section-title">Notre Vision</h2>
+            <p>Dans un contexte de transition énergétique et de hausse des coûts, les professionnels ont besoin d'outils performants pour maîtriser leurs consommations et optimiser leurs productions d'énergie.</p>
+
+            <div class="highlight mb-4">
+                <h5><i class="fas fa-lightbulb me-2"></i> Problématique</h5>
+                <p class="mb-0">Les industriels, établissements publics et producteurs d'énergie renouvelable manquent d'outils intégrés pour visualiser, analyser et contrôler leurs flux énergétiques en temps réel.</p>
+            </div>
+
+            <h4 class="mt-4 mb-3">Nos solutions répondent aux besoins de :</h4>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-building me-2"></i> Consommateurs</h5>
+                            <ul class="mb-0">
+                                <li>Visualisation multi-énergies (électricité, gaz, eau)</li>
+                                <li>Analyse de consommation par usage</li>
+                                <li>Optimisation basée sur l'occupation</li>
+                                <li>Alertes et reporting automatisés</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-solar-panel me-2"></i> Producteurs</h5>
+                            <ul class="mb-0">
+                                <li>Monitoring de production solaire</li>
+                                <li>Intégration avec solutions existantes</li>
+                                <li>Analyses de performance</li>
+                                <li>Prévisions de production</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="section-title mt-5">Écosystème Technologique</h2>
+            <p>Notre plateforme s'appuie sur des technologies modernes et robustes pour offrir une expérience utilisateur exceptionnelle et une infrastructure scalable.</p>
+
+            <div class="mb-4">
+                <span class="tech-badge"><i class="fas fa-database me-1"></i> PostgreSQL/MySQL</span>
+                <span class="tech-badge"><i class="fab fa-docker me-1"></i> Docker & Kubernetes</span>
+                <span class="tech-badge"><i class="fab fa-gitlab me-1"></i> GitLab CI/CD</span>
+                <span class="tech-badge"><i class="fas fa-server me-1"></i> Microservices</span>
+                <span class="tech-badge"><i class="fas fa-chart-bar me-1"></i> Elastic Stack</span>
+                <span class="tech-badge"><i class="fas fa-bolt me-1"></i> APIs RESTful</span>
+                <span class="tech-badge"><i class="fab fa-html5 me-1"></i> HTML5 Dashboards</span>
+                <span class="tech-badge"><i class="fab fa-flutter me-1"></i> Flutter Mobile</span>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-energy-blue text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i> Chiffres Clés</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                        <span>Projets en phase pilote</span>
+                        <strong class="text-energy-blue">3+</strong>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                        <span>Utilisateurs actifs</span>
+                        <strong class="text-energy-blue">50+</strong>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                        <span>Types de compteurs gérés</span>
+                        <strong class="text-energy-blue">6+</strong>
+                    </div>
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                        <span>Fréquence de collecte</span>
+                        <strong class="text-energy-blue">10 min</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Solutions disponibles</span>
+                        <strong class="text-energy-blue">2 produits</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i> Avantages Concurrentiels</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-check-circle text-success me-2"></i> Solution complète</h6>
+                        <p class="small mb-2">De la collecte au contrôle, en passant par l'analyse</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-check-circle text-success me-2"></i> Multi-énergies</h6>
+                        <p class="small mb-2">Électricité, gaz, eau, température, hygrométrie</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><i class="fas fa-check-circle text-success me-2"></i> Intégration facilitée</h6>
+                        <p class="small mb-2">APIs ouvertes, connecteurs existants</p>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-check-circle text-success me-2"></i> Architecture modulaire</h6>
+                        <p class="small mb-0">Briques indépendantes, déploiement flexible</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 text-center">
+                <div class="icon-box mx-auto mb-3">
+                    <i class="fas fa-infinity"></i>
+                </div>
+                <h5>Scalabilité garantie</h5>
+                <p class="small">Notre architecture nous permet de passer de 10 à 10 000 clients sans refonte.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer & Navigation -->
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Function to handle print styles
+    function beforePrint() {
+        document.querySelectorAll('.btn-nav').forEach(el => el.style.display = 'none');
+    }
+
+    function afterPrint() {
+        document.querySelectorAll('.btn-nav').forEach(el => el.style.display = 'inline-flex');
+    }
+
+    // Add event listeners for print
+    if (window.matchMedia) {
+        const mediaQueryList = window.matchMedia('print');
+        mediaQueryList.addListener(mql => {
+            if (mql.matches) {
+                beforePrint();
+            } else {
+                afterPrint();
+            }
+        });
+    }
+
+    window.onbeforeprint = beforePrint;
+    window.onafterprint = afterPrint;
+</script>
+</body>
+</html>
