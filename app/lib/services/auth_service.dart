@@ -58,6 +58,7 @@ class AuthService {
 
     if (user != null && authorization != null) {
       print(user);
+      print("===== user =======");
 
       try {
         final OAuthCredential googleCredential = GoogleAuthProvider.credential(
@@ -76,6 +77,9 @@ class AuthService {
           if (onAuthenticationEvent != null) {
             await onAuthenticationEvent!(event);
           }
+
+          print(tokenResult.token);
+          print("====== tokenResult.token =======");
 
 
         }

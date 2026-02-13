@@ -112,7 +112,10 @@ class GenerateLiveKitController extends AbstractController
             // Retourner la réponse JSON
             return $this->json([
                 'server_url' => $this->livekitUrl,
-                'participant_token' => $token->toJwt()
+                'participant_token' => $token->toJwt(),
+                'participant_identity' => $body['participant_identity'],
+                'participant_name' => $body['participant_name'],
+                'room_name' => $body['room_name'],
             ]);
 
         } catch (\Exception $e) {
