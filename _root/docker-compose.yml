@@ -36,14 +36,30 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PWD}
     volumes:
-      - database_data:/var/lib/mysql
+#      - database_data:/var/lib/mysql
+        #      - ${MYSQL_INITDB_DIR}:/docker-entrypoint-initdb.d
+        - ${MYSQL_DATA_DIR}:/var/lib/mysql
+        - ${MYSQL_LOG_DIR}:/var/log/mysql
     ports:
       - "${MYSQL_PORT}:3306"
     networks:
       - drinkks-net
 
-volumes:
-  database_data:
+  phpmyadmin:
+    image: phpmyadmin:5.2.0
+    #    container_name: phpmyadmin
+    links:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - ${PMA_PORT}:80
+    networks:
+      - drinkks-net
+
+#volumes:
+#  database_data:
 
 networks:
   drinkks-net:

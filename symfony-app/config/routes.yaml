@@ -7,9 +7,14 @@
 # To list all registered routes, run the following command:
 #   bin/console debug:router
 
-controllers:
-    resource: routing.controllers
+#controllers:
+#    resource: routing.controllers
 
+controllers:
+    resource:
+        path: ../src/Infrastructure/Http/Controller/
+        namespace: App\Infrastructure\Http\Controller
+    type: attribute
 
 app.swagger_ui:
     path: /api/doc

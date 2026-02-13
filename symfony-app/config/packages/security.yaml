@@ -1,26 +1,63 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+#    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+#    password_hashers:
+#        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+#
+#    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+#    providers:
+#        users_in_memory: { memory: null }
+
+
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        App\Infrastructure\Persistence\Doctrine\Entity\UserEntity:
+            algorithm: auto
 
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            id: App\Infrastructure\Security\UserProvider
+
+
+#    firewalls:
+#        dev:
+#            # Ensure dev tools and static assets are always allowed
+#            pattern: ^/(_profiler|_wdt|assets|build)/
+#            security: false
+#        main:
+#            lazy: true
+#            provider: users_in_memory
+#
+#            # Activate different ways to authenticate:
+#            # https://symfony.com/doc/current/security.html#the-firewall
+#
+#            # https://symfony.com/doc/current/security/impersonating_user.html
+#            # switch_user: true
+
 
     firewalls:
-        dev:
-            # Ensure dev tools and static assets are always allowed
-            pattern: ^/(_profiler|_wdt|assets|build)/
-            security: false
-        main:
-            lazy: true
-            provider: users_in_memory
+        api_doc:
+            pattern: ^/api/doc
+            stateless: true
+            # pas de jwt ici
 
-            # Activate different ways to authenticate:
-            # https://symfony.com/doc/current/security.html#the-firewall
+        login:
+            pattern: ^/api/auth/login
+            stateless: true
+            json_login:
+                check_path: /api/auth/login
+                username_path: email
+                password_path: password
+                #                success_handler: lexik_jwt_authentication.handler.authentication_success
+                success_handler: App\Infrastructure\Security\JWTLoginSuccessHandler
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            provider: app_user_provider
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+        api:
+            pattern: ^/api
+            stateless: true
+            jwt: ~
+            provider: app_user_provider
+
 
     # Note: Only the *first* matching rule is applied
     access_control:
