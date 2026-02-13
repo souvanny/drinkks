@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../providers/auth_provider.dart';
 import '../../domain/entities/social_login_entity.dart';
 import '../controllers/social_login_controller.dart';
 
@@ -67,8 +68,37 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Écouter les changements d'authentification
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuthenticationState();
+    });
+  }
+
+  void _checkAuthenticationState() {
+    final authState = ref.read(authStateProvider);
+    authState.whenData((user) {
+      if (user != null) {
+        print('✅ Utilisateur déjà connecté, redirection vers /venues');
+        context.go('/venues');
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final socialLoginState = ref.watch(socialLoginControllerProvider);
+
+    // Écouter les changements d'état d'authentification
+    ref.listen(authStateProvider, (previous, next) {
+      next.whenData((user) {
+        if (user != null) {
+          print('✅ Auth state changed - User connected, redirecting to /venues');
+          context.go('/venues');
+        }
+      });
+    });
 
     // Palette de couleurs pour l'ambiance Drinkks
     const primaryColor = Color(0xFF6366F1); // Indigo doux
