@@ -11,11 +11,11 @@
 docker pull livekit/generate
 docker run --rm -it -v$PWD:/output livekit/generate
 
-- Le dossier livekit.project-takagi.fr est créé
+- Le dossier livekit.project-takagi.fr est créé si l'url saisi est livekit.project-takagi.fr
 - cd livekit.project-takagi.fr
 - tous les fichier sont présents
   - docker-compose up -d
-- Si on veu t créer un token :
+- Si on veut créer un token :
 
 livekit-cli create-token \
 --api-key APITCL53pSLyZaR --api-secret G2qNPc1PjNjfhdGGzwORQ7v4aLDhsNovnFN36PMXeho \
