@@ -1,17 +1,96 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:dio/dio.dart';
 import '../controllers/tables_controller.dart';
+import 'prejoin.dart';
 
 class TablesScreen extends ConsumerWidget {
   final String venueId;
-  
+  final Dio _dio = Dio(); // À idéalement injecter via un provider
+
   const TablesScreen({
     super.key,
     required this.venueId,
   });
+
+  // Méthode pour générer le token LiveKit
+  Future<void> _generateLiveKitToken(BuildContext context, Map<String, dynamic> table) async {
+    try {
+      const storage = FlutterSecureStorage();
+
+      // Récupérer les informations de l'utilisateur connecté
+      final connectedUserName = await storage.read(key: 'connected_user_displayname');
+      final connectedUserIdentity = await storage.read(key: 'connected_user_identity');
+
+      if (connectedUserName == null || connectedUserIdentity == null) {
+        print('Informations utilisateur manquantes');
+        return;
+      }
+
+      // Préparer le payload pour l'API
+      final payload = {
+        "participant_identity": connectedUserIdentity,
+        "participant_name": connectedUserName,
+        "participant_metadata": "",
+        "participant_attributes": {},
+        "room_name": table['name'], // Utilise le nom de la table comme room_name
+        "room_config": {}
+      };
+
+      print('Envoi de la requête à /api/sfu/generate-token avec payload: $payload');
+
+      // Appel à l'API
+      final response = await _dio.post(
+        '/api/sfu/generate-token',
+        data: payload,
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print('Token généré avec succès: ${response.data}');
+
+        // Pour l'instant, on ne fait rien de la réponse
+        // Plus tard, on utilisera ces données pour se connecter à LiveKit
+
+        // TODO: Utiliser les données de réponse pour se connecter à la room LiveKit
+        // response.data['server_url']
+        // response.data['participant_token']
+
+        // Navigation vers la page de pré-join avec les informations reçues
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PreJoinPage(
+                args: JoinArgs(
+                  url: response.data['server_url'],
+                  token: response.data['participant_token'],
+                  e2ee: false,
+                  e2eeKey: null,
+                  simulcast: true,
+                  adaptiveStream: true,
+                  dynacast: true,
+                  preferredCodec: 'VP8',
+                  enableBackupVideoCodec: true,
+                ),
+              ),
+            ),
+          );
+        }
+      } else {
+        print('Erreur lors de la génération du token: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Exception lors de l\'appel API: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -206,6 +285,12 @@ class TablesScreen extends ConsumerWidget {
                                     emptyColor,
                                     primaryColor,
                                     textPrimary,
+                                    onTap: () {
+                                      final isFull = (table['occupiedSeats'] as int) == (table['totalSeats'] as int);
+                                      if (!isFull) {
+                                        _generateLiveKitToken(context, table);
+                                      }
+                                    },
                                   );
                                 }
                                 return null;
@@ -245,6 +330,12 @@ class TablesScreen extends ConsumerWidget {
                                     emptyColor,
                                     primaryColor,
                                     textPrimary,
+                                    onTap: () {
+                                      final isFull = (table['occupiedSeats'] as int) == (table['totalSeats'] as int);
+                                      if (!isFull) {
+                                        _generateLiveKitToken(context, table);
+                                      }
+                                    },
                                   );
                                 }
                                 return null;
@@ -625,8 +716,9 @@ class TablesScreen extends ConsumerWidget {
       Color occupiedColor,
       Color emptyColor,
       Color primaryColor,
-      Color textPrimary,
-      ) {
+      Color textPrimary, {
+        required VoidCallback onTap,
+      }) {
     final occupiedSeats = table['occupiedSeats'] as int;
     final totalSeats = table['totalSeats'] as int;
     final isFull = occupiedSeats == totalSeats;
@@ -638,12 +730,7 @@ class TablesScreen extends ConsumerWidget {
         // Carte de la table
         Expanded(
           child: InkWell(
-            onTap: () {
-              if (!isFull) {
-                // Rejoindre la table
-                print('Rejoindre la table: ${table['name']}');
-              }
-            },
+            onTap: isFull ? null : onTap,
             borderRadius: BorderRadius.circular(16),
             child: Card(
               elevation: 4,
