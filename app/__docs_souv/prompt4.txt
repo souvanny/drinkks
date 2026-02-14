@@ -1,0 +1,27 @@
+Dans table_screen, ligne641, sur le onTap, je voudrais faire un appel à cet api en POST :
+curl -X 'POST' \
+  'http://localhost:8101/api/sfu/generate-token' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "participant_identity": "string",
+  "participant_name": "string",
+  "participant_metadata": "string",
+  "participant_attributes": {},
+  "room_name": "string",
+  "room_config": {}
+}'
+
+Ne pas oublier de passer le token se trouvant dans le storage : "firebase_id_token"
+
+La réponse est de cet type :
+
+{
+    "server_url": "livekit.project-takagi.fr",
+    "participant_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IxIiwianRpIjoiYm9iMSIsImV4cCI6MTc3MTExMTU4MiwibmJmIjoxNzcxMDk3MTgyLCJpYXQiOjE3NzEwOTcxODIsImlzcyI6IkFQSVRDTDUzcFNMeVphUiIsIm5hbWUiOiJib2IxIiwibWV0YWRhdGEiOiJzdHJpbmciLCJ2aWRlbyI6eyJyb29tSm9pbiI6dHJ1ZSwicm9vbSI6Im15X3N1cGVyX3Jvb20ifX0.IKg-Qh6RN0Quxmfd9cMn6o4eQzWPsUFu-n9W59K-LZk",
+    "participant_identity": "bob1",
+    "participant_name": "bob1",
+    "room_name": "my_super_room"
+}
+
+Pour l'instant ne fait rien la réponse

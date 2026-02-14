@@ -25,6 +25,7 @@ services:
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
     volumes:
       - ../symfony-app:/var/www/html
+      - ../app/lib:/var/www/html/flutter_lib
     depends_on:
       - mysql
     networks:
