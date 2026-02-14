@@ -79,6 +79,10 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
   void _checkAuthenticationState() {
     final authState = ref.read(authStateProvider);
     authState.whenData((user) {
+
+      print(user);
+      print('--- user ---');
+
       if (user != null) {
         print('✅ Utilisateur déjà connecté, redirection vers /venues');
         context.go('/venues');

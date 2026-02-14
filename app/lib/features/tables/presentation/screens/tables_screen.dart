@@ -7,7 +7,7 @@ import '../controllers/tables_controller.dart';
 
 class TablesScreen extends ConsumerWidget {
   final String venueId;
-
+  
   const TablesScreen({
     super.key,
     required this.venueId,
@@ -214,18 +214,18 @@ class TablesScreen extends ConsumerWidget {
                             ),
                           ),
 
-                          // Sliver pour le bar central
-                          SliverToBoxAdapter(
-                            child: Container(
-                              height: 180,
-                              margin: const EdgeInsets.symmetric(vertical: 20),
-                              child: _buildBarIsland(  // ← Ici, il faut appeler la fonction
-                                barColor,
-                                primaryColor,
-                                textPrimary,
-                              ),
-                            ),
-                          ),
+                          // // Sliver pour le bar central
+                          // SliverToBoxAdapter(
+                          //   child: Container(
+                          //     height: 180,
+                          //     margin: const EdgeInsets.symmetric(vertical: 20),
+                          //     child: _buildBarIsland(  // ← Ici, il faut appeler la fonction
+                          //       barColor,
+                          //       primaryColor,
+                          //       textPrimary,
+                          //     ),
+                          //   ),
+                          // ),
 
                           // Sliver pour les autres tables
                           SliverGrid(

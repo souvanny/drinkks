@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -10,6 +12,8 @@ class AuthService {
 
   // Clé pour le stockage
   static const _tokenKey = 'firebase_id_token';
+  static const _userIdentityKey = 'connected_user_identity';
+  static const _userDisplayNameKey = 'connected_user_displayname';
 
 
   // Callbacks injectés
@@ -71,7 +75,12 @@ class AuthService {
         IdTokenResult tokenResult = await FirebaseAuth.instance.currentUser!.getIdTokenResult();
 
         if (tokenResult.token != null) {
+
+
+
           await _storage.write(key: _tokenKey, value: tokenResult.token);
+          await _storage.write(key: _userIdentityKey, value: user.displayName);
+          await _storage.write(key: _userDisplayNameKey, value: user.displayName);
 
           // Appeler le callback injecté si présent
           if (onAuthenticationEvent != null) {
