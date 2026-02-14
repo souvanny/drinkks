@@ -15,7 +15,7 @@ class GeneratePromptController extends AbstractController
 {
     #[Route('', name: 'generate_prompt', methods: ['GET'])]
     #[OA\Get(
-        description: 'Exporte tous les fichiers d\'un ou plusieurs dossiers avec leurs extensions spécifiées au format texte brut pour analyse par IA',
+        description: 'Exporte des fichiers et dossiers au format texte brut pour analyse par IA',
         summary: 'Génère un prompt texte contenant l\'arborescence et le code source',
         parameters: [
             new OA\Parameter(
@@ -25,8 +25,17 @@ class GeneratePromptController extends AbstractController
                 required: false,
                 schema: new OA\Schema(
                     type: 'string',
-                    default: 'src',
                     example: 'src,config,templates'
+                )
+            ),
+            new OA\Parameter(
+                name: 'files',
+                description: 'Chemin des fichiers individuels à analyser (séparés par des virgules) - absolus ou relatifs à la racine du projet',
+                in: 'query',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                    example: 'src/Controller/GeneratePromptController.php,config/routes.yaml'
                 )
             ),
             new OA\Parameter(
@@ -44,34 +53,118 @@ class GeneratePromptController extends AbstractController
     )]
     public function generatePrompt(Request $request): Response
     {
-        $pathsParam = $request->query->get('paths', 'src');
+        $pathsParam = $request->query->get('paths');
+        $filesParam = $request->query->get('files');
         $extensions = $request->query->get('extensions', 'php,dart,html,twig,js,css');
 
-        // Séparer les différents chemins
-        $rawPaths = array_map('trim', explode(',', $pathsParam));
-        $resolvedPaths = [];
-        $invalidPaths = [];
+        // Vérifier qu'au moins un paramètre est fourni
+        if (!$pathsParam && !$filesParam) {
+            return new Response(
+                "ERREUR: Vous devez fournir au moins un dossier (paths) ou un fichier (files) à analyser.\n",
+                Response::HTTP_BAD_REQUEST,
+                ['Content-Type' => 'text/plain']
+            );
+        }
 
-        foreach ($rawPaths as $path) {
-            // Résoudre le chemin absolu
-            if (!str_starts_with($path, '/')) {
-                $path = $this->getParameter('kernel.project_dir') . '/' . $path;
+        $allowedExtensions = array_map('trim', explode(',', $extensions));
+        $warningMessages = [];
+        $allFiles = [];
+        $allDirs = [];
+
+        // Traitement des dossiers (paths)
+        $resolvedPaths = [];
+        if ($pathsParam) {
+            $rawPaths = array_map('trim', explode(',', $pathsParam));
+
+            foreach ($rawPaths as $path) {
+                // Résoudre le chemin absolu
+                if (!str_starts_with($path, '/')) {
+                    $path = $this->getParameter('kernel.project_dir') . '/' . $path;
+                }
+
+                $realPath = realpath($path);
+
+                if ($realPath && is_dir($realPath)) {
+                    $resolvedPaths[] = $realPath;
+                } else {
+                    $warningMessages[] = "Dossier ignoré (invalide): " . $path;
+                }
             }
 
-            $realPath = realpath($path);
+            // Collecter les fichiers des dossiers valides
+            foreach ($resolvedPaths as $rootPath) {
+                $finder = new Finder();
+                $finder->files()
+                    ->in($rootPath)
+                    ->ignoreDotFiles(false)
+                    ->ignoreVCS(false);
 
-            if ($realPath && is_dir($realPath)) {
-                $resolvedPaths[] = $realPath;
-            } else {
-                $invalidPaths[] = $path;
+                foreach ($finder as $file) {
+                    $ext = $file->getExtension();
+                    if (in_array($ext, $allowedExtensions)) {
+                        $allFiles[] = $file;
+
+                        // Collecter tous les dossiers parents
+                        $relativePath = $file->getRelativePath();
+                        if (!empty($relativePath)) {
+                            $parts = explode(DIRECTORY_SEPARATOR, $relativePath);
+                            $currentPath = '';
+                            foreach ($parts as $part) {
+                                $currentPath = empty($currentPath) ? $part : $currentPath . DIRECTORY_SEPARATOR . $part;
+                                $allDirs[$currentPath] = true;
+                            }
+                        }
+                    }
+                }
             }
         }
 
-        // Si aucun dossier valide
-        if (empty($resolvedPaths)) {
-            $errorMsg = "ERREUR: Aucun dossier valide trouvé.\n";
-            if (!empty($invalidPaths)) {
-                $errorMsg .= "Dossiers invalides: " . implode(', ', $invalidPaths) . "\n";
+        // Traitement des fichiers individuels (files)
+        $resolvedFiles = [];
+        if ($filesParam) {
+            $rawFiles = array_map('trim', explode(',', $filesParam));
+
+            foreach ($rawFiles as $file) {
+                // Résoudre le chemin absolu
+                if (!str_starts_with($file, '/')) {
+                    $file = $this->getParameter('kernel.project_dir') . '/' . $file;
+                }
+
+                $realPath = realpath($file);
+
+                if ($realPath && is_file($realPath)) {
+                    $ext = pathinfo($realPath, PATHINFO_EXTENSION);
+                    if (in_array($ext, $allowedExtensions)) {
+                        $resolvedFiles[] = $realPath;
+
+                        // Créer un objet fichier virtuel pour le traitement
+                        $virtualFile = new \SplFileInfo($realPath);
+                        $allFiles[] = $virtualFile;
+
+                        // Collecter le dossier parent
+                        $relativePath = str_replace($this->getParameter('kernel.project_dir') . '/', '', dirname($realPath));
+                        if ($relativePath !== '.' && !empty($relativePath)) {
+                            $parts = explode(DIRECTORY_SEPARATOR, $relativePath);
+                            $currentPath = '';
+                            foreach ($parts as $part) {
+                                $currentPath = empty($currentPath) ? $part : $currentPath . DIRECTORY_SEPARATOR . $part;
+                                $allDirs[$currentPath] = true;
+                            }
+                        }
+                    } else {
+                        $warningMessages[] = "Fichier ignoré (extension non autorisée): " . $file;
+                    }
+                } else {
+                    $warningMessages[] = "Fichier ignoré (invalide): " . $file;
+                }
+            }
+        }
+
+        // Vérifier qu'on a au moins un fichier à analyser
+        if (empty($allFiles)) {
+            $errorMsg = "ERREUR: Aucun fichier valide trouvé.\n";
+            if (!empty($warningMessages)) {
+                $errorMsg .= implode("\n", $warningMessages) . "\n";
             }
             return new Response(
                 $errorMsg,
@@ -80,20 +173,17 @@ class GeneratePromptController extends AbstractController
             );
         }
 
-        // Avertir si certains dossiers sont invalides
-        if (!empty($invalidPaths)) {
-            $errorMsg = "ATTENTION: Certains dossiers n'existent pas: " . implode(', ', $invalidPaths) . "\n\n";
-        } else {
-            $errorMsg = "";
-        }
-
-        $allowedExtensions = array_map('trim', explode(',', $extensions));
-
         try {
-            $content = $this->generateExport($resolvedPaths, $allowedExtensions);
+            $content = $this->generateExport($allFiles, $allDirs, $resolvedPaths, $allowedExtensions);
+
+            // Ajouter les avertissements au début si nécessaire
+            if (!empty($warningMessages)) {
+                $warnings = "ATTENTIONS:\n" . implode("\n", $warningMessages) . "\n\n";
+                $content = $warnings . $content;
+            }
 
             return new Response(
-                $errorMsg . $content,
+                $content,
                 Response::HTTP_OK,
                 ['Content-Type' => 'text/plain']
             );
@@ -107,55 +197,28 @@ class GeneratePromptController extends AbstractController
         }
     }
 
-    private function generateExport(array $rootPaths, array $allowedExtensions): string
+    private function generateExport(array $allFiles, array $allDirs, array $rootPaths, array $allowedExtensions): string
     {
         $output = [];
+        $projectRoot = $this->getParameter('kernel.project_dir');
 
         // En-tête
         $output[] = "FICHIERS POUR ANALYSE";
         $output[] = "=====================";
-        $output[] = "Dossiers analysés:";
-        foreach ($rootPaths as $path) {
-            $output[] = "  - " . $path;
+
+        if (!empty($rootPaths)) {
+            $output[] = "Dossiers analysés:";
+            foreach ($rootPaths as $path) {
+                $relativePath = str_replace($projectRoot . '/', '', $path);
+                $output[] = "  - " . $relativePath;
+            }
         }
+
         $output[] = "Extensions: " . implode(', ', $allowedExtensions);
         $output[] = "Date: " . date('Y-m-d H:i:s');
         $output[] = "";
 
-        // Collecter tous les fichiers de tous les dossiers
-        $allFiles = [];
-        $allDirs = [];
-        $totalFiles = 0;
-
-        foreach ($rootPaths as $rootPath) {
-            $finder = new Finder();
-            $finder->files()
-                ->in($rootPath)
-                ->ignoreDotFiles(false)
-                ->ignoreVCS(false);
-
-            foreach ($finder as $file) {
-                $ext = $file->getExtension();
-                if (in_array($ext, $allowedExtensions)) {
-                    // Stocker avec le chemin complet pour éviter les collisions
-                    $allFiles[] = $file;
-                    $totalFiles++;
-
-                    // Collecter tous les dossiers parents
-                    $relativePath = $file->getRelativePath();
-                    if (!empty($relativePath)) {
-                        $parts = explode(DIRECTORY_SEPARATOR, $relativePath);
-                        $currentPath = '';
-                        foreach ($parts as $part) {
-                            $currentPath = empty($currentPath) ? $part : $currentPath . DIRECTORY_SEPARATOR . $part;
-                            $allDirs[$currentPath] = true;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Trier les fichiers par chemin complet
+        // Trier les fichiers par chemin
         usort($allFiles, function($a, $b) {
             return strcmp($a->getRealPath(), $b->getRealPath());
         });
@@ -169,32 +232,34 @@ class GeneratePromptController extends AbstractController
         $output[] = "-------------";
 
         if (empty($allFiles)) {
-            $output[] = "  (aucun fichier trouvé avec ces extensions)";
+            $output[] = "  (aucun fichier trouvé)";
         } else {
-            // Pour chaque dossier racine, construire son arbre
-            foreach ($rootPaths as $rootPath) {
-                $rootName = basename($rootPath) . " (" . $rootPath . ")";
-                $output[] = "📁 " . $rootName . "/";
+            // Construire l'arbre global
+            $globalTree = [];
 
-                // Filtrer les fichiers et dossiers pour cette racine
-                $rootFiles = array_filter($allFiles, function($file) use ($rootPath) {
-                    return strpos($file->getRealPath(), $rootPath) === 0;
-                });
+            foreach ($allFiles as $file) {
+                $fullPath = $file->getRealPath();
+                $relativePath = str_replace($projectRoot . '/', '', $fullPath);
+                $parts = explode('/', $relativePath);
 
-                $rootDirs = array_filter($dirs, function($dir) use ($rootPath, $rootFiles) {
-                    // Ne garder que les dossiers qui contiennent des fichiers
-                    foreach ($rootFiles as $file) {
-                        if (strpos($file->getRelativePath(), $dir) === 0) {
-                            return true;
+                $current = &$globalTree;
+                $lastIndex = count($parts) - 1;
+
+                foreach ($parts as $index => $part) {
+                    if ($index === $lastIndex) {
+                        // C'est un fichier
+                        $current[$part] = null;
+                    } else {
+                        // C'est un dossier
+                        if (!isset($current[$part])) {
+                            $current[$part] = [];
                         }
+                        $current = &$current[$part];
                     }
-                    return false;
-                });
-
-                $tree = $this->buildTree($rootPath, $rootDirs, $rootFiles);
-                $output[] = $this->renderTree($tree, '    ');
-                $output[] = ""; // Ligne vide entre les dossiers racines
+                }
             }
+
+            $output[] = $this->renderTree($globalTree);
         }
 
         $output[] = "";
@@ -203,78 +268,29 @@ class GeneratePromptController extends AbstractController
         $output[] = "";
 
         // Contenu de chaque fichier
-        if (empty($allFiles)) {
-            $output[] = "Aucun fichier à afficher.";
-        } else {
-            foreach ($allFiles as $file) {
-                // Afficher le chemin complet relatif à la racine du projet
-                $projectRoot = $this->getParameter('kernel.project_dir');
-                $fullPath = $file->getRealPath();
-                $relativeToProject = str_replace($projectRoot . '/', '', $fullPath);
+        foreach ($allFiles as $file) {
+            $fullPath = $file->getRealPath();
+            $relativeToProject = str_replace($projectRoot . '/', '', $fullPath);
 
-                $output[] = "FICHIER: " . $relativeToProject;
-                $output[] = str_repeat("-", 80);
+            $output[] = "FICHIER: " . $relativeToProject;
+            $output[] = str_repeat("-", 80);
 
-                $content = file_get_contents($file->getRealPath());
-                if ($content === false) {
-                    $output[] = "[ERREUR LECTURE]";
-                } else {
-                    $output[] = $content;
-                }
-
-                $output[] = ""; // Ligne vide entre les fichiers
-                $output[] = ""; // Une de plus pour la séparation
+            $content = file_get_contents($fullPath);
+            if ($content === false) {
+                $output[] = "[ERREUR LECTURE]";
+            } else {
+                $output[] = $content;
             }
+
+            $output[] = ""; // Ligne vide entre les fichiers
+            $output[] = ""; // Une de plus pour la séparation
         }
 
         $output[] = "FIN";
         $output[] = "============";
-        $output[] = "Total fichiers: " . $totalFiles;
+        $output[] = "Total fichiers: " . count($allFiles);
 
         return implode("\n", $output);
-    }
-
-    private function buildTree(string $rootPath, array $dirs, array $files): array
-    {
-        $tree = [];
-
-        // Ajouter les dossiers
-        foreach ($dirs as $dir) {
-            $parts = explode(DIRECTORY_SEPARATOR, $dir);
-            $current = &$tree;
-
-            foreach ($parts as $part) {
-                if (!isset($current[$part])) {
-                    $current[$part] = [];
-                }
-                $current = &$current[$part];
-            }
-        }
-
-        // Ajouter les fichiers
-        foreach ($files as $file) {
-            $relativePath = $file->getRelativePath();
-            $filename = $file->getFilename();
-
-            if (empty($relativePath)) {
-                // Fichier à la racine
-                $tree[$filename] = null;
-            } else {
-                $parts = explode(DIRECTORY_SEPARATOR, $relativePath);
-                $current = &$tree;
-
-                foreach ($parts as $part) {
-                    if (!isset($current[$part])) {
-                        $current[$part] = [];
-                    }
-                    $current = &$current[$part];
-                }
-
-                $current[$filename] = null;
-            }
-        }
-
-        return $tree;
     }
 
     private function renderTree(array $tree, string $prefix = ''): string
