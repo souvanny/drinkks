@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
+import '../../../../services/api_service.dart';
 import '../controllers/tables_controller.dart';
 import 'prejoin.dart';
 
@@ -17,82 +18,58 @@ class TablesScreen extends ConsumerWidget {
   });
 
   // Méthode pour générer le token LiveKit
-  Future<void> _generateLiveKitToken(BuildContext context, Map<String, dynamic> table) async {
+  Future<void> _generateLiveKitToken(BuildContext context, WidgetRef ref, Map<String, dynamic> table) async {
     try {
-      const storage = FlutterSecureStorage();
-      const _appJwtKey = 'app_jwt_token'; // Nouvelle clé pour le JWT applicatif
+      // Appel via le controller qui utilise le service
+      final tokenData = await ref.read(tablesControllerProvider.notifier).generateTokenForTable(table);
 
-      // Récupérer les informations de l'utilisateur connecté
-      final appJwt = await storage.read(key: _appJwtKey);
-      final connectedUserName = await storage.read(key: 'connected_user_displayname');
-      final connectedUserIdentity = await storage.read(key: 'connected_user_identity');
-
-      if (connectedUserName == null || connectedUserIdentity == null) {
-        print('Informations utilisateur manquantes');
-        return;
-      }
-
-      // Préparer le payload pour l'API
-      final payload = {
-        "participant_identity": connectedUserIdentity,
-        "participant_name": connectedUserName,
-        "participant_metadata": "",
-        "participant_attributes": {},
-        "room_name": table['name'], // Utilise le nom de la table comme room_name
-        "room_config": {}
-      };
-
-      print('Envoi de la requête à /api/sfu/generate-token avec payload: $payload');
-
-      // Appel à l'API
-      final response = await _dio.post(
-        'http://192.168.1.56:8101/api/sfu/generate-token',
-        data: payload,
-        options: Options(
-          headers: {
-            // 'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE3NzExMTMyNjQsImV4cCI6MTc3MTExNjg2NCwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVVNFUiJdLCJ1c2VybmFtZSI6InVzZXJAZXhhbXBsZS5jb20ifQ.UW06Nun53EMjnO5abOcpmn9NKl1iL_zymJnHP2XvPFRXZ9Gn5eSb3bm_MtHu1V60cf3ZHIs5n_1SdnKNuWEVzJfgJc_bBP1NXiFSyyopHARoi7lNdDBeCKVebHzAD0QWHfvSPuk5NVKDgGuFlnm5CKs4D8UqNnHo103UYFLg-BtZbI_Nn4vyVL6F1EBp0OmuQNpOuD0ZeFal0CzM690M4W1MdsRIjhXutxa0juSZhINDiBE_WFFyGENiJ4kY5lCXVcpJhdCjYKvzK3Gysw438WTpKRx9ce7rwsq7abD9GgcuytdAMURRmsbT6vYR_jgHGdJgpFWyhLkya5atJHszig',
-            'Authorization': 'Bearer ' + appJwt.toString(),
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        print('Token généré avec succès: ${response.data}');
-
-        // Pour l'instant, on ne fait rien de la réponse
-        // Plus tard, on utilisera ces données pour se connecter à LiveKit
-
-        // TODO: Utiliser les données de réponse pour se connecter à la room LiveKit
-        // response.data['server_url']
-        // response.data['participant_token']
-
-        // Navigation vers la page de pré-join avec les informations reçues
+      if (tokenData == null) {
         if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => PreJoinPage(
-                args: JoinArgs(
-                  url: response.data['server_url'],
-                  token: response.data['participant_token'],
-                  e2ee: false,
-                  e2eeKey: null,
-                  simulcast: true,
-                  adaptiveStream: true,
-                  dynacast: true,
-                  preferredCodec: 'VP8',
-                  enableBackupVideoCodec: true,
-                ),
-              ),
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Impossible de générer le token de connexion'),
+              backgroundColor: Colors.red,
             ),
           );
         }
-      } else {
-        print('Erreur lors de la génération du token: ${response.statusCode}');
+        return;
+      }
+
+      // Navigation vers la page de pré-join
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PreJoinPage(
+              args: JoinArgs(
+                url: tokenData['server_url'],
+                token: tokenData['participant_token'],
+                e2ee: false,
+                e2eeKey: null,
+                simulcast: true,
+                adaptiveStream: true,
+                dynacast: true,
+                preferredCodec: 'VP8',
+                enableBackupVideoCodec: true,
+              ),
+            ),
+          ),
+        );
       }
     } catch (e) {
-      print('Exception lors de l\'appel API: $e');
+      if (context.mounted) {
+        String errorMessage = 'Erreur de connexion';
+        if (e is ApiException) {
+          errorMessage = e.message;
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -292,7 +269,7 @@ class TablesScreen extends ConsumerWidget {
                                     onTap: () {
                                       final isFull = (table['occupiedSeats'] as int) == (table['totalSeats'] as int);
                                       if (!isFull) {
-                                        _generateLiveKitToken(context, table);
+                                        _generateLiveKitToken(context, ref, table);
                                       }
                                     },
                                   );
@@ -337,7 +314,7 @@ class TablesScreen extends ConsumerWidget {
                                     onTap: () {
                                       final isFull = (table['occupiedSeats'] as int) == (table['totalSeats'] as int);
                                       if (!isFull) {
-                                        _generateLiveKitToken(context, table);
+                                        _generateLiveKitToken(context, ref, table);
                                       }
                                     },
                                   );

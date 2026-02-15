@@ -33,7 +33,7 @@ final class TablesControllerProvider
   TablesController create() => TablesController();
 }
 
-String _$tablesControllerHash() => r'3603b6bb014238c79fd2ef6963277f1b427360ed';
+String _$tablesControllerHash() => r'f15b9925908014fc546d034ff7c0a2a99081cf9c';
 
 abstract class _$TablesController extends $AsyncNotifier<List<TablesEntity>> {
   FutureOr<List<TablesEntity>> build();

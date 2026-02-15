@@ -130,8 +130,55 @@ class ApiService {
     );
   }
 
-// Autres méthodes API peuvent être ajoutées ici
-// Future<Type> autreMethode() async { ... }
+// Nouvelle méthode pour générer le token LiveKit
+  Future<Map<String, dynamic>> generateLiveKitToken({
+    required String participantIdentity,
+    required String participantName,
+    required String roomName,
+    String participantMetadata = '',
+    Map<String, dynamic> participantAttributes = const {},
+    Map<String, dynamic> roomConfig = const {},
+  }) async {
+    return safeApiCall(
+      apiCall: () async {
+        final payload = {
+          "participant_identity": participantIdentity,
+          "participant_name": participantName,
+          "participant_metadata": participantMetadata,
+          "participant_attributes": participantAttributes,
+          "room_name": roomName,
+          "room_config": roomConfig
+        };
+
+        // Récupérer le JWT pour l'authentification
+        final appJwt = await _storage.read(key: 'app_jwt_token');
+
+        if (appJwt == null) {
+          throw ApiException(message: 'JWT token non disponible');
+        }
+
+        final response = await _dio.post(
+          '/sfu/generate-token', // Note: plus besoin de l'URL complète, baseUrl est déjà configurée
+          data: payload,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $appJwt',
+            },
+          ),
+        );
+
+        if (response.statusCode == 200) {
+          return response.data as Map<String, dynamic>;
+        } else {
+          throw ApiException(
+            message: 'Erreur lors de la génération du token LiveKit',
+            statusCode: response.statusCode,
+          );
+        }
+      },
+      errorMessage: 'Impossible de générer le token LiveKit',
+    );
+  }
 }
 
 @riverpod
