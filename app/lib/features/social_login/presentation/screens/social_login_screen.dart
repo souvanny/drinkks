@@ -95,13 +95,25 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
     final socialLoginState = ref.watch(socialLoginControllerProvider);
 
     // Écouter les changements d'état d'authentification
-    ref.listen(authStateProvider, (previous, next) {
-      next.whenData((user) {
-        if (user != null) {
-          print('✅ Auth state changed - User connected, redirecting to /venues');
-          context.go('/venues');
-        }
-      });
+    // ref.listen(authStateProvider, (previous, next) {
+    //   next.whenData((user) {
+    //     if (user != null) {
+    //       print('✅ Auth state changed - User connected, redirecting to /venues');
+    //       context.go('/venues');
+    //     }
+    //   });
+    // });
+
+    ref.listen(authStateNotifierProvider, (previous, next) {
+      if (next.isFullyAuthenticated) {
+        // Redirection uniquement quand Firebase ET JWT sont OK
+        context.go('/venues');
+      } else if (next.hasError) {
+        // Gérer l'erreur
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: ${next.error}')),
+        );
+      }
     });
 
     // Palette de couleurs pour l'ambiance Drinkks

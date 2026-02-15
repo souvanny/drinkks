@@ -17,8 +17,8 @@ class AuthService {
   static const _userDisplayNameKey = 'connected_user_displayname';
 
   // Callbacks injectés
-  final Future<void> Function(GoogleSignInAuthenticationEvent)? onAuthenticationEvent;
-  final Future<void> Function(Object)? onAuthenticationError;
+  Future<void> Function(GoogleSignInAuthenticationEvent)? onAuthenticationEvent;
+  Future<void> Function(Object)? onAuthenticationError;
 
   AuthService({
     this.onAuthenticationEvent,
