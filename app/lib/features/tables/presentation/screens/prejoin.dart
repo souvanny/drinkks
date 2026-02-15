@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../../drinkks/exts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,6 +62,40 @@ class _PreJoinPageState extends State<PreJoinPage> {
   MediaDevice? _selectedAudioDevice;
   VideoParameters _selectedVideoParameters = VideoParametersPresets.h720_169;
 
+  // Nouvelle méthode pour vérifier et demander les permissions
+  Future<bool> _checkAndRequestPermissions() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.camera,
+      Permission.microphone,
+    ].request();
+
+    bool cameraGranted = statuses[Permission.camera]?.isGranted ?? false;
+    bool microphoneGranted = statuses[Permission.microphone]?.isGranted ?? false;
+
+    if (!cameraGranted || !microphoneGranted) {
+      if (mounted) {
+        await showDialog(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: const Text('Permissions requises'),
+            content: const Text(
+                'L\'application a besoin des permissions caméra et microphone pour la visioconférence. '
+                    'Veuillez les activer dans les paramètres.'
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+      return false;
+    }
+    return true;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -68,16 +103,16 @@ class _PreJoinPageState extends State<PreJoinPage> {
   }
 
   Future<void> _initStateAsync() async {
+    // Vérifier les permissions avant de continuer
+    bool hasPermissions = await _checkAndRequestPermissions();
+    if (!hasPermissions) {
+      return;
+    }
+
     await _readPrefs();
     _subscription = Hardware.instance.onDeviceChange.stream.listen(_loadDevices);
     final devices = await Hardware.instance.enumerateDevices();
     await _loadDevices(devices);
-  }
-
-  @override
-  void deactivate() {
-    unawaited(_subscription?.cancel());
-    super.deactivate();
   }
 
   Future<void> _loadDevices(List<MediaDevice> devices) async {
@@ -131,6 +166,18 @@ class _PreJoinPageState extends State<PreJoinPage> {
       _videoTrack = null;
       _selectedVideoDevice = null;
     } else {
+      // Vérifier les permissions avant d'activer la caméra
+      PermissionStatus cameraStatus = await Permission.camera.status;
+      if (!cameraStatus.isGranted) {
+        bool granted = await _checkAndRequestPermissions();
+        if (!granted) {
+          setState(() {
+            _enableVideo = false;
+          });
+          return;
+        }
+      }
+
       if (_selectedVideoDevice == null && _videoInputs.isNotEmpty) {
         _selectedVideoDevice = _videoInputs.first;
       }
@@ -147,6 +194,18 @@ class _PreJoinPageState extends State<PreJoinPage> {
       _audioTrack = null;
       _selectedAudioDevice = null;
     } else {
+      // Vérifier les permissions avant d'activer le micro
+      PermissionStatus microphoneStatus = await Permission.microphone.status;
+      if (!microphoneStatus.isGranted) {
+        bool granted = await _checkAndRequestPermissions();
+        if (!granted) {
+          setState(() {
+            _enableAudio = false;
+          });
+          return;
+        }
+      }
+
       if (_selectedAudioDevice == null && _audioInputs.isNotEmpty) {
         _selectedAudioDevice = _audioInputs.first;
       }
@@ -157,34 +216,56 @@ class _PreJoinPageState extends State<PreJoinPage> {
 
   Future<void> _changeLocalAudioTrack() async {
     if (!_enableAudio) return;
-    if (_audioTrack != null) {
-      await _audioTrack!.stop();
-      _audioTrack = null;
-    }
+    try {
+      if (_audioTrack != null) {
+        await _audioTrack!.stop();
+        _audioTrack = null;
+      }
 
-    if (_selectedAudioDevice != null) {
-      _audioTrack = await LocalAudioTrack.create(
-        AudioCaptureOptions(
-          deviceId: _selectedAudioDevice!.deviceId,
-        ),
-      );
-      await _audioTrack!.start();
+      if (_selectedAudioDevice != null) {
+        _audioTrack = await LocalAudioTrack.create(
+          AudioCaptureOptions(
+            deviceId: _selectedAudioDevice!.deviceId,
+          ),
+        );
+        await _audioTrack!.start();
+      }
+    } catch (e) {
+      print('Erreur lors de la création du track audio: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur audio: $e')),
+        );
+      }
     }
   }
 
   Future<void> _changeLocalVideoTrack() async {
     if (!_enableVideo) return;
-    if (_videoTrack != null) {
-      await _videoTrack!.stop();
-      _videoTrack = null;
-    }
+    try {
+      if (_videoTrack != null) {
+        await _videoTrack!.stop();
+        _videoTrack = null;
+      }
 
-    if (_selectedVideoDevice != null) {
-      _videoTrack = await LocalVideoTrack.createCameraTrack(CameraCaptureOptions(
-        deviceId: _selectedVideoDevice!.deviceId,
-        params: _selectedVideoParameters,
-      ));
-      await _videoTrack!.start();
+      if (_selectedVideoDevice != null) {
+        _videoTrack = await LocalVideoTrack.createCameraTrack(CameraCaptureOptions(
+          deviceId: _selectedVideoDevice!.deviceId,
+          params: _selectedVideoParameters,
+        ));
+        await _videoTrack!.start();
+      }
+    } catch (e) {
+      print('Erreur lors de la création du track vidéo: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur vidéo: $e')),
+        );
+        // Désactiver la vidéo en cas d'erreur
+        setState(() {
+          _enableVideo = false;
+        });
+      }
     }
   }
 
@@ -202,6 +283,15 @@ class _PreJoinPageState extends State<PreJoinPage> {
     final args = widget.args;
 
     try {
+      // Vérifier les permissions avant de rejoindre
+      bool hasPermissions = await _checkAndRequestPermissions();
+      if (!hasPermissions) {
+        setState(() {
+          _busy = false;
+        });
+        return;
+      }
+
       //create new room
       const cameraEncoding = VideoEncoding(
         maxBitrate: 5 * 1000 * 1000,
@@ -321,210 +411,210 @@ class _PreJoinPageState extends State<PreJoinPage> {
             alignment: Alignment.center,
             child: SingleChildScrollView(
                 child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 20,
-              ),
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: SizedBox(
-                        width: 320,
-                        height: 240,
-                        child: Container(
-                          alignment: Alignment.center,
-                          color: Colors.black54,
-                          child: _videoTrack != null
-                              ? VideoTrackRenderer(
-                                  renderMode: VideoRenderMode.auto,
-                                  _videoTrack!,
-                                )
-                              : Container(
-                                  alignment: Alignment.center,
-                                  child: LayoutBuilder(
-                                    builder: (ctx, constraints) => Icon(
-                                      Icons.videocam_off,
-                                      color: LKColors.lkBlue,
-                                      size: math.min(constraints.maxHeight, constraints.maxWidth) * 0.3,
-                                    ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 20,
+                  ),
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: SizedBox(
+                            width: 320,
+                            height: 240,
+                            child: Container(
+                              alignment: Alignment.center,
+                              color: Colors.black54,
+                              child: _videoTrack != null
+                                  ? VideoTrackRenderer(
+                                renderMode: VideoRenderMode.auto,
+                                _videoTrack!,
+                              )
+                                  : Container(
+                                alignment: Alignment.center,
+                                child: LayoutBuilder(
+                                  builder: (ctx, constraints) => Icon(
+                                    Icons.videocam_off,
+                                    color: LKColors.lkBlue,
+                                    size: math.min(constraints.maxHeight, constraints.maxWidth) * 0.3,
                                   ),
                                 ),
-                        ))),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Camera:'),
-                      Switch(
-                        value: _enableVideo,
-                        onChanged: (value) => _setEnableVideo(value),
+                              ),
+                            ))),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Camera:'),
+                          Switch(
+                            value: _enableVideo,
+                            onChanged: (value) => _setEnableVideo(value),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 25),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton2<MediaDevice>(
-                      isExpanded: true,
-                      disabledHint: const Text('Disable Camera'),
-                      hint: const Text(
-                        'Select Camera',
-                      ),
-                      items: _enableVideo
-                          ? _videoInputs
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 25),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton2<MediaDevice>(
+                          isExpanded: true,
+                          disabledHint: const Text('Disable Camera'),
+                          hint: const Text(
+                            'Select Camera',
+                          ),
+                          items: _enableVideo
+                              ? _videoInputs
                               .map((MediaDevice item) => DropdownMenuItem<MediaDevice>(
-                                    value: item,
-                                    child: Text(
-                                      item.label,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ))
+                            value: item,
+                            child: Text(
+                              item.label,
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ))
                               .toList()
-                          : [],
-                      value: _selectedVideoDevice,
-                      onChanged: (MediaDevice? value) async {
-                        if (value != null) {
-                          _selectedVideoDevice = value;
-                          await _changeLocalVideoTrack();
-                          setState(() {});
-                        }
-                      },
-                      buttonStyleData: const ButtonStyleData(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        height: 40,
-                        width: 140,
-                      ),
-                      menuItemStyleData: const MenuItemStyleData(
-                        height: 40,
-                      ),
-                    ),
-                  ),
-                ),
-                if (_enableVideo)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 25),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton2<VideoParameters>(
-                        isExpanded: true,
-                        hint: const Text(
-                          'Select Video Dimensions',
-                        ),
-                        items: [
-                          VideoParametersPresets.h480_43,
-                          VideoParametersPresets.h540_169,
-                          VideoParametersPresets.h720_169,
-                          VideoParametersPresets.h1080_169,
-                        ]
-                            .map((VideoParameters item) => DropdownMenuItem<VideoParameters>(
-                                  value: item,
-                                  child: Text(
-                                    '${item.dimensions.width}x${item.dimensions.height}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ))
-                            .toList(),
-                        value: _selectedVideoParameters,
-                        onChanged: (VideoParameters? value) async {
-                          if (value != null) {
-                            _selectedVideoParameters = value;
-                            await _changeLocalVideoTrack();
-                            setState(() {});
-                          }
-                        },
-                        buttonStyleData: const ButtonStyleData(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          height: 40,
-                          width: 140,
-                        ),
-                        menuItemStyleData: const MenuItemStyleData(
-                          height: 40,
+                              : [],
+                          value: _selectedVideoDevice,
+                          onChanged: (MediaDevice? value) async {
+                            if (value != null) {
+                              _selectedVideoDevice = value;
+                              await _changeLocalVideoTrack();
+                              setState(() {});
+                            }
+                          },
+                          buttonStyleData: const ButtonStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            height: 40,
+                            width: 140,
+                          ),
+                          menuItemStyleData: const MenuItemStyleData(
+                            height: 40,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('Microphone:'),
-                      Switch(
-                        value: _enableAudio,
-                        onChanged: (value) => _setEnableAudio(value),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 25),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton2<MediaDevice>(
-                      isExpanded: true,
-                      disabledHint: const Text('Disable Microphone'),
-                      hint: const Text(
-                        'Select Microphone',
-                      ),
-                      items: _enableAudio
-                          ? _audioInputs
-                              .map((MediaDevice item) => DropdownMenuItem<MediaDevice>(
-                                    value: item,
-                                    child: Text(
-                                      item.label,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ))
-                              .toList()
-                          : [],
-                      value: _selectedAudioDevice,
-                      onChanged: (MediaDevice? value) async {
-                        if (value != null) {
-                          _selectedAudioDevice = value;
-                          await _changeLocalAudioTrack();
-                          setState(() {});
-                        }
-                      },
-                      buttonStyleData: const ButtonStyleData(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        height: 40,
-                        width: 140,
-                      ),
-                      menuItemStyleData: const MenuItemStyleData(
-                        height: 40,
-                      ),
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: _busy ? null : () => _join(context),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (_busy)
-                        const Padding(
-                          padding: EdgeInsets.only(right: 10),
-                          child: SizedBox(
-                            height: 15,
-                            width: 15,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
+                    if (_enableVideo)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 25),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton2<VideoParameters>(
+                            isExpanded: true,
+                            hint: const Text(
+                              'Select Video Dimensions',
+                            ),
+                            items: [
+                              VideoParametersPresets.h480_43,
+                              VideoParametersPresets.h540_169,
+                              VideoParametersPresets.h720_169,
+                              VideoParametersPresets.h1080_169,
+                            ]
+                                .map((VideoParameters item) => DropdownMenuItem<VideoParameters>(
+                              value: item,
+                              child: Text(
+                                '${item.dimensions.width}x${item.dimensions.height}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ))
+                                .toList(),
+                            value: _selectedVideoParameters,
+                            onChanged: (VideoParameters? value) async {
+                              if (value != null) {
+                                _selectedVideoParameters = value;
+                                await _changeLocalVideoTrack();
+                                setState(() {});
+                              }
+                            },
+                            buttonStyleData: const ButtonStyleData(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              height: 40,
+                              width: 140,
+                            ),
+                            menuItemStyleData: const MenuItemStyleData(
+                              height: 40,
                             ),
                           ),
                         ),
-                      const Text('JOIN'),
-                    ],
-                  ),
-                ),
-              ]),
-            ))));
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Microphone:'),
+                          Switch(
+                            value: _enableAudio,
+                            onChanged: (value) => _setEnableAudio(value),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 25),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton2<MediaDevice>(
+                          isExpanded: true,
+                          disabledHint: const Text('Disable Microphone'),
+                          hint: const Text(
+                            'Select Microphone',
+                          ),
+                          items: _enableAudio
+                              ? _audioInputs
+                              .map((MediaDevice item) => DropdownMenuItem<MediaDevice>(
+                            value: item,
+                            child: Text(
+                              item.label,
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ))
+                              .toList()
+                              : [],
+                          value: _selectedAudioDevice,
+                          onChanged: (MediaDevice? value) async {
+                            if (value != null) {
+                              _selectedAudioDevice = value;
+                              await _changeLocalAudioTrack();
+                              setState(() {});
+                            }
+                          },
+                          buttonStyleData: const ButtonStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            height: 40,
+                            width: 140,
+                          ),
+                          menuItemStyleData: const MenuItemStyleData(
+                            height: 40,
+                          ),
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: _busy ? null : () => _join(context),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_busy)
+                            const Padding(
+                              padding: EdgeInsets.only(right: 10),
+                              child: SizedBox(
+                                height: 15,
+                                width: 15,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          const Text('JOIN'),
+                        ],
+                      ),
+                    ),
+                  ]),
+                ))));
   }
 }
