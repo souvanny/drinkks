@@ -1,0 +1,4326 @@
+Pour TableScreen, le bouton en haut à gaucje, je voudrais que ça fasse office de logout et que ça amène à la page de social_login.
+Ajouter un nouveau bouton en haut à droite, avec une roue crantée, qui amène vers un nouveau feature qui sera l'espace account.
+Où on aura, dans différents onglets :
+- un espace info du compte, avec modification possible :
+    - username
+    - genre (masculin ou féminin)
+    - date de naissance (date picker)
+- un espace où on peut saisir un "aboutMe"
+- un espace où on peut uploader une photo ou la récupérer de l'appareil photo ou du téléphone
+
+Fais moi de jolis écrans.
+
+Prévoir de créer les controller  :
+- GET /api/account/me , récupère les infos pour le premier onglet
+- GET /api/account/about-me , récupère les infos pour le deuxième onglet
+- GET /api/account/photo , récupère les infos pour le 3ème onglet
+- PUT /api/account/me , met à jour les infos du premier onglet
+- PUT /api/account/about-me , met à jour les infos du deuxième onglet
+- PUT /api/account/photo , met à jour les infos du 3ème onglet
+
+Voici le projet (Flutter et Symfony):
+
+FICHIERS POUR ANALYSE
+=====================
+Dossiers analysés:
+  - flutter_lib/services
+  - flutter_lib/providers
+  - flutter_lib/features/venues
+  - flutter_lib/features/account
+  - src/Infrastructure/Http/Controller
+  - src/Infrastructure/Persistence
+Extensions: dart, php
+Date: 2026-02-15 14:44:22
+
+ARBORESCENCE:
+-------------
+├── 📁 flutter_lib/
+│   ├── 📁 features/
+│   │   ├── 📁 account/
+│   │   │   ├── 📁 data/
+│   │   │   │   ├── 📁 datasources/
+│   │   │   │   │   ├── 📄 account_remote_data_source.dart
+│   │   │   │   │   └── 📄 account_remote_data_source.g.dart
+│   │   │   │   ├── 📁 models/
+│   │   │   │   │   ├── 📄 account_model.dart
+│   │   │   │   │   ├── 📄 account_model.freezed.dart
+│   │   │   │   │   └── 📄 account_model.g.dart
+│   │   │   │   └── 📁 repositories/
+│   │   │   │       ├── 📄 account_repository_impl.dart
+│   │   │   │       └── 📄 account_repository_impl.g.dart
+│   │   │   ├── 📁 domain/
+│   │   │   │   ├── 📁 entities/
+│   │   │   │   │   ├── 📄 account_entity.dart
+│   │   │   │   │   └── 📄 account_entity.freezed.dart
+│   │   │   │   ├── 📁 repositories/
+│   │   │   │   │   └── 📄 account_repository.dart
+│   │   │   │   └── 📁 usecases/
+│   │   │   │       ├── 📄 get_accounts_usecase.dart
+│   │   │   │       └── 📄 get_accounts_usecase.g.dart
+│   │   │   └── 📁 presentation/
+│   │   │       ├── 📁 controllers/
+│   │   │       │   ├── 📄 account_controller.dart
+│   │   │       │   └── 📄 account_controller.g.dart
+│   │   │       └── 📁 screens/
+│   │   │           └── 📄 account_screen.dart
+│   │   └── 📁 venues/
+│   │       ├── 📁 data/
+│   │       │   ├── 📁 datasources/
+│   │       │   │   ├── 📄 venues_remote_data_source.dart
+│   │       │   │   └── 📄 venues_remote_data_source.g.dart
+│   │       │   ├── 📁 models/
+│   │       │   │   ├── 📄 venues_model.dart
+│   │       │   │   ├── 📄 venues_model.freezed.dart
+│   │       │   │   └── 📄 venues_model.g.dart
+│   │       │   └── 📁 repositories/
+│   │       │       ├── 📄 venues_repository_impl.dart
+│   │       │       └── 📄 venues_repository_impl.g.dart
+│   │       ├── 📁 domain/
+│   │       │   ├── 📁 entities/
+│   │       │   │   ├── 📄 venues_entity.dart
+│   │       │   │   └── 📄 venues_entity.freezed.dart
+│   │       │   ├── 📁 repositories/
+│   │       │   │   └── 📄 venues_repository.dart
+│   │       │   └── 📁 usecases/
+│   │       │       ├── 📄 get_venuess_usecase.dart
+│   │       │       └── 📄 get_venuess_usecase.g.dart
+│   │       └── 📁 presentation/
+│   │           ├── 📁 controllers/
+│   │           │   ├── 📄 venues_controller.dart
+│   │           │   └── 📄 venues_controller.g.dart
+│   │           └── 📁 screens/
+│   │               └── 📄 venues_screen.dart
+│   ├── 📁 providers/
+│   │   ├── 📄 auth_provider.dart
+│   │   └── 📄 test_state_notifier.dart
+│   └── 📁 services/
+│       ├── 📄 api_service.dart
+│       ├── 📄 api_service.g.dart
+│       ├── 📄 auth_service.dart
+│       ├── 📄 sfu_service.dart
+│       └── 📄 sfu_service.g.dart
+└── 📁 src/
+    └── 📁 Infrastructure/
+        ├── 📁 Http/
+        │   └── 📁 Controller/
+        │       ├── 📄 AuthController.php
+        │       ├── 📄 GenerateLiveKitController.php
+        │       ├── 📄 GeneratePromptController.php
+        │       └── 📄 UsersGetJwtTokenFromFirebaseAuthAction.php
+        └── 📁 Persistence/
+            └── 📁 Doctrine/
+                ├── 📁 Entity/
+                │   └── 📄 UserEntity.php
+                └── 📁 Repository/
+                    └── 📄 UserRepository.php
+
+
+CONTENU DES FICHIERS
+====================
+
+FICHIER: flutter_lib/features/account/data/datasources/account_remote_data_source.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:dio/dio.dart';
+import '../../../../core/providers/network_providers.dart';
+import '../models/account_model.dart';
+
+part 'account_remote_data_source.g.dart';
+
+abstract class AccountRemoteDataSource {
+  Future<List<AccountModel>> fetchAccounts();
+  Future<AccountModel> fetchAccount(String id);
+}
+
+@riverpod
+AccountRemoteDataSource accountRemoteDataSource(Ref ref) {
+  final dio = ref.watch(dioProvider);
+  return AccountRemoteDataSourceImpl(dio);
+}
+
+class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
+  final Dio _dio;
+
+  AccountRemoteDataSourceImpl(this._dio);
+
+  @override
+  Future<List<AccountModel>> fetchAccounts() async {
+    // final response = await _dio.get('/accounts');
+    // return (response.data as List).map((e) => AccountModel.fromJson(e)).toList();
+    await Future.delayed(const Duration(seconds: 1));
+    return [
+      const AccountModel(id: '1', name: 'Item 1'),
+      const AccountModel(id: '2', name: 'Item 2'),
+    ];
+  }
+
+  @override
+  Future<AccountModel> fetchAccount(String id) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return AccountModel(id: id, name: 'Item ');
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/account/data/datasources/account_remote_data_source.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'account_remote_data_source.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(accountRemoteDataSource)
+final accountRemoteDataSourceProvider = AccountRemoteDataSourceProvider._();
+
+final class AccountRemoteDataSourceProvider
+    extends
+        $FunctionalProvider<
+          AccountRemoteDataSource,
+          AccountRemoteDataSource,
+          AccountRemoteDataSource
+        >
+    with $Provider<AccountRemoteDataSource> {
+  AccountRemoteDataSourceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'accountRemoteDataSourceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$accountRemoteDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<AccountRemoteDataSource> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AccountRemoteDataSource create(Ref ref) {
+    return accountRemoteDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AccountRemoteDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AccountRemoteDataSource>(value),
+    );
+  }
+}
+
+String _$accountRemoteDataSourceHash() =>
+    r'53ff15520eb0b74c67501459a5e2e8b065c3b943';
+
+
+
+FICHIER: flutter_lib/features/account/data/models/account_model.dart
+--------------------------------------------------------------------------------
+import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../domain/entities/account_entity.dart';
+
+part 'account_model.freezed.dart';
+part 'account_model.g.dart';
+
+@freezed
+abstract class AccountModel with _$AccountModel {
+  const AccountModel._();
+
+  const factory AccountModel({
+    required String id,
+    required String name,
+  }) = _AccountModel;
+
+  factory AccountModel.fromJson(Map<String, dynamic> json) =>
+      _$AccountModelFromJson(json);
+
+  AccountEntity toEntity() => AccountEntity(id: id, name: name);
+}
+
+
+
+FICHIER: flutter_lib/features/account/data/models/account_model.freezed.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'account_model.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+
+/// @nodoc
+mixin _$AccountModel {
+
+ String get id; String get name;
+/// Create a copy of AccountModel
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AccountModelCopyWith<AccountModel> get copyWith => _$AccountModelCopyWithImpl<AccountModel>(this as AccountModel, _$identity);
+
+  /// Serializes this AccountModel to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AccountModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'AccountModel(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $AccountModelCopyWith<$Res>  {
+  factory $AccountModelCopyWith(AccountModel value, $Res Function(AccountModel) _then) = _$AccountModelCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class _$AccountModelCopyWithImpl<$Res>
+    implements $AccountModelCopyWith<$Res> {
+  _$AccountModelCopyWithImpl(this._self, this._then);
+
+  final AccountModel _self;
+  final $Res Function(AccountModel) _then;
+
+/// Create a copy of AccountModel
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [AccountModel].
+extension AccountModelPatterns on AccountModel {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AccountModel value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _AccountModel() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AccountModel value)  $default,){
+final _that = this;
+switch (_that) {
+case _AccountModel():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AccountModel value)?  $default,){
+final _that = this;
+switch (_that) {
+case _AccountModel() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _AccountModel() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name)  $default,) {final _that = this;
+switch (_that) {
+case _AccountModel():
+return $default(_that.id,_that.name);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name)?  $default,) {final _that = this;
+switch (_that) {
+case _AccountModel() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _AccountModel extends AccountModel {
+  const _AccountModel({required this.id, required this.name}): super._();
+  factory _AccountModel.fromJson(Map<String, dynamic> json) => _$AccountModelFromJson(json);
+
+@override final  String id;
+@override final  String name;
+
+/// Create a copy of AccountModel
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$AccountModelCopyWith<_AccountModel> get copyWith => __$AccountModelCopyWithImpl<_AccountModel>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$AccountModelToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AccountModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'AccountModel(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$AccountModelCopyWith<$Res> implements $AccountModelCopyWith<$Res> {
+  factory _$AccountModelCopyWith(_AccountModel value, $Res Function(_AccountModel) _then) = __$AccountModelCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$AccountModelCopyWithImpl<$Res>
+    implements _$AccountModelCopyWith<$Res> {
+  __$AccountModelCopyWithImpl(this._self, this._then);
+
+  final _AccountModel _self;
+  final $Res Function(_AccountModel) _then;
+
+/// Create a copy of AccountModel
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_AccountModel(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+// dart format on
+
+
+
+FICHIER: flutter_lib/features/account/data/models/account_model.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'account_model.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_AccountModel _$AccountModelFromJson(Map<String, dynamic> json) =>
+    _AccountModel(id: json['id'] as String, name: json['name'] as String);
+
+Map<String, dynamic> _$AccountModelToJson(_AccountModel instance) =>
+    <String, dynamic>{'id': instance.id, 'name': instance.name};
+
+
+
+FICHIER: flutter_lib/features/account/data/repositories/account_repository_impl.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../domain/entities/account_entity.dart';
+import '../../domain/repositories/account_repository.dart';
+import '../datasources/account_remote_data_source.dart';
+
+part 'account_repository_impl.g.dart';
+
+@riverpod
+AccountRepository accountRepository(Ref ref) {
+  final remoteDataSource = ref.watch(accountRemoteDataSourceProvider);
+  return AccountRepositoryImpl(remoteDataSource);
+}
+
+class AccountRepositoryImpl implements AccountRepository {
+  final AccountRemoteDataSource _remoteDataSource;
+
+  AccountRepositoryImpl(this._remoteDataSource);
+
+  @override
+  Future<List<AccountEntity>> getAccounts() async {
+    final models = await _remoteDataSource.fetchAccounts();
+    return models.map((e) => e.toEntity()).toList();
+  }
+
+  @override
+  Future<AccountEntity> getAccount(String id) async {
+    final model = await _remoteDataSource.fetchAccount(id);
+    return model.toEntity();
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/account/data/repositories/account_repository_impl.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'account_repository_impl.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(accountRepository)
+final accountRepositoryProvider = AccountRepositoryProvider._();
+
+final class AccountRepositoryProvider
+    extends
+        $FunctionalProvider<
+          AccountRepository,
+          AccountRepository,
+          AccountRepository
+        >
+    with $Provider<AccountRepository> {
+  AccountRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'accountRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$accountRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<AccountRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  AccountRepository create(Ref ref) {
+    return accountRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(AccountRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<AccountRepository>(value),
+    );
+  }
+}
+
+String _$accountRepositoryHash() => r'8e9b066c582c158b7615cf5520bab449a8d821ba';
+
+
+
+FICHIER: flutter_lib/features/account/domain/entities/account_entity.dart
+--------------------------------------------------------------------------------
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'account_entity.freezed.dart';
+
+@freezed
+abstract class AccountEntity with _$AccountEntity {
+  const factory AccountEntity({
+    required String id,
+    required String name,
+  }) = _AccountEntity;
+}
+
+
+
+FICHIER: flutter_lib/features/account/domain/entities/account_entity.freezed.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'account_entity.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+/// @nodoc
+mixin _$AccountEntity {
+
+ String get id; String get name;
+/// Create a copy of AccountEntity
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AccountEntityCopyWith<AccountEntity> get copyWith => _$AccountEntityCopyWithImpl<AccountEntity>(this as AccountEntity, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AccountEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'AccountEntity(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $AccountEntityCopyWith<$Res>  {
+  factory $AccountEntityCopyWith(AccountEntity value, $Res Function(AccountEntity) _then) = _$AccountEntityCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class _$AccountEntityCopyWithImpl<$Res>
+    implements $AccountEntityCopyWith<$Res> {
+  _$AccountEntityCopyWithImpl(this._self, this._then);
+
+  final AccountEntity _self;
+  final $Res Function(AccountEntity) _then;
+
+/// Create a copy of AccountEntity
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [AccountEntity].
+extension AccountEntityPatterns on AccountEntity {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AccountEntity value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _AccountEntity() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AccountEntity value)  $default,){
+final _that = this;
+switch (_that) {
+case _AccountEntity():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AccountEntity value)?  $default,){
+final _that = this;
+switch (_that) {
+case _AccountEntity() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _AccountEntity() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name)  $default,) {final _that = this;
+switch (_that) {
+case _AccountEntity():
+return $default(_that.id,_that.name);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name)?  $default,) {final _that = this;
+switch (_that) {
+case _AccountEntity() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _AccountEntity implements AccountEntity {
+  const _AccountEntity({required this.id, required this.name});
+
+
+@override final  String id;
+@override final  String name;
+
+/// Create a copy of AccountEntity
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$AccountEntityCopyWith<_AccountEntity> get copyWith => __$AccountEntityCopyWithImpl<_AccountEntity>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AccountEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'AccountEntity(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$AccountEntityCopyWith<$Res> implements $AccountEntityCopyWith<$Res> {
+  factory _$AccountEntityCopyWith(_AccountEntity value, $Res Function(_AccountEntity) _then) = __$AccountEntityCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$AccountEntityCopyWithImpl<$Res>
+    implements _$AccountEntityCopyWith<$Res> {
+  __$AccountEntityCopyWithImpl(this._self, this._then);
+
+  final _AccountEntity _self;
+  final $Res Function(_AccountEntity) _then;
+
+/// Create a copy of AccountEntity
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_AccountEntity(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+// dart format on
+
+
+
+FICHIER: flutter_lib/features/account/domain/repositories/account_repository.dart
+--------------------------------------------------------------------------------
+import '../entities/account_entity.dart';
+
+abstract class AccountRepository {
+  Future<List<AccountEntity>> getAccounts();
+  Future<AccountEntity> getAccount(String id);
+}
+
+
+
+FICHIER: flutter_lib/features/account/domain/usecases/get_accounts_usecase.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../entities/account_entity.dart';
+import '../repositories/account_repository.dart';
+import '../../data/repositories/account_repository_impl.dart';
+
+part 'get_accounts_usecase.g.dart';
+
+@riverpod
+Future<List<AccountEntity>> getAccounts(Ref ref) {
+  return ref.watch(accountRepositoryProvider).getAccounts();
+}
+
+
+
+FICHIER: flutter_lib/features/account/domain/usecases/get_accounts_usecase.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'get_accounts_usecase.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(getAccounts)
+final getAccountsProvider = GetAccountsProvider._();
+
+final class GetAccountsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<AccountEntity>>,
+          List<AccountEntity>,
+          FutureOr<List<AccountEntity>>
+        >
+    with
+        $FutureModifier<List<AccountEntity>>,
+        $FutureProvider<List<AccountEntity>> {
+  GetAccountsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getAccountsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getAccountsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<AccountEntity>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<AccountEntity>> create(Ref ref) {
+    return getAccounts(ref);
+  }
+}
+
+String _$getAccountsHash() => r'c6cdda7c5e10644ce00d526909fb606832565b54';
+
+
+
+FICHIER: flutter_lib/features/account/presentation/controllers/account_controller.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../domain/entities/account_entity.dart';
+import '../../domain/usecases/get_accounts_usecase.dart';
+
+part 'account_controller.g.dart';
+
+@riverpod
+class AccountController extends _$AccountController {
+  @override
+  FutureOr<List<AccountEntity>> build() {
+    return ref.watch(getAccountsProvider.future);
+  }
+
+  Future<void> refresh() async {
+     state = const AsyncValue.loading();
+     state = await AsyncValue.guard(() => ref.refresh(getAccountsProvider.future));
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/account/presentation/controllers/account_controller.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'account_controller.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(AccountController)
+final accountControllerProvider = AccountControllerProvider._();
+
+final class AccountControllerProvider
+    extends $AsyncNotifierProvider<AccountController, List<AccountEntity>> {
+  AccountControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'accountControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$accountControllerHash();
+
+  @$internal
+  @override
+  AccountController create() => AccountController();
+}
+
+String _$accountControllerHash() => r'3d07a8cbbec8f9136c4aead37215e4922845c2c4';
+
+abstract class _$AccountController extends $AsyncNotifier<List<AccountEntity>> {
+  FutureOr<List<AccountEntity>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<List<AccountEntity>>, List<AccountEntity>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<AccountEntity>>, List<AccountEntity>>,
+              AsyncValue<List<AccountEntity>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/account/presentation/screens/account_screen.dart
+--------------------------------------------------------------------------------
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../controllers/account_controller.dart';
+
+class AccountScreen extends ConsumerWidget {
+  const AccountScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final accountState = ref.watch(accountControllerProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Account Feature'),
+      ),
+      body: accountState.when(
+        data: (items) => ListView.builder(
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            return ListTile(
+              title: Text(item.name),
+              subtitle: Text(item.id),
+            );
+          },
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          ref.read(accountControllerProvider.notifier).refresh(); // Or specialized method
+        },
+        child: const Icon(Icons.refresh),
+      ),
+    );
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/venues/data/datasources/venues_remote_data_source.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:dio/dio.dart';
+import '../../../../core/providers/network_providers.dart';
+import '../models/venues_model.dart';
+
+part 'venues_remote_data_source.g.dart';
+
+abstract class VenuesRemoteDataSource {
+  Future<List<VenuesModel>> fetchVenuess();
+  Future<VenuesModel> fetchVenues(String id);
+}
+
+@riverpod
+VenuesRemoteDataSource venuesRemoteDataSource(Ref ref) {
+  final dio = ref.watch(dioProvider);
+  return VenuesRemoteDataSourceImpl(dio);
+}
+
+class VenuesRemoteDataSourceImpl implements VenuesRemoteDataSource {
+  final Dio _dio;
+
+  VenuesRemoteDataSourceImpl(this._dio);
+
+  @override
+  Future<List<VenuesModel>> fetchVenuess() async {
+    // final response = await _dio.get('/venuess');
+    // return (response.data as List).map((e) => VenuesModel.fromJson(e)).toList();
+    await Future.delayed(const Duration(seconds: 1));
+    return [
+      const VenuesModel(id: '1', name: 'Item 1'),
+      const VenuesModel(id: '2', name: 'Item 2'),
+    ];
+  }
+
+  @override
+  Future<VenuesModel> fetchVenues(String id) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return VenuesModel(id: id, name: 'Item ');
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/venues/data/datasources/venues_remote_data_source.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'venues_remote_data_source.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(venuesRemoteDataSource)
+final venuesRemoteDataSourceProvider = VenuesRemoteDataSourceProvider._();
+
+final class VenuesRemoteDataSourceProvider
+    extends
+        $FunctionalProvider<
+          VenuesRemoteDataSource,
+          VenuesRemoteDataSource,
+          VenuesRemoteDataSource
+        >
+    with $Provider<VenuesRemoteDataSource> {
+  VenuesRemoteDataSourceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'venuesRemoteDataSourceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$venuesRemoteDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<VenuesRemoteDataSource> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  VenuesRemoteDataSource create(Ref ref) {
+    return venuesRemoteDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VenuesRemoteDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VenuesRemoteDataSource>(value),
+    );
+  }
+}
+
+String _$venuesRemoteDataSourceHash() =>
+    r'e3f50d7bfca91f1f7daddcf90adeb4190d66dc72';
+
+
+
+FICHIER: flutter_lib/features/venues/data/models/venues_model.dart
+--------------------------------------------------------------------------------
+import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../domain/entities/venues_entity.dart';
+
+part 'venues_model.freezed.dart';
+part 'venues_model.g.dart';
+
+@freezed
+abstract class VenuesModel with _$VenuesModel {
+  const VenuesModel._();
+
+  const factory VenuesModel({
+    required String id,
+    required String name,
+  }) = _VenuesModel;
+
+  factory VenuesModel.fromJson(Map<String, dynamic> json) =>
+      _$VenuesModelFromJson(json);
+
+  VenuesEntity toEntity() => VenuesEntity(id: id, name: name);
+}
+
+
+
+FICHIER: flutter_lib/features/venues/data/models/venues_model.freezed.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'venues_model.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+
+/// @nodoc
+mixin _$VenuesModel {
+
+ String get id; String get name;
+/// Create a copy of VenuesModel
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$VenuesModelCopyWith<VenuesModel> get copyWith => _$VenuesModelCopyWithImpl<VenuesModel>(this as VenuesModel, _$identity);
+
+  /// Serializes this VenuesModel to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'VenuesModel(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $VenuesModelCopyWith<$Res>  {
+  factory $VenuesModelCopyWith(VenuesModel value, $Res Function(VenuesModel) _then) = _$VenuesModelCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class _$VenuesModelCopyWithImpl<$Res>
+    implements $VenuesModelCopyWith<$Res> {
+  _$VenuesModelCopyWithImpl(this._self, this._then);
+
+  final VenuesModel _self;
+  final $Res Function(VenuesModel) _then;
+
+/// Create a copy of VenuesModel
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [VenuesModel].
+extension VenuesModelPatterns on VenuesModel {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _VenuesModel value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _VenuesModel() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _VenuesModel value)  $default,){
+final _that = this;
+switch (_that) {
+case _VenuesModel():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _VenuesModel value)?  $default,){
+final _that = this;
+switch (_that) {
+case _VenuesModel() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _VenuesModel() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name)  $default,) {final _that = this;
+switch (_that) {
+case _VenuesModel():
+return $default(_that.id,_that.name);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name)?  $default,) {final _that = this;
+switch (_that) {
+case _VenuesModel() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _VenuesModel extends VenuesModel {
+  const _VenuesModel({required this.id, required this.name}): super._();
+  factory _VenuesModel.fromJson(Map<String, dynamic> json) => _$VenuesModelFromJson(json);
+
+@override final  String id;
+@override final  String name;
+
+/// Create a copy of VenuesModel
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$VenuesModelCopyWith<_VenuesModel> get copyWith => __$VenuesModelCopyWithImpl<_VenuesModel>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$VenuesModelToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'VenuesModel(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$VenuesModelCopyWith<$Res> implements $VenuesModelCopyWith<$Res> {
+  factory _$VenuesModelCopyWith(_VenuesModel value, $Res Function(_VenuesModel) _then) = __$VenuesModelCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$VenuesModelCopyWithImpl<$Res>
+    implements _$VenuesModelCopyWith<$Res> {
+  __$VenuesModelCopyWithImpl(this._self, this._then);
+
+  final _VenuesModel _self;
+  final $Res Function(_VenuesModel) _then;
+
+/// Create a copy of VenuesModel
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_VenuesModel(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+// dart format on
+
+
+
+FICHIER: flutter_lib/features/venues/data/models/venues_model.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'venues_model.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_VenuesModel _$VenuesModelFromJson(Map<String, dynamic> json) =>
+    _VenuesModel(id: json['id'] as String, name: json['name'] as String);
+
+Map<String, dynamic> _$VenuesModelToJson(_VenuesModel instance) =>
+    <String, dynamic>{'id': instance.id, 'name': instance.name};
+
+
+
+FICHIER: flutter_lib/features/venues/data/repositories/venues_repository_impl.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../domain/entities/venues_entity.dart';
+import '../../domain/repositories/venues_repository.dart';
+import '../datasources/venues_remote_data_source.dart';
+
+part 'venues_repository_impl.g.dart';
+
+@riverpod
+VenuesRepository venuesRepository(Ref ref) {
+  final remoteDataSource = ref.watch(venuesRemoteDataSourceProvider);
+  return VenuesRepositoryImpl(remoteDataSource);
+}
+
+class VenuesRepositoryImpl implements VenuesRepository {
+  final VenuesRemoteDataSource _remoteDataSource;
+
+  VenuesRepositoryImpl(this._remoteDataSource);
+
+  @override
+  Future<List<VenuesEntity>> getVenuess() async {
+    final models = await _remoteDataSource.fetchVenuess();
+    return models.map((e) => e.toEntity()).toList();
+  }
+
+  @override
+  Future<VenuesEntity> getVenues(String id) async {
+    final model = await _remoteDataSource.fetchVenues(id);
+    return model.toEntity();
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/venues/data/repositories/venues_repository_impl.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'venues_repository_impl.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(venuesRepository)
+final venuesRepositoryProvider = VenuesRepositoryProvider._();
+
+final class VenuesRepositoryProvider
+    extends
+        $FunctionalProvider<
+          VenuesRepository,
+          VenuesRepository,
+          VenuesRepository
+        >
+    with $Provider<VenuesRepository> {
+  VenuesRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'venuesRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$venuesRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<VenuesRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  VenuesRepository create(Ref ref) {
+    return venuesRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(VenuesRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<VenuesRepository>(value),
+    );
+  }
+}
+
+String _$venuesRepositoryHash() => r'955ae296e3ec7371336fe0c1b64a9ea6bb687cc9';
+
+
+
+FICHIER: flutter_lib/features/venues/domain/entities/venues_entity.dart
+--------------------------------------------------------------------------------
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'venues_entity.freezed.dart';
+
+@freezed
+abstract class VenuesEntity with _$VenuesEntity {
+  const factory VenuesEntity({
+    required String id,
+    required String name,
+  }) = _VenuesEntity;
+}
+
+
+
+FICHIER: flutter_lib/features/venues/domain/entities/venues_entity.freezed.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'venues_entity.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+/// @nodoc
+mixin _$VenuesEntity {
+
+ String get id; String get name;
+/// Create a copy of VenuesEntity
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$VenuesEntityCopyWith<VenuesEntity> get copyWith => _$VenuesEntityCopyWithImpl<VenuesEntity>(this as VenuesEntity, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VenuesEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'VenuesEntity(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $VenuesEntityCopyWith<$Res>  {
+  factory $VenuesEntityCopyWith(VenuesEntity value, $Res Function(VenuesEntity) _then) = _$VenuesEntityCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class _$VenuesEntityCopyWithImpl<$Res>
+    implements $VenuesEntityCopyWith<$Res> {
+  _$VenuesEntityCopyWithImpl(this._self, this._then);
+
+  final VenuesEntity _self;
+  final $Res Function(VenuesEntity) _then;
+
+/// Create a copy of VenuesEntity
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [VenuesEntity].
+extension VenuesEntityPatterns on VenuesEntity {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _VenuesEntity value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _VenuesEntity() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _VenuesEntity value)  $default,){
+final _that = this;
+switch (_that) {
+case _VenuesEntity():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _VenuesEntity value)?  $default,){
+final _that = this;
+switch (_that) {
+case _VenuesEntity() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _VenuesEntity() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name)  $default,) {final _that = this;
+switch (_that) {
+case _VenuesEntity():
+return $default(_that.id,_that.name);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name)?  $default,) {final _that = this;
+switch (_that) {
+case _VenuesEntity() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _VenuesEntity implements VenuesEntity {
+  const _VenuesEntity({required this.id, required this.name});
+
+
+@override final  String id;
+@override final  String name;
+
+/// Create a copy of VenuesEntity
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$VenuesEntityCopyWith<_VenuesEntity> get copyWith => __$VenuesEntityCopyWithImpl<_VenuesEntity>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VenuesEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'VenuesEntity(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$VenuesEntityCopyWith<$Res> implements $VenuesEntityCopyWith<$Res> {
+  factory _$VenuesEntityCopyWith(_VenuesEntity value, $Res Function(_VenuesEntity) _then) = __$VenuesEntityCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$VenuesEntityCopyWithImpl<$Res>
+    implements _$VenuesEntityCopyWith<$Res> {
+  __$VenuesEntityCopyWithImpl(this._self, this._then);
+
+  final _VenuesEntity _self;
+  final $Res Function(_VenuesEntity) _then;
+
+/// Create a copy of VenuesEntity
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_VenuesEntity(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+// dart format on
+
+
+
+FICHIER: flutter_lib/features/venues/domain/repositories/venues_repository.dart
+--------------------------------------------------------------------------------
+import '../entities/venues_entity.dart';
+
+abstract class VenuesRepository {
+  Future<List<VenuesEntity>> getVenuess();
+  Future<VenuesEntity> getVenues(String id);
+}
+
+
+
+FICHIER: flutter_lib/features/venues/domain/usecases/get_venuess_usecase.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../entities/venues_entity.dart';
+import '../repositories/venues_repository.dart';
+import '../../data/repositories/venues_repository_impl.dart';
+
+part 'get_venuess_usecase.g.dart';
+
+@riverpod
+Future<List<VenuesEntity>> getVenuess(Ref ref) {
+  return ref.watch(venuesRepositoryProvider).getVenuess();
+}
+
+
+
+FICHIER: flutter_lib/features/venues/domain/usecases/get_venuess_usecase.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'get_venuess_usecase.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(getVenuess)
+final getVenuessProvider = GetVenuessProvider._();
+
+final class GetVenuessProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<VenuesEntity>>,
+          List<VenuesEntity>,
+          FutureOr<List<VenuesEntity>>
+        >
+    with
+        $FutureModifier<List<VenuesEntity>>,
+        $FutureProvider<List<VenuesEntity>> {
+  GetVenuessProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getVenuessProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getVenuessHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<VenuesEntity>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<VenuesEntity>> create(Ref ref) {
+    return getVenuess(ref);
+  }
+}
+
+String _$getVenuessHash() => r'6b2a6082f558f080b70226dcebd34eb82d08e689';
+
+
+
+FICHIER: flutter_lib/features/venues/presentation/controllers/venues_controller.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../domain/entities/venues_entity.dart';
+import '../../domain/usecases/get_venuess_usecase.dart';
+
+part 'venues_controller.g.dart';
+
+@riverpod
+class VenuesController extends _$VenuesController {
+  @override
+  FutureOr<List<VenuesEntity>> build() {
+    return ref.watch(getVenuessProvider.future);
+  }
+
+  Future<void> refresh() async {
+     state = const AsyncValue.loading();
+     state = await AsyncValue.guard(() => ref.refresh(getVenuessProvider.future));
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/venues/presentation/controllers/venues_controller.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'venues_controller.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(VenuesController)
+final venuesControllerProvider = VenuesControllerProvider._();
+
+final class VenuesControllerProvider
+    extends $AsyncNotifierProvider<VenuesController, List<VenuesEntity>> {
+  VenuesControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'venuesControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$venuesControllerHash();
+
+  @$internal
+  @override
+  VenuesController create() => VenuesController();
+}
+
+String _$venuesControllerHash() => r'18c03a10919a21dceb170a8eebf95b929dcd9744';
+
+abstract class _$VenuesController extends $AsyncNotifier<List<VenuesEntity>> {
+  FutureOr<List<VenuesEntity>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref as $Ref<AsyncValue<List<VenuesEntity>>, List<VenuesEntity>>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<List<VenuesEntity>>, List<VenuesEntity>>,
+              AsyncValue<List<VenuesEntity>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/venues/presentation/screens/venues_screen.dart
+--------------------------------------------------------------------------------
+// features/venues/presentation/screens/venues_screen.dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:livekit_client/livekit_client.dart';
+
+class VenuesScreen extends ConsumerStatefulWidget {
+  const VenuesScreen({super.key});
+
+  @override
+  ConsumerState<VenuesScreen> createState() => _VenuesScreenState();
+}
+
+class _VenuesScreenState extends ConsumerState<VenuesScreen> {
+  @override
+  Widget build(BuildContext context) {
+    const backgroundColor = Color(0xFF0F0F23);
+    const primaryColor = Color(0xFF6366F1);
+    const textPrimary = Colors.white;
+
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: textPrimary),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        title: Text(
+          'Nos Bars Virtuels',
+          style: TextStyle(
+            color: textPrimary,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Message de bienvenue
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: Text(
+                'Choisissez votre ambiance',
+                style: TextStyle(
+                  color: textPrimary,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+
+            // Liste des bars virtuels
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: _venues.length,
+                itemBuilder: (context, index) {
+                  final venue = _venues[index];
+                  return _buildVenueCard(venue, primaryColor, backgroundColor, textPrimary);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVenueCard(Map<String, dynamic> venue, Color primaryColor, Color backgroundColor, Color textPrimary) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      color: backgroundColor,
+      child: InkWell(
+        onTap: () {
+          // Navigation vers l'écran des tables avec GoRouter
+          final venueId = venue['id'] ?? 'default'; // Assurez-vous d'avoir un ID
+          context.go('/venues/$venueId/tables');
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image du bar
+            Container(
+              height: 120,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                image: DecorationImage(
+                  image: AssetImage(venue['image']),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.6),
+                    ],
+                  ),
+                ),
+                alignment: Alignment.bottomLeft,
+                padding: const EdgeInsets.all(12),
+                child: Text(
+                  venue['name'],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+
+            // Informations
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    venue['description'],
+                    style: TextStyle(
+                      color: textPrimary.withOpacity(0.8),
+                      fontSize: 12,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Nombre de personnes connectées
+                  // Row(
+                  //   children: [
+                  //     Icon(
+                  //       Icons.group,
+                  //       color: primaryColor,
+                  //       size: 16,
+                  //     ),
+                  //     const SizedBox(width: 4),
+                  //     Text(
+                  //       '${venue['activeUsers']} personnes',
+                  //       style: TextStyle(
+                  //         color: textPrimary.withOpacity(0.6),
+                  //         fontSize: 12,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  final List<Map<String, dynamic>> _venues = [
+    {
+      'id': 'lounge',
+      'name': 'Le Lounge Étoilé',
+      'description': 'Ambiance lounge avec vue sur les étoiles',
+      'image': 'assets/images/venues/lounge.png',
+      'activeUsers': 24,
+    },
+    {
+      'id': 'port',
+      'name': 'Le Bar du Port',
+      'description': 'Son des vagues et cocktails fruités',
+      'image': 'assets/images/venues/port.png',
+      'activeUsers': 18,
+    },
+    {
+      'id': 'rooftop',
+      'name': 'Le Rooftop Urbain',
+      'description': 'Vue panoramique sur la skyline',
+      'image': 'assets/images/venues/rooftop.png',
+      'activeUsers': 32,
+    },
+    {
+      'id': 'jazz',
+      'name': 'La Cave Jazz',
+      'description': 'Ambiance intime et musique live',
+      'image': 'assets/images/venues/jazz.png',
+      'activeUsers': 12,
+    },
+    {
+      'id': 'garden',
+      'name': 'Le Garden Tropical',
+      'description': 'Jardin virtuel avec cocktails exotiques',
+      'image': 'assets/images/venues/garden.png',
+      'activeUsers': 28,
+    },
+    {
+      'id': 'club',
+      'name': 'Le Club Privé',
+      'description': 'Accès exclusif, ambiance feutrée',
+      'image': 'assets/images/venues/club.png',
+      'activeUsers': 8,
+    },
+  ];
+}
+
+
+FICHIER: flutter_lib/providers/auth_provider.dart
+--------------------------------------------------------------------------------
+import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
+
+// Provider pour ApiService
+final apiServiceProvider = Provider<ApiService>((ref) {
+  final dio = Dio();
+  final storage = const FlutterSecureStorage();
+  return ApiService(dio: dio, storage: storage);
+});
+
+// Provider pour AuthService
+final authServiceProvider = Provider<AuthService>((ref) {
+  final apiService = ref.watch(apiServiceProvider);
+  return AuthService(
+    onAuthenticationEvent: (event) async {
+      print('Authentication event: $event');
+    },
+    onAuthenticationError: (error) async {
+      print('Authentication error: $error');
+    },
+    apiService: apiService,
+  );
+});
+
+// Stream provider pour les changements d'état Firebase
+final authStateProvider = StreamProvider<User?>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  return authService.authStateChanges;
+});
+
+// Provider pour l'utilisateur courant Firebase
+final currentUserProvider = Provider<User?>((ref) {
+  return ref.watch(authServiceProvider).currentUser;
+});
+
+// Provider pour récupérer le JWT applicatif (version FutureProvider)
+final appJwtProvider = FutureProvider<String?>((ref) async {
+  final authService = ref.watch(authServiceProvider);
+  return await authService.getAppJwt();
+});
+
+// ============================================================
+// NOUVEAUX PROVIDERS POUR LA GESTION COMPLÈTE DE L'AUTH
+// ============================================================
+
+// Enum pour les différents statuts d'authentification
+enum AuthStatus {
+  initial,           // Non connecté
+  authenticated,     // Firebase OK mais JWT en cours
+  fullyAuthenticated, // Firebase + JWT OK
+  error,             // Erreur
+}
+
+// Classe représentant l'état d'authentification complet
+class AuthState {
+  final AuthStatus status;
+  final User? user;
+  final String? jwtToken;
+  final Object? error;
+
+  const AuthState({
+    required this.status,
+    this.user,
+    this.jwtToken,
+    this.error,
+  });
+
+  // ⚠️ CORRECTION ICI : Ce ne sont plus des factory constructors
+  // Ce sont des constructors nommés qui retournent une nouvelle instance
+
+  static const AuthState initial = AuthState(status: AuthStatus.initial);
+
+  const AuthState.authenticated(User user) : this(
+    status: AuthStatus.authenticated,
+    user: user,
+  );
+
+  const AuthState.fullyAuthenticated({
+    required User user,
+    required String jwtToken,
+  }) : this(
+    status: AuthStatus.fullyAuthenticated,
+    user: user,
+    jwtToken: jwtToken,
+  );
+
+  const AuthState.error(Object error) : this(
+    status: AuthStatus.error,
+    error: error,
+  );
+
+  // Méthodes utilitaires
+  bool get isFullyAuthenticated => status == AuthStatus.fullyAuthenticated;
+  bool get isAuthenticated => status == AuthStatus.authenticated || status == AuthStatus.fullyAuthenticated;
+  bool get isInitial => status == AuthStatus.initial;
+  bool get hasError => status == AuthStatus.error;
+
+  // Méthode copyWith pour faciliter les mises à jour
+  AuthState copyWith({
+    AuthStatus? status,
+    User? user,
+    String? jwtToken,
+    Object? error,
+  }) {
+    return AuthState(
+      status: status ?? this.status,
+      user: user ?? this.user,
+      jwtToken: jwtToken ?? this.jwtToken,
+      error: error ?? this.error,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'AuthState(status: $status, user: ${user?.uid}, hasJwt: ${jwtToken != null})';
+  }
+}
+
+// StateNotifier pour gérer l'état d'authentification complet
+class AuthStateNotifier extends StateNotifier<AuthState> {
+  final AuthService _authService;
+  final Ref _ref;
+
+  AuthStateNotifier({
+    required AuthService authService,
+    required Ref ref,
+  }) : _authService = authService,
+        _ref = ref,
+        super(AuthState.initial) {  // ⚠️ CORRECTION ICI : AuthState.initial (sans parenthèses)
+    _init();
+  }
+
+  Future<void> _init() async {
+    // Écouter les changements d'authentification Firebase
+    _ref.listen(authStateProvider, (previous, next) {
+      next.whenData((user) async {
+        if (user != null) {
+          // Utilisateur Firebase connecté
+          state = AuthState.authenticated(user);
+
+          // Vérifier si on a déjà un JWT
+          try {
+            final existingJwt = await _authService.getAppJwt();
+            if (existingJwt != null && existingJwt.isNotEmpty) {
+              // JWT déjà présent
+              state = AuthState.fullyAuthenticated(
+                user: user,
+                jwtToken: existingJwt,
+              );
+              print('✅ JWT déjà présent dans le stockage');
+            } else {
+              print('⏳ En attente du JWT applicatif...');
+            }
+          } catch (e) {
+            print('❌ Erreur lors de la vérification du JWT: $e');
+          }
+        } else {
+          // Déconnecté
+          state = AuthState.initial;  // ⚠️ CORRECTION ICI : AuthState.initial (sans parenthèses)
+          print('👤 Utilisateur déconnecté');
+        }
+      });
+    });
+
+    // Écouter les événements d'authentification pour capturer le JWT
+    _authService.onAuthenticationEvent = (event) async {
+      if (event is GoogleSignInAuthenticationEventSignIn) {
+        print('📡 Événement d\'authentification reçu, attente du JWT...');
+
+        // Attendre que le JWT soit stocké (avec timeout)
+        const maxAttempts = 10;
+        var attempts = 0;
+        String? jwt;
+
+        while (attempts < maxAttempts) {
+          await Future.delayed(const Duration(milliseconds: 300));
+          jwt = await _authService.getAppJwt();
+          if (jwt != null && jwt.isNotEmpty) {
+            break;
+          }
+          attempts++;
+        }
+
+        final user = _authService.currentUser;
+
+        if (jwt != null && jwt.isNotEmpty && user != null) {
+          state = AuthState.fullyAuthenticated(
+            user: user,
+            jwtToken: jwt,
+          );
+          print('✅ Authentification complète (Firebase + JWT)');
+        } else if (user != null) {
+          // Firebase OK mais pas de JWT
+          state = AuthState.authenticated(user);
+          print('⚠️ Firebase authentifié mais JWT manquant');
+        }
+      }
+    };
+
+    // Écouter les erreurs d'authentification
+    _authService.onAuthenticationError = (error) async {
+      state = AuthState.error(error);
+      print('❌ Erreur d\'authentification: $error');
+    };
+  }
+
+  // Méthode pour réinitialiser manuellement l'état
+  void reset() {
+    state = AuthState.initial;  // ⚠️ CORRECTION ICI : AuthState.initial (sans parenthèses)
+  }
+
+  // Méthode pour forcer une erreur
+  void setError(Object error) {
+    state = AuthState.error(error);
+  }
+
+  // Méthode pour rafraîchir le JWT (si nécessaire)
+  /*
+  Future<bool> refreshJwt() async {
+    try {
+      final user = _authService.currentUser;
+      if (user == null) {
+        return false;
+      }
+
+      // Récupérer un nouveau token Firebase
+      final tokenResult = await user.getIdTokenResult(true);
+      if (tokenResult.token == null) {
+        return false;
+      }
+
+      // Appeler l'API pour obtenir un nouveau JWT
+      final newJwt = await _authService.refreshJwtFromApi(tokenResult.token!);
+
+      if (newJwt != null && newJwt.isNotEmpty) {
+        state = state.copyWith(
+          jwtToken: newJwt,
+          status: AuthStatus.fullyAuthenticated,
+        );
+        return true;
+      }
+      return false;
+    } catch (e) {
+      setError(e);
+      return false;
+    }
+  }
+
+   */
+}
+
+// StateNotifierProvider
+final authStateNotifierProvider = StateNotifierProvider<AuthStateNotifier, AuthState>((ref) {
+  final authService = ref.watch(authServiceProvider);
+  return AuthStateNotifier(
+    authService: authService,
+    ref: ref,
+  );
+});
+
+// Providers utilitaires pour faciliter l'accès à l'état
+
+// Provider pour savoir si l'utilisateur est complètement authentifié
+final isFullyAuthenticatedProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authStateNotifierProvider);
+  return authState.isFullyAuthenticated;
+});
+
+// Provider pour récupérer le JWT de manière synchrone (si disponible)
+final appJwtSyncProvider = Provider<String?>((ref) {
+  final authState = ref.watch(authStateNotifierProvider);
+  return authState.jwtToken;
+});
+
+// Provider pour récupérer l'utilisateur de manière synchrone
+final currentUserSyncProvider = Provider<User?>((ref) {
+  final authState = ref.watch(authStateNotifierProvider);
+  return authState.user;
+});
+
+// Provider pour vérifier si l'authentification est en cours
+final isAuthenticatingProvider = Provider<bool>((ref) {
+  final authState = ref.watch(authStateNotifierProvider);
+  return authState.status == AuthStatus.authenticated;
+});
+
+// Provider pour obtenir le message d'erreur (si présent)
+final authErrorProvider = Provider<Object?>((ref) {
+  final authState = ref.watch(authStateNotifierProvider);
+  return authState.error;
+});
+
+
+FICHIER: flutter_lib/providers/test_state_notifier.dart
+--------------------------------------------------------------------------------
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+
+// Test simple
+class TestNotifier extends StateNotifier<int> {
+  TestNotifier() : super(0);
+}
+
+final testProvider = StateNotifierProvider<TestNotifier, int>((ref) {
+  return TestNotifier();
+});
+
+void main() {
+  print('✅ Si ce fichier compile, StateNotifier est disponible');
+}
+
+
+FICHIER: flutter_lib/services/api_service.dart
+--------------------------------------------------------------------------------
+import 'package:dio/dio.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'api_service.g.dart';
+
+class ApiException implements Exception {
+  final String message;
+  final int? statusCode;
+  final dynamic originalError;
+
+  ApiException({
+    required this.message,
+    this.statusCode,
+    this.originalError,
+  });
+
+  @override
+  String toString() => 'ApiException: $message (Status: $statusCode)';
+}
+
+class ApiService {
+  final Dio _dio;
+  final FlutterSecureStorage _storage;
+  static const _baseUrl = 'http://192.168.1.56:8101/api';
+
+  ApiService({
+    required Dio dio,
+    required FlutterSecureStorage storage,
+  })  : _dio = dio,
+        _storage = storage {
+    _dio.options.baseUrl = _baseUrl;
+    _dio.options.headers['Content-Type'] = 'application/json';
+    _dio.options.connectTimeout = const Duration(seconds: 10);
+    _dio.options.receiveTimeout = const Duration(seconds: 10);
+
+    _dio.interceptors
+        .add(LogInterceptor(requestBody: true, responseBody: true));
+  }
+
+
+
+
+
+  // Méthode générique pour gérer les requêtes avec gestion d'erreur centralisée
+  Future<T> safeApiCall<T>({
+    required Future<T> Function() apiCall,
+    String? errorMessage,
+  }) async {
+    try {
+      return await apiCall();
+    } on DioException catch (e) {
+      throw _handleDioError(e, errorMessage);
+    } catch (e) {
+      throw ApiException(
+        message: errorMessage ?? 'Une erreur inattendue est survenue',
+        originalError: e,
+      );
+    }
+  }
+
+  ApiException _handleDioError(DioException e, String? customMessage) {
+    String message;
+    int? statusCode = e.response?.statusCode;
+
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        message = 'Délai de connexion dépassé';
+        break;
+      case DioExceptionType.badResponse:
+        message = _parseErrorResponse(e.response);
+        break;
+      case DioExceptionType.cancel:
+        message = 'Requête annulée';
+        break;
+      case DioExceptionType.connectionError:
+        message = 'Erreur de connexion réseau';
+        break;
+      default:
+        message = customMessage ?? 'Erreur réseau inconnue';
+    }
+
+    return ApiException(
+      message: message,
+      statusCode: statusCode,
+      originalError: e,
+    );
+  }
+
+  String _parseErrorResponse(Response? response) {
+    try {
+      if (response?.data != null && response!.data is Map) {
+        return response.data['message'] ??
+            response.data['error'] ??
+            'Erreur serveur (${response.statusCode})';
+      }
+      return 'Erreur serveur (${response?.statusCode ?? 'inconnue'})';
+    } catch (_) {
+      return 'Erreur serveur inconnue';
+    }
+  }
+
+  // Méthodes API spécifiques
+  Future<String> getJwtFromFirebaseToken(String firebaseToken) async {
+    return safeApiCall(
+      apiCall: () async {
+        final response = await _dio.post(
+          '/users/jwt-by-firebase-token',
+          data: {'token': firebaseToken},
+        );
+
+        if (response.statusCode == 200) {
+          // Adapter selon le format de réponse de votre API
+          // Supposons que l'API retourne { "jwt": "token_value" }
+          final jwt = response.data['jwt'] ?? response.data['token'] ?? response.data;
+          if (jwt == null) {
+            throw ApiException(message: 'Format de réponse API invalide');
+          }
+          return jwt.toString();
+        } else {
+          throw ApiException(
+            message: 'Erreur lors de la récupération du JWT',
+            statusCode: response.statusCode,
+          );
+        }
+      },
+      errorMessage: 'Impossible de récupérer le token JWT',
+    );
+  }
+
+// Nouvelle méthode pour générer le token LiveKit
+  Future<Map<String, dynamic>> generateLiveKitToken({
+    required String participantIdentity,
+    required String participantName,
+    required String roomName,
+    String participantMetadata = '',
+    Map<String, dynamic> participantAttributes = const {},
+    Map<String, dynamic> roomConfig = const {},
+  }) async {
+    return safeApiCall(
+      apiCall: () async {
+        final payload = {
+          "participant_identity": participantIdentity,
+          "participant_name": participantName,
+          "participant_metadata": participantMetadata,
+          "participant_attributes": participantAttributes,
+          "room_name": roomName,
+          "room_config": roomConfig
+        };
+
+        // Récupérer le JWT pour l'authentification
+        final appJwt = await _storage.read(key: 'app_jwt_token');
+
+        if (appJwt == null) {
+          throw ApiException(message: 'JWT token non disponible');
+        }
+
+        final response = await _dio.post(
+          '/sfu/generate-token', // Note: plus besoin de l'URL complète, baseUrl est déjà configurée
+          data: payload,
+          options: Options(
+            headers: {
+              'Authorization': 'Bearer $appJwt',
+            },
+          ),
+        );
+
+        if (response.statusCode == 200) {
+          return response.data as Map<String, dynamic>;
+        } else {
+          throw ApiException(
+            message: 'Erreur lors de la génération du token LiveKit',
+            statusCode: response.statusCode,
+          );
+        }
+      },
+      errorMessage: 'Impossible de générer le token LiveKit',
+    );
+  }
+}
+
+@riverpod
+ApiService apiService(Ref ref) {
+  final dio = Dio(); // À configurer selon vos besoins
+  final storage = const FlutterSecureStorage();
+  return ApiService(dio: dio, storage: storage);
+}
+
+
+FICHIER: flutter_lib/services/api_service.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'api_service.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(apiService)
+final apiServiceProvider = ApiServiceProvider._();
+
+final class ApiServiceProvider
+    extends $FunctionalProvider<ApiService, ApiService, ApiService>
+    with $Provider<ApiService> {
+  ApiServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'apiServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$apiServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<ApiService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ApiService create(Ref ref) {
+    return apiService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ApiService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ApiService>(value),
+    );
+  }
+}
+
+String _$apiServiceHash() => r'eb9a66cc54e1c15d5870b8da260d4ea1f6b053ac';
+
+
+
+FICHIER: flutter_lib/services/auth_service.dart
+--------------------------------------------------------------------------------
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'api_service.dart'; // Ajout de l'import
+
+class AuthService {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final ApiService _apiService; // Ajout du service API
+
+  // Instance du stockage sécurisé
+  final _storage = const FlutterSecureStorage();
+
+  // Clé pour le stockage
+  static const _tokenKey = 'firebase_id_token';
+  static const _appJwtKey = 'app_jwt_token'; // Nouvelle clé pour le JWT applicatif
+  static const _userIdentityKey = 'connected_user_identity';
+  static const _userDisplayNameKey = 'connected_user_displayname';
+
+  // Callbacks injectés
+  Future<void> Function(GoogleSignInAuthenticationEvent)? onAuthenticationEvent;
+  Future<void> Function(Object)? onAuthenticationError;
+
+  AuthService({
+    this.onAuthenticationEvent,
+    this.onAuthenticationError,
+    required ApiService apiService, // Ajout du paramètre
+  }) : _apiService = apiService;
+
+  // Get current user
+  User? get currentUser => _firebaseAuth.currentUser;
+
+  // Stream pour écouter les changements d'authentification
+  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+
+  bool _isSignInInitialized = false;
+
+  // GOOGLE SIGNIN
+  String? clientId;
+  String? serverClientId = '1084343369802-36565dmgarm2gkos54eb6j9q6so0s9bf.apps.googleusercontent.com';
+  List<String> scopes = <String>[
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+  ];
+  final GoogleSignIn signIn = GoogleSignIn.instance;
+
+  Future<void> _handleAuthenticationEvent(GoogleSignInAuthenticationEvent event) async {
+    final GoogleSignInAccount? user = switch (event) {
+      GoogleSignInAuthenticationEventSignIn() => event.user,
+      GoogleSignInAuthenticationEventSignOut() => null,
+    };
+
+    final GoogleSignInClientAuthorization? authorization = await user?.authorizationClient.authorizationForScopes(scopes);
+
+    if (user != null && authorization != null) {
+      print(user);
+      print("===== user =======");
+
+      try {
+        final OAuthCredential googleCredential = GoogleAuthProvider.credential(
+          accessToken: authorization.accessToken,
+          idToken: user.authentication.idToken,
+        );
+
+        final UserCredential googleUserCredential = await FirebaseAuth.instance.signInWithCredential(googleCredential);
+
+        IdTokenResult tokenResult = await FirebaseAuth.instance.currentUser!.getIdTokenResult();
+
+        if (tokenResult.token != null) {
+          // Stocker le token Firebase
+          await _storage.write(key: _tokenKey, value: tokenResult.token);
+          await _storage.write(key: _userIdentityKey, value: user.displayName);
+          await _storage.write(key: _userDisplayNameKey, value: user.displayName);
+
+          // NOUVEAU : Appeler l'API pour obtenir le JWT applicatif
+          try {
+            print('🔄 Récupération du JWT applicatif...');
+            final appJwt = await _apiService.getJwtFromFirebaseToken(tokenResult.token!);
+
+            // Stocker le JWT applicatif
+            await _storage.write(key: _appJwtKey, value: appJwt);
+            print('✅ JWT applicatif récupéré et stocké');
+
+          } catch (e) {
+            print('❌ Erreur lors de la récupération du JWT applicatif: $e');
+            // Ne pas bloquer la connexion si l'API JWT échoue ?
+            // Selon votre logique métier, vous pouvez choisir de rethrow ou non
+            if (e is ApiException) {
+              print('Détails API: ${e.message} (${e.statusCode})');
+            }
+
+            // Option 1: Laisser l'erreur remonter (décommentez la ligne suivante)
+            // rethrow;
+
+            // Option 2: Continuer quand même (actuellement choisi)
+          }
+
+          // Appeler le callback injecté si présent
+          if (onAuthenticationEvent != null) {
+            await onAuthenticationEvent!(event);
+          }
+
+          print(tokenResult.token);
+          print("====== tokenResult.token =======");
+        }
+
+      } catch (error) {
+        print(error);
+        print('error');
+
+        // Appeler le callback d'erreur
+        if (onAuthenticationError != null) {
+          await onAuthenticationError!(error);
+        }
+      }
+    }
+  }
+
+  // ... (le reste du code reste identique)
+
+  Future<void> _handleAuthenticationError(Object e) async {
+    print(e);
+
+    if (onAuthenticationError != null) {
+      await onAuthenticationError!(e);
+    }
+  }
+
+  Future<void> initGoogleSignIn() async {
+    if (_isSignInInitialized) return;
+
+    _isSignInInitialized = true;
+
+    await signIn.initialize(clientId: clientId, serverClientId: serverClientId).then((_) async {
+      signIn.authenticationEvents.listen(_handleAuthenticationEvent).onError(_handleAuthenticationError);
+    });
+  }
+
+  Future<User?> signInWithGoogle() async {
+    await initGoogleSignIn();
+
+    if (GoogleSignIn.instance.supportsAuthenticate()) {
+      try {
+        await GoogleSignIn.instance.authenticate();
+      } catch (e) {
+        print("Erreur Google Sign-In : $e");
+      }
+    }
+  }
+
+  // Nouvelle méthode pour récupérer le JWT applicatif
+  Future<String?> getAppJwt() async {
+    return await _storage.read(key: _appJwtKey);
+  }
+
+  // Méthode de déconnexion améliorée
+  Future<void> signOut() async {
+    try {
+      await _firebaseAuth.signOut();
+      await GoogleSignIn.instance.signOut();
+
+      // Nettoyer le stockage
+      await _storage.delete(key: _tokenKey);
+      await _storage.delete(key: _appJwtKey);
+      await _storage.delete(key: _userIdentityKey);
+      await _storage.delete(key: _userDisplayNameKey);
+
+      print('✅ Déconnexion réussie');
+    } catch (e) {
+      print('❌ Erreur lors de la déconnexion: $e');
+      rethrow;
+    }
+  }
+
+  bool isLoggedIn() {
+    return _firebaseAuth.currentUser != null;
+  }
+}
+
+
+FICHIER: flutter_lib/services/sfu_service.dart
+--------------------------------------------------------------------------------
+// Créer un nouveau fichier: flutter_lib/features/tables/services/sfu_service.dart
+
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../../services/api_service.dart';
+
+part 'sfu_service.g.dart';
+
+class SfuService {
+  final ApiService _apiService;
+
+  SfuService({required ApiService apiService}) : _apiService = apiService;
+
+  Future<Map<String, dynamic>> generateToken({
+    required String participantIdentity,
+    required String participantName,
+    required String roomName,
+    String participantMetadata = '',
+    Map<String, dynamic> participantAttributes = const {},
+    Map<String, dynamic> roomConfig = const {},
+  }) async {
+    return _apiService.generateLiveKitToken(
+      participantIdentity: participantIdentity,
+      participantName: participantName,
+      participantAttributes: participantAttributes,
+      participantMetadata: participantMetadata,
+      roomName: roomName,
+      roomConfig: roomConfig,
+    );
+  }
+}
+
+@riverpod
+SfuService sfuService(Ref ref) {
+  final apiService = ref.watch(apiServiceProvider);
+  return SfuService(apiService: apiService);
+}
+
+
+FICHIER: flutter_lib/services/sfu_service.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'sfu_service.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(sfuService)
+final sfuServiceProvider = SfuServiceProvider._();
+
+final class SfuServiceProvider
+    extends $FunctionalProvider<SfuService, SfuService, SfuService>
+    with $Provider<SfuService> {
+  SfuServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sfuServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sfuServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SfuService> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SfuService create(Ref ref) {
+    return sfuService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SfuService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SfuService>(value),
+    );
+  }
+}
+
+String _$sfuServiceHash() => r'eec97a26458eb6027d15e5c5845938b8e56f520d';
+
+
+
+FICHIER: src/Infrastructure/Http/Controller/AuthController.php
+--------------------------------------------------------------------------------
+<?php
+
+namespace App\Infrastructure\Http\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use OpenApi\Attributes as OA;
+
+#[OA\Tag(name: 'auth')]
+class AuthController extends AbstractController
+{
+    public function __construct(
+        private UserPasswordHasherInterface $passwordHasher
+    ) {}
+
+    #[Route('/api/auth/login', name: 'api_auth_login', methods: ['POST'])]
+    #[OA\Post(
+        summary: 'Authentifie un utilisateur et renvoie un JWT',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                type: 'object',
+                required: ['email', 'password'],
+                properties: [
+                    new OA\Property(property: 'email', type: 'string', example: 'user@example.com'),
+                    new OA\Property(property: 'password', type: 'string', example: 'MonMotDePasse123!')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Token JWT renvoyé',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'token', type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5...')
+                    ]
+                )
+            ),
+            new OA\Response(response: 401, description: 'Identifiants invalides')
+        ]
+    )]
+    public function login(): void
+    {
+        // Lexik gère la logique, on ne met rien ici
+    }
+
+    #[Route('/api/auth/generate-password', name: 'api_auth_generate_password', methods: ['POST'])]
+    #[OA\Post(
+        summary: 'Hash un mot de passe en clair (utile pour tests ou création manuelle d’utilisateurs).',
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: 'Mot de passe à chiffrer',
+            content: new OA\JsonContent(
+                type: 'object',
+                required: ['password'],
+                properties: [
+                    new OA\Property(property: 'password', type: 'string', example: 'MonMotDePasse123!')
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Mot de passe chiffré renvoyé avec succès',
+                content: new OA\JsonContent(
+                    type: 'object',
+                    properties: [
+                        new OA\Property(property: 'hash', type: 'string', example: '$2y$13$abc123...')
+                    ]
+                )
+            )
+        ]
+    )]
+    public function generatePassword(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!isset($data['password']) || !is_string($data['password']) || $data['password'] === '') {
+            return $this->json(['error' => 'Le champ "password" est requis.'], 400);
+        }
+
+        $plain = $data['password'];
+
+        if (strlen($plain) < 8) {
+            return $this->json(['error' => 'Le mot de passe doit faire au moins 8 caractères.'], 400);
+        }
+
+        // Fake user conforme à l’interface PasswordAuthenticatedUserInterface
+        $user = new class implements PasswordAuthenticatedUserInterface {
+            public function getPassword(): ?string { return null; }
+        };
+
+        $hash = $this->passwordHasher->hashPassword($user, $plain);
+
+        return $this->json(['hash' => $hash]);
+    }
+}
+
+
+
+FICHIER: src/Infrastructure/Http/Controller/GenerateLiveKitController.php
+--------------------------------------------------------------------------------
+<?php
+
+namespace App\Infrastructure\Http\Controller;
+
+use Agence104\LiveKit\AccessToken;
+use Agence104\LiveKit\AccessTokenOptions;
+use Agence104\LiveKit\VideoGrant;
+use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route('/api/sfu/generate-token')]
+#[OA\Tag(name: 'sfu')]
+class GenerateLiveKitController extends AbstractController
+{
+    public function __construct(
+        private readonly string $livekitApiKey,
+        private readonly string $livekitApiSecret,
+        private readonly string $livekitUrl,
+    ) {
+    }
+
+    #[Route('', name: 'sfu_generate_token', methods: ['POST'])]
+    #[OA\Post(
+        description: 'Génère un token JWT pour LiveKit SFU',
+        summary: 'Générer un token d\'accès LiveKit',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['participant_identity', 'room_name'],
+                properties: [
+                    new OA\Property(property: 'participant_identity', type: 'string', description: 'Identifiant unique du participant'),
+                    new OA\Property(property: 'participant_name', type: 'string', description: 'Nom du participant'),
+                    new OA\Property(property: 'participant_metadata', type: 'string', description: 'Métadonnées du participant'),
+                    new OA\Property(property: 'participant_attributes', type: 'object', description: 'Attributs du participant'),
+                    new OA\Property(property: 'room_name', type: 'string', description: 'Nom de la salle'),
+                    new OA\Property(property: 'room_config', type: 'object', description: 'Configuration de la salle'),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Token généré avec succès',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'server_url', type: 'string', example: 'wss://livekit.example.com'),
+                        new OA\Property(property: 'participant_token', type: 'string', example: 'eyJhbGciOiJIUzI1NiIs...'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Requête invalide'
+            )
+        ]
+    )]
+    public function generateSfuToken(Request $request): JsonResponse
+    {
+        try {
+            // Décoder le corps de la requête JSON
+            $body = json_decode($request->getContent(), true);
+
+            // Valider que nous avons du JSON valide
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return $this->json([
+                    'error' => 'Invalid JSON in request body'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Valider les champs requis
+            if (!isset($body['participant_identity']) || !isset($body['room_name'])) {
+                return $this->json([
+                    'error' => 'Missing required fields: participant_identity and room_name are required'
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Définir les options du token
+            $tokenOptions = (new AccessTokenOptions())
+                ->setIdentity($body['participant_identity'])
+                ->setName($body['participant_name'] ?? $body['participant_identity']);
+
+            // Ajouter les métadonnées si présentes
+            if (!empty($body['participant_metadata'])) {
+                $tokenOptions = $tokenOptions->setMetadata($body['participant_metadata']);
+            }
+
+            // Ajouter les attributs si présents
+            if (!empty($body['participant_attributes']) && is_array($body['participant_attributes'])) {
+                $tokenOptions = $tokenOptions->setAttributes($body['participant_attributes']);
+            }
+
+            // Définir les grants vidéo
+            $roomName = $body['room_name'];
+            $videoGrant = (new VideoGrant())
+                ->setRoomJoin()
+                ->setRoomName($roomName);
+
+            // Créer le token
+            $token = (new AccessToken($this->livekitApiKey, $this->livekitApiSecret))
+                ->init($tokenOptions)
+                ->setGrant($videoGrant);
+
+            // Ajouter la configuration de la salle si présente
+            if (!empty($body['room_config']) && is_array($body['room_config'])) {
+                $token = $token->setRoomConfig($body['room_config']);
+            }
+
+            // Retourner la réponse JSON
+            return $this->json([
+                'server_url' => $this->livekitUrl,
+                'participant_token' => $token->toJwt(),
+                'participant_identity' => $body['participant_identity'],
+                'participant_name' => $body['participant_name'],
+                'room_name' => $body['room_name'],
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'error' => 'Failed to generate token: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+}
+
+
+
+FICHIER: src/Infrastructure/Http/Controller/GeneratePromptController.php
+--------------------------------------------------------------------------------
+<?php
+
+namespace App\Infrastructure\Http\Controller;
+
+use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Finder\Finder;
+
+#[Route('/api/generate-prompt')]
+#[OA\Tag(name: 'ia assistant', description: 'Génération de prompts pour l\'IA')]
+class GeneratePromptController extends AbstractController
+{
+    #[Route('', name: 'generate_prompt', methods: ['GET'])]
+    #[OA\Get(
+        description: 'Exporte des fichiers et dossiers au format texte brut pour analyse par IA',
+        summary: 'Génère un prompt texte contenant l\'arborescence et le code source',
+        parameters: [
+            new OA\Parameter(
+                name: 'paths',
+                description: 'Chemin des dossiers à analyser (séparés par des virgules) - absolus ou relatifs à la racine du projet',
+                in: 'query',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                    example: 'src,config,templates'
+                )
+            ),
+            new OA\Parameter(
+                name: 'files',
+                description: 'Chemin des fichiers individuels à analyser (séparés par des virgules) - absolus ou relatifs à la racine du projet',
+                in: 'query',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                    example: 'src/Controller/GeneratePromptController.php,config/routes.yaml'
+                )
+            ),
+            new OA\Parameter(
+                name: 'extensions',
+                description: 'Liste des extensions de fichiers à inclure (séparées par des virgules)',
+                in: 'query',
+                required: false,
+                schema: new OA\Schema(
+                    type: 'string',
+                    default: 'php,dart,html,twig,js,css',
+                    example: 'php,twig,yaml'
+                )
+            ),
+        ]
+    )]
+    public function generatePrompt(Request $request): Response
+    {
+        $pathsParam = $request->query->get('paths');
+        $filesParam = $request->query->get('files');
+        $extensions = $request->query->get('extensions', 'php,dart,html,twig,js,css');
+
+        // Vérifier qu'au moins un paramètre est fourni
+        if (!$pathsParam && !$filesParam) {
+            return new Response(
+                "ERREUR: Vous devez fournir au moins un dossier (paths) ou un fichier (files) à analyser.\n",
+                Response::HTTP_BAD_REQUEST,
+                ['Content-Type' => 'text/plain']
+            );
+        }
+
+        $allowedExtensions = array_map('trim', explode(',', $extensions));
+        $warningMessages = [];
+        $allFiles = [];
+        $allDirs = [];
+
+        // Traitement des dossiers (paths)
+        $resolvedPaths = [];
+        if ($pathsParam) {
+            $rawPaths = array_map('trim', explode(',', $pathsParam));
+
+            foreach ($rawPaths as $path) {
+                // Résoudre le chemin absolu
+                if (!str_starts_with($path, '/')) {
+                    $path = $this->getParameter('kernel.project_dir') . '/' . $path;
+                }
+
+                $realPath = realpath($path);
+
+                if ($realPath && is_dir($realPath)) {
+                    $resolvedPaths[] = $realPath;
+                } else {
+                    $warningMessages[] = "Dossier ignoré (invalide): " . $path;
+                }
+            }
+
+            // Collecter les fichiers des dossiers valides
+            foreach ($resolvedPaths as $rootPath) {
+                $finder = new Finder();
+                $finder->files()
+                    ->in($rootPath)
+                    ->ignoreDotFiles(false)
+                    ->ignoreVCS(false);
+
+                foreach ($finder as $file) {
+                    $ext = $file->getExtension();
+                    if (in_array($ext, $allowedExtensions)) {
+                        $allFiles[] = $file;
+
+                        // Collecter tous les dossiers parents
+                        $relativePath = $file->getRelativePath();
+                        if (!empty($relativePath)) {
+                            $parts = explode(DIRECTORY_SEPARATOR, $relativePath);
+                            $currentPath = '';
+                            foreach ($parts as $part) {
+                                $currentPath = empty($currentPath) ? $part : $currentPath . DIRECTORY_SEPARATOR . $part;
+                                $allDirs[$currentPath] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Traitement des fichiers individuels (files)
+        $resolvedFiles = [];
+        if ($filesParam) {
+            $rawFiles = array_map('trim', explode(',', $filesParam));
+
+            foreach ($rawFiles as $file) {
+                // Résoudre le chemin absolu
+                if (!str_starts_with($file, '/')) {
+                    $file = $this->getParameter('kernel.project_dir') . '/' . $file;
+                }
+
+                $realPath = realpath($file);
+
+                if ($realPath && is_file($realPath)) {
+                    $ext = pathinfo($realPath, PATHINFO_EXTENSION);
+                    if (in_array($ext, $allowedExtensions)) {
+                        $resolvedFiles[] = $realPath;
+
+                        // Créer un objet fichier virtuel pour le traitement
+                        $virtualFile = new \SplFileInfo($realPath);
+                        $allFiles[] = $virtualFile;
+
+                        // Collecter le dossier parent
+                        $relativePath = str_replace($this->getParameter('kernel.project_dir') . '/', '', dirname($realPath));
+                        if ($relativePath !== '.' && !empty($relativePath)) {
+                            $parts = explode(DIRECTORY_SEPARATOR, $relativePath);
+                            $currentPath = '';
+                            foreach ($parts as $part) {
+                                $currentPath = empty($currentPath) ? $part : $currentPath . DIRECTORY_SEPARATOR . $part;
+                                $allDirs[$currentPath] = true;
+                            }
+                        }
+                    } else {
+                        $warningMessages[] = "Fichier ignoré (extension non autorisée): " . $file;
+                    }
+                } else {
+                    $warningMessages[] = "Fichier ignoré (invalide): " . $file;
+                }
+            }
+        }
+
+        // Vérifier qu'on a au moins un fichier à analyser
+        if (empty($allFiles)) {
+            $errorMsg = "ERREUR: Aucun fichier valide trouvé.\n";
+            if (!empty($warningMessages)) {
+                $errorMsg .= implode("\n", $warningMessages) . "\n";
+            }
+            return new Response(
+                $errorMsg,
+                Response::HTTP_NOT_FOUND,
+                ['Content-Type' => 'text/plain']
+            );
+        }
+
+        try {
+            $content = $this->generateExport($allFiles, $allDirs, $resolvedPaths, $allowedExtensions);
+
+            // Ajouter les avertissements au début si nécessaire
+            if (!empty($warningMessages)) {
+                $warnings = "ATTENTIONS:\n" . implode("\n", $warningMessages) . "\n\n";
+                $content = $warnings . $content;
+            }
+
+            return new Response(
+                $content,
+                Response::HTTP_OK,
+                ['Content-Type' => 'text/plain']
+            );
+
+        } catch (\Exception $e) {
+            return new Response(
+                "ERREUR: " . $e->getMessage() . "\n",
+                Response::HTTP_INTERNAL_SERVER_ERROR,
+                ['Content-Type' => 'text/plain']
+            );
+        }
+    }
+
+    private function generateExport(array $allFiles, array $allDirs, array $rootPaths, array $allowedExtensions): string
+    {
+        $output = [];
+        $projectRoot = $this->getParameter('kernel.project_dir');
+
+        // En-tête
+        $output[] = "FICHIERS POUR ANALYSE";
+        $output[] = "=====================";
+
+        if (!empty($rootPaths)) {
+            $output[] = "Dossiers analysés:";
+            foreach ($rootPaths as $path) {
+                $relativePath = str_replace($projectRoot . '/', '', $path);
+                $output[] = "  - " . $relativePath;
+            }
+        }
+
+        $output[] = "Extensions: " . implode(', ', $allowedExtensions);
+        $output[] = "Date: " . date('Y-m-d H:i:s');
+        $output[] = "";
+
+        // Trier les fichiers par chemin
+        usort($allFiles, function($a, $b) {
+            return strcmp($a->getRealPath(), $b->getRealPath());
+        });
+
+        // Trier les dossiers
+        $dirs = array_keys($allDirs);
+        sort($dirs);
+
+        // Générer l'arborescence complète
+        $output[] = "ARBORESCENCE:";
+        $output[] = "-------------";
+
+        if (empty($allFiles)) {
+            $output[] = "  (aucun fichier trouvé)";
+        } else {
+            // Construire l'arbre global
+            $globalTree = [];
+
+            foreach ($allFiles as $file) {
+                $fullPath = $file->getRealPath();
+                $relativePath = str_replace($projectRoot . '/', '', $fullPath);
+                $parts = explode('/', $relativePath);
+
+                $current = &$globalTree;
+                $lastIndex = count($parts) - 1;
+
+                foreach ($parts as $index => $part) {
+                    if ($index === $lastIndex) {
+                        // C'est un fichier
+                        $current[$part] = null;
+                    } else {
+                        // C'est un dossier
+                        if (!isset($current[$part])) {
+                            $current[$part] = [];
+                        }
+                        $current = &$current[$part];
+                    }
+                }
+            }
+
+            $output[] = $this->renderTree($globalTree);
+        }
+
+        $output[] = "";
+        $output[] = "CONTENU DES FICHIERS";
+        $output[] = "====================";
+        $output[] = "";
+
+        // Contenu de chaque fichier
+        foreach ($allFiles as $file) {
+            $fullPath = $file->getRealPath();
+            $relativeToProject = str_replace($projectRoot . '/', '', $fullPath);
+
+            $output[] = "FICHIER: " . $relativeToProject;
+            $output[] = str_repeat("-", 80);
+
+            $content = file_get_contents($fullPath);
+            if ($content === false) {
+                $output[] = "[ERREUR LECTURE]";
+            } else {
+                $output[] = $content;
+            }
+
+            $output[] = ""; // Ligne vide entre les fichiers
+            $output[] = ""; // Une de plus pour la séparation
+        }
+
+        $output[] = "FIN";
+        $output[] = "============";
+        $output[] = "Total fichiers: " . count($allFiles);
+
+        return implode("\n", $output);
+    }
+
+    private function renderTree(array $tree, string $prefix = ''): string
+    {
+        $output = '';
+        $items = $this->sortTreeItems($tree);
+        $count = count($items);
+        $i = 0;
+
+        foreach ($items as $key => $value) {
+            $i++;
+            $isLast = ($i === $count);
+            $isDir = is_array($value);
+
+            // Choisir le marqueur
+            if ($isDir) {
+                $marker = $isLast ? '└── 📁 ' : '├── 📁 ';
+            } else {
+                $marker = $isLast ? '└── 📄 ' : '├── 📄 ';
+            }
+
+            // Ajouter l'élément courant
+            $output .= $prefix . $marker . $key . ($isDir ? '/' : '') . "\n";
+
+            // Si c'est un dossier, rendre son contenu
+            if ($isDir) {
+                $newPrefix = $prefix . ($isLast ? '    ' : '│   ');
+                $output .= $this->renderTree($value, $newPrefix);
+            }
+        }
+
+        return $output;
+    }
+
+    private function sortTreeItems(array $tree): array
+    {
+        // Séparer les dossiers et les fichiers
+        $dirs = [];
+        $files = [];
+
+        foreach ($tree as $key => $value) {
+            if (is_array($value)) {
+                $dirs[$key] = $value;
+            } else {
+                $files[$key] = $value;
+            }
+        }
+
+        // Trier alphabétiquement
+        ksort($dirs);
+        ksort($files);
+
+        // Fusionner (dossiers d'abord, puis fichiers)
+        return array_merge($dirs, $files);
+    }
+}
+
+
+
+FICHIER: src/Infrastructure/Http/Controller/UsersGetJwtTokenFromFirebaseAuthAction.php
+--------------------------------------------------------------------------------
+<?php
+
+declare(strict_types=1);
+
+namespace App\Infrastructure\Http\Controller;
+
+use App\Shared\Application\Query\QueryBusInterface;
+use App\Users\Application\Config\UsersAppConfig;
+use App\Users\Application\DTO\UserDTO;
+use App\Users\Application\Query\GetJwtForSignup\GetJwtForSignupQuery;
+use App\Users\Application\Query\GetJwtFromUser\GetJwtFromUserQuery;
+use App\Users\Application\Query\GetUserByFirebaseToken\GetUserByFirebaseTokenQuery;
+use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+#[Route('/api/users/jwt-by-firebase-token', name: 'UsersGetJwtTokenFromFirebaseAuth', methods: ['POST'])]
+class UsersGetJwtTokenFromFirebaseAuthAction
+{
+    public function __construct(private readonly QueryBusInterface $queryBus)
+    {
+    }
+
+    #[OA\Tag(name: 'users')]
+    public function __invoke(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+
+        $token = $data['token'];
+        /** @var UserDTO $userDTO */
+        $userDTO = $this->queryBus->execute(new GetUserByFirebaseTokenQuery($token));
+
+
+        if ($userDTO->status >= 20) {
+
+            $message = '';
+            switch($userDTO->status) {
+                case UsersAppConfig::$USER_UNSUBSCRIBED:
+                    $message = 'Vous êtes désinscrit(e).';
+                    break;
+                case UsersAppConfig::$USER_BANNED:
+                    $message = 'Vous avez été banni(e).';
+                    break;
+                case UsersAppConfig::$USER_BLOCKED:
+                    $message = 'Vous avez été bloqué(e).';
+                    break;
+
+            }
+
+            return new JsonResponse(['message' => json_encode([
+                "code" => UsersAppConfig::$ERREUR_USER,
+                "title" => "Erreur",
+                "message" => $message."\n\nSupport: contact@playwinher.com",
+            ])], Response::HTTP_FORBIDDEN);
+
+        } else {
+            if ('' == $userDTO->email) {
+                $jwt = $this->queryBus->execute(new GetJwtForSignupQuery($userDTO));
+            } else {
+                $jwt = $this->queryBus->execute(new GetJwtFromUserQuery($userDTO));
+            }
+
+            return new JsonResponse([
+                'jwt' => $jwt,
+                'found' => ('' != $userDTO->email),
+                'auth_uid' => $userDTO->authUid,
+            ]);
+        }
+
+
+
+
+
+    }
+}
+
+
+
+FICHIER: src/Infrastructure/Persistence/Doctrine/Entity/UserEntity.php
+--------------------------------------------------------------------------------
+<?php
+
+namespace App\Infrastructure\Persistence\Doctrine\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+/**
+ * Infrastructure Entity - Mapping Doctrine uniquement
+ * Sert d'adapter entre le domaine et la base de données
+ */
+#[ORM\Entity]
+#[ORM\Table(name: '`user`')]
+#[ORM\HasLifecycleCallbacks]
+class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $uid = null;
+
+    #[ORM\Column(name: 'auth_uid', type: 'string', length: 100, nullable: true)]
+    private ?string $authUid = null;
+
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $email = null;
+
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $username = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
+    private string $password;
+
+    #[ORM\Column(name: 'about_me', type: 'text', nullable: true)]
+    private ?string $aboutMe = null;
+
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $gender = null;
+
+    #[ORM\Column(type: 'date', nullable: true)]
+    private ?\DateTime $birthdate = null;
+
+    #[ORM\Column(type: 'integer', options: ['default' => 1])]
+    private int $status = 1;
+
+    #[ORM\Column(name: 'created_at', type: 'datetime')]
+    private \DateTimeInterface $createdAt;
+
+    #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $updatedAt = null;
+
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
+    {
+        if ($this->createdAt === null) {
+            $this->createdAt = new \DateTime();
+        }
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updatedAt = new \DateTime();
+    }
+
+    // Getters and Setters
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function setId(?int $id): void
+    {
+        $this->id = $id;
+    }
+
+    public function getUid(): ?string
+    {
+        return $this->uid;
+    }
+
+    public function setUid(?string $uid): void
+    {
+        $this->uid = $uid;
+    }
+
+    public function getAuthUid(): ?string
+    {
+        return $this->authUid;
+    }
+
+    public function setAuthUid(?string $authUid): void
+    {
+        $this->authUid = $authUid;
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(?string $email): void
+    {
+        $this->email = $email;
+    }
+
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(?string $username): void
+    {
+        $this->username = $username;
+    }
+
+    public function getAboutMe(): ?string
+    {
+        return $this->aboutMe;
+    }
+
+    public function setAboutMe(?string $aboutMe): void
+    {
+        $this->aboutMe = $aboutMe;
+    }
+
+    public function getGender(): ?int
+    {
+        return $this->gender;
+    }
+
+    public function setGender(?int $gender): void
+    {
+        $this->gender = $gender;
+    }
+
+    public function getBirthdate(): ?\DateTime
+    {
+        return $this->birthdate;
+    }
+
+    public function setBirthdate(?\DateTime $birthdate): void
+    {
+        $this->birthdate = $birthdate;
+    }
+
+    public function isStatus(): bool
+    {
+        return $this->status;
+    }
+
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(int $status): void
+    {
+        $this->status = $status;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email ?? '';
+    }
+
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): void
+    {
+        $this->roles = $roles;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): void
+    {
+        $this->password = $password;
+    }
+
+    public function eraseCredentials(): void
+    {
+    }
+
+    public function getCreatedAt(): \DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): void
+    {
+        $this->createdAt = $createdAt;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): void
+    {
+        $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * Méthodes d'aide pour la compatibilité avec l'ancien nommage
+     */
+    public function isActive(): bool
+    {
+        return $this->status;
+    }
+
+    public function setIsActive(bool $isActive): void
+    {
+        $this->status = $isActive;
+    }
+}
+
+
+
+FICHIER: src/Infrastructure/Persistence/Doctrine/Repository/UserRepository.php
+--------------------------------------------------------------------------------
+<?php
+
+namespace App\Infrastructure\Persistence\Doctrine\Repository;
+
+use App\Domain\Entity\User;
+use App\Domain\Repository\UserRepositoryInterface;
+use App\Domain\ValueObject\Email;
+use App\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+/**
+ * Doctrine Repository (Adapter) - Implémente le port du domaine
+ */
+class UserRepository extends ServiceEntityRepository implements UserRepositoryInterface
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, UserEntity::class);
+    }
+
+    public function save(User $user): void
+    {
+        $userEntity = $this->toDoctrineEntity($user);
+
+        $this->getEntityManager()->persist($userEntity);
+        $this->getEntityManager()->flush();
+
+        // Sync l'ID généré vers l'entité domain
+        if ($user->getId() === null && $userEntity->getId() !== null) {
+            $user->setId($userEntity->getId());
+        }
+    }
+
+    public function delete(User $user): void
+    {
+        $userEntity = $this->find($user->getId());
+        if ($userEntity) {
+            $this->getEntityManager()->remove($userEntity);
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function findById(int $id): ?User
+    {
+        $userEntity = $this->find($id);
+        return $userEntity ? $this->toDomainEntity($userEntity) : null;
+    }
+
+    public function findByEmail(Email $email): ?User
+    {
+        $userEntity = $this->findOneBy(['email' => $email->getValue()]);
+        return $userEntity ? $this->toDomainEntity($userEntity) : null;
+    }
+
+    public function findAll(): array
+    {
+        $entities = $this->findBy([], ['createdAt' => 'DESC']);
+        return array_map(fn($e) => $this->toDomainEntity($e), $entities);
+    }
+
+    public function findActiveUsers(): array
+    {
+        $entities = $this->createQueryBuilder('u')
+            ->where('u.isActive = :active')
+            ->setParameter('active', true)
+            ->orderBy('u.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return array_map(fn($e) => $this->toDomainEntity($e), $entities);
+    }
+
+    public function findByRole(string $role): array
+    {
+        $entities = $this->createQueryBuilder('u')
+            ->andWhere('JSON_CONTAINS(u.roles, :role) = 1')
+            ->setParameter('role', json_encode($role))
+            ->getQuery()
+            ->getResult();
+
+        return array_map(fn($e) => $this->toDomainEntity($e), $entities);
+    }
+
+    public function search(string $searchTerm): array
+    {
+        $entities = $this->createQueryBuilder('u')
+            ->where('u.email LIKE :search OR u.firstname LIKE :search OR u.lastname LIKE :search')
+            ->setParameter('search', '%' . $searchTerm . '%')
+            ->orderBy('u.lastname', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return array_map(fn($e) => $this->toDomainEntity($e), $entities);
+    }
+
+    public function countActiveUsers(): int
+    {
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.isActive = :active')
+            ->setParameter('active', true)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    public function existsByEmail(Email $email): bool
+    {
+        return $this->count(['email' => $email->getValue()]) > 0;
+    }
+
+    /**
+     * Convertit une entité Domain en entité Doctrine
+     */
+    private function toDoctrineEntity(User $domainUser): UserEntity
+    {
+        $userEntity = new UserEntity();
+
+        if ($domainUser->getId() !== null) {
+            $existing = $this->find($domainUser->getId());
+            if ($existing) {
+                $userEntity = $existing;
+            } else {
+                $userEntity->setId($domainUser->getId());
+            }
+        }
+
+        $userEntity->setEmail($domainUser->getEmail()->getValue());
+        $userEntity->setRoles($domainUser->getRoles());
+        $userEntity->setPassword($domainUser->getPassword());
+        $userEntity->setFirstname($domainUser->getFirstname());
+        $userEntity->setLastname($domainUser->getLastname());
+        $userEntity->setIsActive($domainUser->isActive());
+        $userEntity->setCreatedAt($domainUser->getCreatedAt());
+
+        if ($domainUser->getUpdatedAt()) {
+            $userEntity->setUpdatedAt($domainUser->getUpdatedAt());
+        }
+
+        return $userEntity;
+    }
+
+    /**
+     * Convertit une entité Doctrine en entité Domain
+     */
+    private function toDomainEntity(UserEntity $userEntity): User
+    {
+        $user = new User(
+            new Email($userEntity->getEmail()),
+            $userEntity->getPassword(),
+            $userEntity->getFirstname(),
+            $userEntity->getLastname()
+        );
+
+        $user->setId($userEntity->getId());
+
+        // Restaurer les rôles (sans ROLE_USER par défaut qui sera ajouté automatiquement)
+        $roles = array_filter($userEntity->getRoles(), fn($r) => $r !== 'ROLE_USER');
+        foreach ($roles as $role) {
+            $user->addRole($role);
+        }
+
+        if (!$userEntity->isActive()) {
+            $user->deactivate();
+        }
+
+        return $user;
+    }
+
+    public function getUserByAuthUid(string $firebaseAuthId): ?UserEntity
+    {
+        return $this->findOneBy(['authUid' => $firebaseAuthId]);
+    }
+}
+
+
+
+FIN
+============
+Total fichiers: 43
+

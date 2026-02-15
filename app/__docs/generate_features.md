@@ -8,5 +8,8 @@ dart run build_runner build -d
 ./generate_feature.sh  --name tables
 dart run build_runner build -d
 
+./generate_feature.sh  --name account
+dart run build_runner build -d
+
 
 
