@@ -1,0 +1,29 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'user_profile_model.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_UserProfileModel _$UserProfileModelFromJson(Map<String, dynamic> json) =>
+    _UserProfileModel(
+      id: json['id'] as String,
+      username: json['username'] as String?,
+      gender: (json['gender'] as num?)?.toInt(),
+      birthdate: const DateTimeConverter().fromJson(
+        json['birthdate'] as String?,
+      ),
+      aboutMe: json['about_me'] as String?,
+      photoUrl: json['photo_url'] as String?,
+    );
+
+Map<String, dynamic> _$UserProfileModelToJson(_UserProfileModel instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'username': instance.username,
+      'gender': instance.gender,
+      'birthdate': const DateTimeConverter().toJson(instance.birthdate),
+      'about_me': instance.aboutMe,
+      'photo_url': instance.photoUrl,
+    };
