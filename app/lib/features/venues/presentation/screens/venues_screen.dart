@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:livekit_client/livekit_client.dart';
+import '../../../../providers/auth_provider.dart';
 
 class VenuesScreen extends ConsumerStatefulWidget {
   const VenuesScreen({super.key});
@@ -13,6 +14,49 @@ class VenuesScreen extends ConsumerStatefulWidget {
 }
 
 class _VenuesScreenState extends ConsumerState<VenuesScreen> {
+
+  // Méthode pour gérer la déconnexion
+  Future<void> _handleLogout(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E3F),
+        title: const Text(
+          'Déconnexion',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Voulez-vous vraiment vous déconnecter ?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Annuler',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6366F1),
+            ),
+            child: const Text('Déconnexion'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await ref.read(authServiceProvider).signOut();
+      if (context.mounted) {
+        // Redirection vers la page de login social
+        context.go('/social_login');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     const backgroundColor = Color(0xFF0F0F23);
@@ -24,11 +68,11 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        // Bouton de déconnexion à gauche
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: textPrimary),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          icon: const Icon(Icons.logout, color: textPrimary),
+          onPressed: () => _handleLogout(context),
+          tooltip: 'Se déconnecter',
         ),
         title: Text(
           'Nos Bars Virtuels',
@@ -39,6 +83,17 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
           ),
         ),
         centerTitle: true,
+        // Bouton de compte (roue crantée) à droite
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: textPrimary),
+            onPressed: () {
+              // Navigation vers l'espace compte
+              context.go('/account');
+            },
+            tooltip: 'Mon compte',
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -155,7 +210,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                   ),
                   const SizedBox(height: 8),
 
-                  // Nombre de personnes connectées
+                  // Nombre de personnes connectées (optionnel)
                   // Row(
                   //   children: [
                   //     Icon(

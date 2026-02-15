@@ -31,14 +31,18 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
       await ref.read(socialLoginControllerProvider.notifier).signInWithGoogle();
     } catch (e) {
       print('❌ Erreur Google Sign-In: $e');
-      setState(() {
-        _errorMessage = _getUserFriendlyError(e);
-      });
-      _showErrorSnackbar(e);
+      if (mounted) {
+        setState(() {
+          _errorMessage = _getUserFriendlyError(e);
+        });
+        _showErrorSnackbar(e);
+      }
     } finally {
-      setState(() {
-        _isGoogleSigningIn = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isGoogleSigningIn = false;
+        });
+      }
     }
   }
 
@@ -57,6 +61,7 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
   }
 
   void _showErrorSnackbar(dynamic error) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(_getUserFriendlyError(error)),
@@ -70,20 +75,26 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
   @override
   void initState() {
     super.initState();
-    // Écouter les changements d'authentification
+    // CORRECTION: Utiliser WidgetsBinding.instance.addPostFrameCallback avec un mounted check
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuthenticationState();
+      if (mounted) {
+        _checkAuthenticationState();
+      }
     });
   }
 
   void _checkAuthenticationState() {
-    final authState = ref.read(authStateProvider);
-    authState.whenData((user) {
+    if (!mounted) return;
 
+    // CORRECTION: Sauvegarder la référence à ref dans une variable locale
+    final localRef = ref;
+    final authState = localRef.read(authStateProvider);
+
+    authState.whenData((user) {
       print(user);
       print('--- user ---');
 
-      if (user != null) {
+      if (user != null && mounted) {
         print('✅ Utilisateur déjà connecté, redirection vers /venues');
         context.go('/venues');
       }
@@ -94,17 +105,10 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
   Widget build(BuildContext context) {
     final socialLoginState = ref.watch(socialLoginControllerProvider);
 
-    // Écouter les changements d'état d'authentification
-    // ref.listen(authStateProvider, (previous, next) {
-    //   next.whenData((user) {
-    //     if (user != null) {
-    //       print('✅ Auth state changed - User connected, redirecting to /venues');
-    //       context.go('/venues');
-    //     }
-    //   });
-    // });
-
+    // CORRECTION: Utiliser ref.listen avec mounted check
     ref.listen(authStateNotifierProvider, (previous, next) {
+      if (!mounted) return;
+
       if (next.isFullyAuthenticated) {
         // Redirection uniquement quand Firebase ET JWT sont OK
         context.go('/venues');
@@ -749,6 +753,7 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
   }
 
   void _showComingSoonSnackbar(String methodName) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(

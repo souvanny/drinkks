@@ -4,6 +4,7 @@ import 'package:flutter_riverpod_clean_architecture/core/constants/app_constants
 import 'package:flutter_riverpod_clean_architecture/core/providers/localization_providers.dart';
 import 'package:flutter_riverpod_clean_architecture/core/router/locale_aware_router.dart';
 import 'package:flutter_riverpod_clean_architecture/examples/localization_assets_demo.dart';
+import 'package:flutter_riverpod_clean_architecture/features/account/presentation/screens/account_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/social_login/presentation/screens/social_login_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/auth/presentation/screens/register_screen.dart';
@@ -14,14 +15,14 @@ import 'package:flutter_riverpod_clean_architecture/features/settings/presentati
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod_clean_architecture/features/chat/presentation/screens/chat_screen.dart';
 import 'package:flutter_riverpod_clean_architecture/features/survey/presentation/screens/survey_screen.dart';
-
 import 'package:flutter_riverpod_clean_architecture/features/venues/presentation/screens/venues_screen.dart';
-
 import '../../features/tables/presentation/screens/tables_screen.dart';
-
+import '../../providers/auth_provider.dart'; // IMPORTANT: Ajouter cet import pour authStateNotifierProvider
 
 final routerProvider = Provider<GoRouter>((ref) {
+  // CORRECTION 1: Utiliser authStateNotifierProvider au lieu de authProvider
   final authState = ref.watch(authProvider);
+  // final authState = ref.watch(authStateNotifierProvider);
 
   // Watch for locale changes - this rebuilds the router when locale changes
   ref.watch(persistentLocaleProvider);
@@ -37,8 +38,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (state.matchedLocation.startsWith('/venues')) {
         return null; // Pas de redirection, autoriser l'accès
       }
+      if (state.matchedLocation.startsWith('/account')) {
+        return null; // Pas de redirection, autoriser l'accès
+      }
 
-      // Get the authentication status
+      // CORRECTION 2: Utiliser isAuthenticated du nouveau provider
       final isLoggedIn = authState.isAuthenticated;
 
       // Check if the user is going to the login page
@@ -118,6 +122,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SurveyScreen(),
       ),
 
+      // CORRECTION 3: Route pour account (supprimer la route dupliquée sous survey)
+      GoRoute(
+        path: '/account',
+        name: 'account',
+        builder: (context, state) => const AccountScreen(),
+      ),
+
       // Venues route (écran des bars)
       GoRoute(
         path: AppConstants.venuesRoute,
@@ -130,7 +141,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'tables',
             builder: (context, state) {
               final venueId = state.pathParameters['venueId']!;
-              // Vous pouvez passer l'ID du bar à votre écran
               return TablesScreen(venueId: venueId);
             },
           ),

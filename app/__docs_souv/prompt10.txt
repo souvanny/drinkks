@@ -1,4 +1,4 @@
-Pour TableScreen, le bouton en haut à gaucje, je voudrais que ça fasse office de logout et que ça amène à la page de social_login.
+Pour VenuesScreen, le bouton en haut à gaucje, je voudrais que ça fasse office de logout et que ça amène à la page de social_login.
 Ajouter un nouveau bouton en haut à droite, avec une roue crantée, qui amène vers un nouveau feature qui sera l'espace account.
 Où on aura, dans différents onglets :
 - un espace info du compte, avec modification possible :
