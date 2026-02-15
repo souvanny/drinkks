@@ -1,0 +1,96 @@
+ls -la android/app/src/main/res/drawable/
+ls -la android/app/src/main/res/values/
+ls -la android/app/src/main/res/mipmap*/
+zsh: command not found: #
+total 16
+drwxr-xr-x@  4 souvanny  staff  128 Feb 15 17:36 .
+drwxr-xr-x@ 25 souvanny  staff  800 Feb 15 17:36 ..
+-rw-r--r--@  1 souvanny  staff   69 Feb 15 18:11 background.png
+-rw-r--r--@  1 souvanny  staff  441 Feb 15 18:11 launch_background.xml
+total 8
+drwxr-xr-x@  3 souvanny  staff    96 Feb 15 17:53 .
+drwxr-xr-x@ 25 souvanny  staff   800 Feb 15 17:36 ..
+-rw-r--r--@  1 souvanny  staff  1131 Feb 15 18:11 styles.xml
+android/app/src/main/res/mipmap-hdpi/:
+total 8
+drwxr-xr-x@  3 souvanny  staff   96 Jan  9 23:54 .
+drwxr-xr-x@ 25 souvanny  staff  800 Feb 15 17:36 ..
+-rw-r--r--@  1 souvanny  staff  544 Jan  9 23:54 ic_launcher.png
+
+android/app/src/main/res/mipmap-mdpi/:
+total 8
+drwxr-xr-x@  3 souvanny  staff   96 Jan  9 23:54 .
+drwxr-xr-x@ 25 souvanny  staff  800 Feb 15 17:36 ..
+-rw-r--r--@  1 souvanny  staff  442 Jan  9 23:54 ic_launcher.png
+
+android/app/src/main/res/mipmap-xhdpi/:
+total 8
+drwxr-xr-x@  3 souvanny  staff   96 Jan  9 23:54 .
+drwxr-xr-x@ 25 souvanny  staff  800 Feb 15 17:36 ..
+-rw-r--r--@  1 souvanny  staff  721 Jan  9 23:54 ic_launcher.png
+
+android/app/src/main/res/mipmap-xxhdpi/:
+total 8
+drwxr-xr-x@  3 souvanny  staff    96 Jan  9 23:54 .
+drwxr-xr-x@ 25 souvanny  staff   800 Feb 15 17:36 ..
+-rw-r--r--@  1 souvanny  staff  1031 Jan  9 23:54 ic_launcher.png
+
+android/app/src/main/res/mipmap-xxxhdpi/:
+total 8
+drwxr-xr-x@  3 souvanny  staff    96 Jan  9 23:54 .
+drwxr-xr-x@ 25 souvanny  staff   800 Feb 15 17:36 ..
+-rw-r--r--@  1 souvanny  staff  1443 Jan  9 23:54 ic_launcher.png
+souvanny@macbookpro-3 app %
+
+
+
+
+cat android/app/src/main/res/values/styles.xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is off -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@drawable/launch_background</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+    <!-- Theme applied to the Android Window as soon as the process has started.
+         This theme determines the color of the Android Window while your
+         Flutter UI initializes, as well as behind your Flutter UI while its
+         running.
+
+         This Theme is only used starting with V2 of Flutter's Android embedding. -->
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>
+
+
+
+cat android/app/src/main/res/drawable/launch_background.xml
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <bitmap android:gravity="fill" android:src="@drawable/background"/>
+    </item>
+    <item>
+        <bitmap android:gravity="center" android:src="@drawable/splash"/>
+    </item>
+    <item android:bottom="0dp">
+        <bitmap android:gravity="bottom" android:src="@drawable/branding"/>
+    </item>
+</layer-list>
+
+
+
+
+
+ls -la android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+ls -la android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+zsh: command not found: #
+-rw-r--r--@ 1 souvanny  staff  544 Jan  9 23:54 android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+-rw-r--r--@ 1 souvanny  staff  721 Jan  9 23:54 android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+
+
