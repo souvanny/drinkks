@@ -1,0 +1,2075 @@
+Ci dessous les fichiers flutter à analyser.
+Dans _handleAuthenticationEvent, dans auth_service.dart, si user != null && authorization != null, alors
+Il faudrait aussi appeler l'api suivant :
+
+curl --location 'http://localhost:8101/api/users/jwt-by-firebase-token' \
+--header 'Content-Type: application/json' \
+--data '{ "token": "{tokenResult.token}" }'
+
+Ensuite renseigner appJwt.
+
+Et stocker ce aapJwt dans le storage (_tokenKey).
+
+Il faudrait centraliser tous les appels vers l'api via un service, dans un autre dossier du projet Flutter.
+Pour pouvoir gérer les exceptions de manière centralisée.
+
+
+FICHIERS POUR ANALYSE
+=====================
+Dossiers analysés:
+  - flutter_lib/features/social_login
+  - flutter_lib/services
+Extensions: dart, php
+Date: 2026-02-15 02:25:36
+
+ARBORESCENCE:
+-------------
+└── 📁 flutter_lib/
+    ├── 📁 features/
+    │   └── 📁 social_login/
+    │       ├── 📁 data/
+    │       │   ├── 📁 datasources/
+    │       │   │   ├── 📄 social_login_remote_data_source.dart
+    │       │   │   └── 📄 social_login_remote_data_source.g.dart
+    │       │   ├── 📁 models/
+    │       │   │   ├── 📄 social_login_model.dart
+    │       │   │   ├── 📄 social_login_model.freezed.dart
+    │       │   │   └── 📄 social_login_model.g.dart
+    │       │   └── 📁 repositories/
+    │       │       ├── 📄 social_login_repository_impl.dart
+    │       │       └── 📄 social_login_repository_impl.g.dart
+    │       ├── 📁 domain/
+    │       │   ├── 📁 entities/
+    │       │   │   ├── 📄 social_login_entity.dart
+    │       │   │   └── 📄 social_login_entity.freezed.dart
+    │       │   ├── 📁 repositories/
+    │       │   │   └── 📄 social_login_repository.dart
+    │       │   └── 📁 usecases/
+    │       │       ├── 📄 get_social_logins_usecase.dart
+    │       │       └── 📄 get_social_logins_usecase.g.dart
+    │       └── 📁 presentation/
+    │           ├── 📁 controllers/
+    │           │   ├── 📄 social_login_controller.dart
+    │           │   └── 📄 social_login_controller.g.dart
+    │           └── 📁 screens/
+    │               └── 📄 social_login_screen.dart
+    └── 📁 services/
+        └── 📄 auth_service.dart
+
+
+CONTENU DES FICHIERS
+====================
+
+FICHIER: flutter_lib/features/social_login/data/datasources/social_login_remote_data_source.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:dio/dio.dart';
+import '../../../../core/providers/network_providers.dart';
+import '../models/social_login_model.dart';
+
+part 'social_login_remote_data_source.g.dart';
+
+abstract class SocialLoginRemoteDataSource {
+  Future<List<SocialLoginModel>> fetchSocialLogins();
+  Future<SocialLoginModel> fetchSocialLogin(String id);
+}
+
+@riverpod
+SocialLoginRemoteDataSource socialLoginRemoteDataSource(Ref ref) {
+  final dio = ref.watch(dioProvider);
+  return SocialLoginRemoteDataSourceImpl(dio);
+}
+
+class SocialLoginRemoteDataSourceImpl implements SocialLoginRemoteDataSource {
+  final Dio _dio;
+
+  SocialLoginRemoteDataSourceImpl(this._dio);
+
+  @override
+  Future<List<SocialLoginModel>> fetchSocialLogins() async {
+    // final response = await _dio.get('/social_logins');
+    // return (response.data as List).map((e) => SocialLoginModel.fromJson(e)).toList();
+    // await Future.delayed(const Duration(seconds: 1));
+    // return [
+    //   const SocialLoginModel(id: '1', name: 'Item 1'),
+    //   const SocialLoginModel(id: '2', name: 'Item 2'),
+    // ];
+    return [];
+  }
+
+  @override
+  Future<SocialLoginModel> fetchSocialLogin(String id) async {
+    await Future.delayed(const Duration(seconds: 1));
+    return SocialLoginModel(id: id, name: 'Item ');
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/social_login/data/datasources/social_login_remote_data_source.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'social_login_remote_data_source.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(socialLoginRemoteDataSource)
+final socialLoginRemoteDataSourceProvider =
+    SocialLoginRemoteDataSourceProvider._();
+
+final class SocialLoginRemoteDataSourceProvider
+    extends
+        $FunctionalProvider<
+          SocialLoginRemoteDataSource,
+          SocialLoginRemoteDataSource,
+          SocialLoginRemoteDataSource
+        >
+    with $Provider<SocialLoginRemoteDataSource> {
+  SocialLoginRemoteDataSourceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'socialLoginRemoteDataSourceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$socialLoginRemoteDataSourceHash();
+
+  @$internal
+  @override
+  $ProviderElement<SocialLoginRemoteDataSource> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SocialLoginRemoteDataSource create(Ref ref) {
+    return socialLoginRemoteDataSource(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SocialLoginRemoteDataSource value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SocialLoginRemoteDataSource>(value),
+    );
+  }
+}
+
+String _$socialLoginRemoteDataSourceHash() =>
+    r'4c702cae0479e7fb4185f7dc09648f98affcfe75';
+
+
+
+FICHIER: flutter_lib/features/social_login/data/models/social_login_model.dart
+--------------------------------------------------------------------------------
+import 'package:freezed_annotation/freezed_annotation.dart';
+import '../../domain/entities/social_login_entity.dart';
+
+part 'social_login_model.freezed.dart';
+part 'social_login_model.g.dart';
+
+@freezed
+abstract class SocialLoginModel with _$SocialLoginModel {
+  const SocialLoginModel._();
+
+  const factory SocialLoginModel({
+    required String id,
+    required String name,
+  }) = _SocialLoginModel;
+
+  factory SocialLoginModel.fromJson(Map<String, dynamic> json) =>
+      _$SocialLoginModelFromJson(json);
+
+  SocialLoginEntity toEntity() => SocialLoginEntity(id: id, name: name);
+}
+
+
+
+FICHIER: flutter_lib/features/social_login/data/models/social_login_model.freezed.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'social_login_model.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+
+/// @nodoc
+mixin _$SocialLoginModel {
+
+ String get id; String get name;
+/// Create a copy of SocialLoginModel
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SocialLoginModelCopyWith<SocialLoginModel> get copyWith => _$SocialLoginModelCopyWithImpl<SocialLoginModel>(this as SocialLoginModel, _$identity);
+
+  /// Serializes this SocialLoginModel to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SocialLoginModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'SocialLoginModel(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $SocialLoginModelCopyWith<$Res>  {
+  factory $SocialLoginModelCopyWith(SocialLoginModel value, $Res Function(SocialLoginModel) _then) = _$SocialLoginModelCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class _$SocialLoginModelCopyWithImpl<$Res>
+    implements $SocialLoginModelCopyWith<$Res> {
+  _$SocialLoginModelCopyWithImpl(this._self, this._then);
+
+  final SocialLoginModel _self;
+  final $Res Function(SocialLoginModel) _then;
+
+/// Create a copy of SocialLoginModel
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [SocialLoginModel].
+extension SocialLoginModelPatterns on SocialLoginModel {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SocialLoginModel value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _SocialLoginModel() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SocialLoginModel value)  $default,){
+final _that = this;
+switch (_that) {
+case _SocialLoginModel():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SocialLoginModel value)?  $default,){
+final _that = this;
+switch (_that) {
+case _SocialLoginModel() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _SocialLoginModel() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name)  $default,) {final _that = this;
+switch (_that) {
+case _SocialLoginModel():
+return $default(_that.id,_that.name);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name)?  $default,) {final _that = this;
+switch (_that) {
+case _SocialLoginModel() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _SocialLoginModel extends SocialLoginModel {
+  const _SocialLoginModel({required this.id, required this.name}): super._();
+  factory _SocialLoginModel.fromJson(Map<String, dynamic> json) => _$SocialLoginModelFromJson(json);
+
+@override final  String id;
+@override final  String name;
+
+/// Create a copy of SocialLoginModel
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SocialLoginModelCopyWith<_SocialLoginModel> get copyWith => __$SocialLoginModelCopyWithImpl<_SocialLoginModel>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$SocialLoginModelToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SocialLoginModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'SocialLoginModel(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SocialLoginModelCopyWith<$Res> implements $SocialLoginModelCopyWith<$Res> {
+  factory _$SocialLoginModelCopyWith(_SocialLoginModel value, $Res Function(_SocialLoginModel) _then) = __$SocialLoginModelCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$SocialLoginModelCopyWithImpl<$Res>
+    implements _$SocialLoginModelCopyWith<$Res> {
+  __$SocialLoginModelCopyWithImpl(this._self, this._then);
+
+  final _SocialLoginModel _self;
+  final $Res Function(_SocialLoginModel) _then;
+
+/// Create a copy of SocialLoginModel
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_SocialLoginModel(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+// dart format on
+
+
+
+FICHIER: flutter_lib/features/social_login/data/models/social_login_model.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'social_login_model.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_SocialLoginModel _$SocialLoginModelFromJson(Map<String, dynamic> json) =>
+    _SocialLoginModel(id: json['id'] as String, name: json['name'] as String);
+
+Map<String, dynamic> _$SocialLoginModelToJson(_SocialLoginModel instance) =>
+    <String, dynamic>{'id': instance.id, 'name': instance.name};
+
+
+
+FICHIER: flutter_lib/features/social_login/data/repositories/social_login_repository_impl.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../domain/entities/social_login_entity.dart';
+import '../../domain/repositories/social_login_repository.dart';
+import '../datasources/social_login_remote_data_source.dart';
+
+part 'social_login_repository_impl.g.dart';
+
+@riverpod
+SocialLoginRepository socialLoginRepository(Ref ref) {
+  final remoteDataSource = ref.watch(socialLoginRemoteDataSourceProvider);
+  return SocialLoginRepositoryImpl(remoteDataSource);
+}
+
+class SocialLoginRepositoryImpl implements SocialLoginRepository {
+  final SocialLoginRemoteDataSource _remoteDataSource;
+
+  SocialLoginRepositoryImpl(this._remoteDataSource);
+
+  @override
+  Future<List<SocialLoginEntity>> getSocialLogins() async {
+    final models = await _remoteDataSource.fetchSocialLogins();
+    return models.map((e) => e.toEntity()).toList();
+  }
+
+  @override
+  Future<SocialLoginEntity> getSocialLogin(String id) async {
+    final model = await _remoteDataSource.fetchSocialLogin(id);
+    return model.toEntity();
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/social_login/data/repositories/social_login_repository_impl.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'social_login_repository_impl.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(socialLoginRepository)
+final socialLoginRepositoryProvider = SocialLoginRepositoryProvider._();
+
+final class SocialLoginRepositoryProvider
+    extends
+        $FunctionalProvider<
+          SocialLoginRepository,
+          SocialLoginRepository,
+          SocialLoginRepository
+        >
+    with $Provider<SocialLoginRepository> {
+  SocialLoginRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'socialLoginRepositoryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$socialLoginRepositoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<SocialLoginRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SocialLoginRepository create(Ref ref) {
+    return socialLoginRepository(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SocialLoginRepository value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SocialLoginRepository>(value),
+    );
+  }
+}
+
+String _$socialLoginRepositoryHash() =>
+    r'245216df254a2f1cbb530b4b7c64b67c6327439c';
+
+
+
+FICHIER: flutter_lib/features/social_login/domain/entities/social_login_entity.dart
+--------------------------------------------------------------------------------
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'social_login_entity.freezed.dart';
+
+@freezed
+abstract class SocialLoginEntity with _$SocialLoginEntity {
+  const factory SocialLoginEntity({
+    required String id,
+    required String name,
+  }) = _SocialLoginEntity;
+}
+
+
+
+FICHIER: flutter_lib/features/social_login/domain/entities/social_login_entity.freezed.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'social_login_entity.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+/// @nodoc
+mixin _$SocialLoginEntity {
+
+ String get id; String get name;
+/// Create a copy of SocialLoginEntity
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SocialLoginEntityCopyWith<SocialLoginEntity> get copyWith => _$SocialLoginEntityCopyWithImpl<SocialLoginEntity>(this as SocialLoginEntity, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SocialLoginEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'SocialLoginEntity(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $SocialLoginEntityCopyWith<$Res>  {
+  factory $SocialLoginEntityCopyWith(SocialLoginEntity value, $Res Function(SocialLoginEntity) _then) = _$SocialLoginEntityCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class _$SocialLoginEntityCopyWithImpl<$Res>
+    implements $SocialLoginEntityCopyWith<$Res> {
+  _$SocialLoginEntityCopyWithImpl(this._self, this._then);
+
+  final SocialLoginEntity _self;
+  final $Res Function(SocialLoginEntity) _then;
+
+/// Create a copy of SocialLoginEntity
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [SocialLoginEntity].
+extension SocialLoginEntityPatterns on SocialLoginEntity {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SocialLoginEntity value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _SocialLoginEntity() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SocialLoginEntity value)  $default,){
+final _that = this;
+switch (_that) {
+case _SocialLoginEntity():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SocialLoginEntity value)?  $default,){
+final _that = this;
+switch (_that) {
+case _SocialLoginEntity() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _SocialLoginEntity() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name)  $default,) {final _that = this;
+switch (_that) {
+case _SocialLoginEntity():
+return $default(_that.id,_that.name);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name)?  $default,) {final _that = this;
+switch (_that) {
+case _SocialLoginEntity() when $default != null:
+return $default(_that.id,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _SocialLoginEntity implements SocialLoginEntity {
+  const _SocialLoginEntity({required this.id, required this.name});
+
+
+@override final  String id;
+@override final  String name;
+
+/// Create a copy of SocialLoginEntity
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SocialLoginEntityCopyWith<_SocialLoginEntity> get copyWith => __$SocialLoginEntityCopyWithImpl<_SocialLoginEntity>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SocialLoginEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,name);
+
+@override
+String toString() {
+  return 'SocialLoginEntity(id: $id, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SocialLoginEntityCopyWith<$Res> implements $SocialLoginEntityCopyWith<$Res> {
+  factory _$SocialLoginEntityCopyWith(_SocialLoginEntity value, $Res Function(_SocialLoginEntity) _then) = __$SocialLoginEntityCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$SocialLoginEntityCopyWithImpl<$Res>
+    implements _$SocialLoginEntityCopyWith<$Res> {
+  __$SocialLoginEntityCopyWithImpl(this._self, this._then);
+
+  final _SocialLoginEntity _self;
+  final $Res Function(_SocialLoginEntity) _then;
+
+/// Create a copy of SocialLoginEntity
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,}) {
+  return _then(_SocialLoginEntity(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+// dart format on
+
+
+
+FICHIER: flutter_lib/features/social_login/domain/repositories/social_login_repository.dart
+--------------------------------------------------------------------------------
+import '../entities/social_login_entity.dart';
+
+abstract class SocialLoginRepository {
+  Future<List<SocialLoginEntity>> getSocialLogins();
+  Future<SocialLoginEntity> getSocialLogin(String id);
+}
+
+
+
+FICHIER: flutter_lib/features/social_login/domain/usecases/get_social_logins_usecase.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../entities/social_login_entity.dart';
+import '../repositories/social_login_repository.dart';
+import '../../data/repositories/social_login_repository_impl.dart';
+
+part 'get_social_logins_usecase.g.dart';
+
+@riverpod
+Future<List<SocialLoginEntity>> getSocialLogins(Ref ref) {
+  return ref.watch(socialLoginRepositoryProvider).getSocialLogins();
+}
+
+
+
+FICHIER: flutter_lib/features/social_login/domain/usecases/get_social_logins_usecase.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'get_social_logins_usecase.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(getSocialLogins)
+final getSocialLoginsProvider = GetSocialLoginsProvider._();
+
+final class GetSocialLoginsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<SocialLoginEntity>>,
+          List<SocialLoginEntity>,
+          FutureOr<List<SocialLoginEntity>>
+        >
+    with
+        $FutureModifier<List<SocialLoginEntity>>,
+        $FutureProvider<List<SocialLoginEntity>> {
+  GetSocialLoginsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getSocialLoginsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getSocialLoginsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<SocialLoginEntity>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<SocialLoginEntity>> create(Ref ref) {
+    return getSocialLogins(ref);
+  }
+}
+
+String _$getSocialLoginsHash() => r'3520f25d6ac3be09c359e09715135a2f6577795e';
+
+
+
+FICHIER: flutter_lib/features/social_login/presentation/controllers/social_login_controller.dart
+--------------------------------------------------------------------------------
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../../../providers/auth_provider.dart';
+import '../../domain/entities/social_login_entity.dart';
+import '../../domain/usecases/get_social_logins_usecase.dart';
+import '../../../../services/auth_service.dart';
+
+part 'social_login_controller.g.dart';
+
+@riverpod
+class SocialLoginController extends _$SocialLoginController {
+  late AuthService _authService;
+
+  @override
+  FutureOr<List<SocialLoginEntity>> build() {
+    _authService = ref.read(authServiceProvider);
+
+    print('🟡 SocialLoginController initialisé');
+    return ref.watch(getSocialLoginsProvider.future);
+  }
+
+  Future<void> refresh() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => ref.refresh(getSocialLoginsProvider.future));
+  }
+
+  Future<void> handleGoogleAuthenticationEvent() async {
+  }
+
+  Future<void> handleGoogleAuthenticationError() async {
+  }
+
+
+
+    // NOUVELLE MÉTHODE : Connexion avec Google
+  Future<User?> signInWithGoogle() async {
+    print('🔵 SocialLoginController.signInWithGoogle() appelé');
+
+    try {
+      // Appeler le service d'authentification
+      await _authService.signInWithGoogle();
+    } catch (e, stack) {
+      print('❌ Erreur dans signInWithGoogle: $e');
+      print('Stack trace: $stack');
+      rethrow;
+    }
+  }
+
+  // Méthode de déconnexion
+  Future<void> signOut() async {
+    try {
+      await _authService.signOut();
+      print('✅ Déconnexion effectuée depuis SocialLoginController');
+    } catch (e) {
+      print('❌ Erreur lors de la déconnexion: $e');
+      rethrow;
+    }
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/social_login/presentation/controllers/social_login_controller.g.dart
+--------------------------------------------------------------------------------
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'social_login_controller.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+
+@ProviderFor(SocialLoginController)
+final socialLoginControllerProvider = SocialLoginControllerProvider._();
+
+final class SocialLoginControllerProvider
+    extends
+        $AsyncNotifierProvider<SocialLoginController, List<SocialLoginEntity>> {
+  SocialLoginControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'socialLoginControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$socialLoginControllerHash();
+
+  @$internal
+  @override
+  SocialLoginController create() => SocialLoginController();
+}
+
+String _$socialLoginControllerHash() =>
+    r'e3178f3ea74973899bbe78ccffb397d264b46adf';
+
+abstract class _$SocialLoginController
+    extends $AsyncNotifier<List<SocialLoginEntity>> {
+  FutureOr<List<SocialLoginEntity>> build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref =
+        this.ref
+            as $Ref<
+              AsyncValue<List<SocialLoginEntity>>,
+              List<SocialLoginEntity>
+            >;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                AsyncValue<List<SocialLoginEntity>>,
+                List<SocialLoginEntity>
+              >,
+              AsyncValue<List<SocialLoginEntity>>,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
+
+
+FICHIER: flutter_lib/features/social_login/presentation/screens/social_login_screen.dart
+--------------------------------------------------------------------------------
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../providers/auth_provider.dart';
+import '../../domain/entities/social_login_entity.dart';
+import '../controllers/social_login_controller.dart';
+
+class SocialLoginScreen extends ConsumerStatefulWidget {
+  const SocialLoginScreen({super.key});
+
+  @override
+  ConsumerState<SocialLoginScreen> createState() => _SocialLoginScreenState();
+}
+
+class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
+  bool _isGoogleSigningIn = false;
+  String? _errorMessage;
+  bool _showMethods = false;
+
+  Future<void> _signInWithGoogle() async {
+    if (_isGoogleSigningIn) return;
+
+    setState(() {
+      _isGoogleSigningIn = true;
+      _errorMessage = null;
+    });
+
+    try {
+      print('🔵 Début de la connexion Google...');
+      await ref.read(socialLoginControllerProvider.notifier).signInWithGoogle();
+    } catch (e) {
+      print('❌ Erreur Google Sign-In: $e');
+      setState(() {
+        _errorMessage = _getUserFriendlyError(e);
+      });
+      _showErrorSnackbar(e);
+    } finally {
+      setState(() {
+        _isGoogleSigningIn = false;
+      });
+    }
+  }
+
+  String _getUserFriendlyError(dynamic error) {
+    if (error is FirebaseAuthException) {
+      switch (error.code) {
+        case 'popup-closed-by-user':
+          return 'Connexion annulée';
+        case 'network-request-failed':
+          return 'Erreur réseau. Vérifiez votre connexion';
+        default:
+          return 'Erreur: ${error.message ?? error.code}';
+      }
+    }
+    return 'Erreur de connexion. Veuillez réessayer.';
+  }
+
+  void _showErrorSnackbar(dynamic error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(_getUserFriendlyError(error)),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Écouter les changements d'authentification
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuthenticationState();
+    });
+  }
+
+  void _checkAuthenticationState() {
+    final authState = ref.read(authStateProvider);
+    authState.whenData((user) {
+
+      print(user);
+      print('--- user ---');
+
+      if (user != null) {
+        print('✅ Utilisateur déjà connecté, redirection vers /venues');
+        context.go('/venues');
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final socialLoginState = ref.watch(socialLoginControllerProvider);
+
+    // Écouter les changements d'état d'authentification
+    ref.listen(authStateProvider, (previous, next) {
+      next.whenData((user) {
+        if (user != null) {
+          print('✅ Auth state changed - User connected, redirecting to /venues');
+          context.go('/venues');
+        }
+      });
+    });
+
+    // Palette de couleurs pour l'ambiance Drinkks
+    const primaryColor = Color(0xFF6366F1); // Indigo doux
+    const backgroundColor = Color(0xFF0F0F23); // Noir bleuté profond
+    const surfaceColor = Color(0xFF1A1A2E); // Surface légèrement plus claire
+    const accentColor = Color(0xFF8B5CF6); // Violet accent
+    const textPrimary = Colors.white;
+    const textSecondary = Color(0xFF94A3B8); // Gris bleuté
+
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Espace en haut
+                const SizedBox(height: 40),
+
+                // Logo et nom d'application animé
+                _buildLogoHeader(primaryColor, accentColor),
+
+                // Espacement
+                const SizedBox(height: 48),
+
+                // Message d'accueil
+                _buildWelcomeText(textPrimary, textSecondary),
+
+                // Espacement
+                const SizedBox(height: 48),
+
+                // Bouton Google principal
+                _buildGoogleSignInButton(primaryColor, textPrimary),
+
+                // Message d'erreur
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 20),
+                  _buildErrorMessage(_errorMessage!, accentColor),
+                ],
+
+                // Séparateur élégant
+                const SizedBox(height: 40),
+                _buildDivider(textSecondary),
+
+                // Bouton pour voir les autres méthodes
+                if (!_showMethods) ...[
+                  const SizedBox(height: 24),
+                  _buildShowMethodsButton(textSecondary, accentColor),
+                ],
+
+                // Liste des autres méthodes
+                if (_showMethods)
+                  _buildOtherMethodsSection(
+                    socialLoginState,
+                    surfaceColor,
+                    textPrimary,
+                    textSecondary,
+                    accentColor,
+                  ),
+
+                // Conditions d'utilisation
+                const SizedBox(height: 40),
+                _buildTermsAndPrivacy(textSecondary),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildLogoHeader(Color primaryColor, Color accentColor) {
+    return Column(
+      children: [
+        // Logo animé (cercle avec effet de vague) - CLIQUEZ ICI !
+        InkWell(
+          onTap: () {
+            // Navigation temporaire vers /venues
+            print('🎬 Clic sur logo - Accès temporaire à /venues');
+            context.go('/venues');
+          },
+          borderRadius: BorderRadius.circular(60),
+          child: Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                colors: [
+                  primaryColor.withOpacity(0.3),
+                  primaryColor.withOpacity(0.1),
+                  Colors.transparent,
+                ],
+                stops: const [0.1, 0.5, 1.0],
+              ),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Effet de vague extérieur
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: primaryColor.withOpacity(0.3),
+                      width: 2,
+                    ),
+                  ),
+                ),
+
+                // Cercle intérieur avec icône
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        primaryColor,
+                        accentColor,
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.4),
+                        blurRadius: 20,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.videocam,
+                    size: 40,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Nom de l'application avec effet de gradient
+        ShaderMask(
+          shaderCallback: (bounds) {
+            return LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [primaryColor, accentColor],
+            ).createShader(bounds);
+          },
+          child: Text(
+            'Drinkks',
+            style: TextStyle(
+              fontSize: 42,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+              color: Colors.white,
+            ),
+          ),
+        ),
+
+        // Tagline
+        const SizedBox(height: 8),
+        Text(
+          'Visio • Social • Instantané',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.white.withOpacity(0.7),
+            letterSpacing: 1.2,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWelcomeText(Color textPrimary, Color textSecondary) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Rejoignez la conversation',
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w700,
+            color: textPrimary,
+            height: 1.2,
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'Prenez place à une table virtuelle, ',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              TextSpan(
+                text: 'discutez en visio',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  height: 1.5,
+                ),
+              ),
+              TextSpan(
+                text: ' et créez des connexions authentiques.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: textSecondary,
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGoogleSignInButton(Color primaryColor, Color textPrimary) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: _isGoogleSigningIn
+            ? null
+            : LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            primaryColor,
+            const Color(0xFF8B5CF6),
+          ],
+        ),
+        boxShadow: _isGoogleSigningIn
+            ? []
+            : [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: _isGoogleSigningIn ? null : _signInWithGoogle,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            width: double.infinity,
+            height: 60,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: _isGoogleSigningIn
+                  ? [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: textPrimary,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  'Connexion en cours...',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textPrimary,
+                  ),
+                ),
+              ]
+                  : [
+                Image.asset(
+                  'assets/images/logos/google-signin-logo_100_100.png',
+                  height: 24,
+                  width: 24,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.g_mobiledata,
+                      size: 24,
+                      color: textPrimary,
+                    );
+                  },
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  'Continuer avec Google',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage(String message, Color accentColor) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: accentColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: accentColor.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            color: accentColor,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivider(Color textSecondary) {
+    return Row(
+      children: [
+        Expanded(
+          child: Divider(
+            color: textSecondary.withOpacity(0.3),
+            thickness: 1,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'ou',
+            style: TextStyle(
+              color: textSecondary,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Divider(
+            color: textSecondary.withOpacity(0.3),
+            thickness: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildShowMethodsButton(Color textSecondary, Color accentColor) {
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          _showMethods = true;
+        });
+      },
+      style: TextButton.styleFrom(
+        foregroundColor: accentColor,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'Autres méthodes de connexion',
+            style: TextStyle(
+              color: textSecondary,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(
+            Icons.arrow_forward,
+            size: 16,
+            color: textSecondary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOtherMethodsSection(
+      AsyncValue<List<SocialLoginEntity>> socialLoginState,
+      Color surfaceColor,
+      Color textPrimary,
+      Color textSecondary,
+      Color accentColor,
+      ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 32),
+        Text(
+          'Bientôt disponible',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: textPrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Nous travaillons à ajouter d\'autres options de connexion',
+          style: TextStyle(
+            fontSize: 14,
+            color: textSecondary,
+          ),
+        ),
+        const SizedBox(height: 24),
+        socialLoginState.when(
+          data: (socialLogins) {
+            final otherMethods = socialLogins
+                .where((method) => method.id.toLowerCase() != 'google')
+                .toList();
+
+            if (otherMethods.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Plus d\'options arrivent bientôt...',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              );
+            }
+
+            return Column(
+              children: otherMethods.map((method) {
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: surfaceColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.05),
+                    ),
+                  ),
+                  child: ListTile(
+                    leading: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: _getColorForMethod(method.id).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        _getIconForMethod(method.id),
+                        color: _getColorForMethod(method.id),
+                        size: 22,
+                      ),
+                    ),
+                    title: Text(
+                      method.name,
+                      style: TextStyle(
+                        color: textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    subtitle: Text(
+                      'Disponible prochainement',
+                      style: TextStyle(
+                        color: textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: accentColor.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Text(
+                        'Bientôt',
+                        style: TextStyle(
+                          color: accentColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    onTap: () {
+                      _showComingSoonSnackbar(method.name);
+                    },
+                  ),
+                );
+              }).toList(),
+            );
+          },
+          loading: () => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: CircularProgressIndicator(
+                color: accentColor,
+              ),
+            ),
+          ),
+          error: (err, stack) => Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: surfaceColor,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.orange.withOpacity(0.3),
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: Colors.orange,
+                  size: 32,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Impossible de charger les autres méthodes',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTermsAndPrivacy(Color textSecondary) {
+    return Column(
+      children: [
+        Text(
+          'En vous connectant, vous acceptez nos',
+          style: TextStyle(
+            color: textSecondary,
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextButton(
+              onPressed: () {
+                // TODO: Naviguer vers les CGU
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                'Conditions d\'utilisation',
+                style: TextStyle(
+                  color: textSecondary.withOpacity(0.8),
+                  fontSize: 12,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+            Text(
+              ' et ',
+              style: TextStyle(
+                color: textSecondary,
+                fontSize: 12,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                // TODO: Naviguer vers la politique de confidentialité
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(
+                'Politique de confidentialité',
+                style: TextStyle(
+                  color: textSecondary.withOpacity(0.8),
+                  fontSize: 12,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _showComingSoonSnackbar(String methodName) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.schedule,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '$methodName sera disponible prochainement !',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+        backgroundColor: const Color(0xFF8B5CF6),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
+  // Helper methods
+  IconData _getIconForMethod(String methodId) {
+    switch (methodId.toLowerCase()) {
+      case 'google':
+        return Icons.g_mobiledata;
+      case 'apple':
+        return Icons.apple;
+      case 'facebook':
+        return Icons.facebook;
+      case 'twitter':
+        return Icons.flutter_dash;
+      case 'email':
+        return Icons.email;
+      case 'phone':
+        return Icons.phone;
+      default:
+        return Icons.login;
+    }
+  }
+
+  Color _getColorForMethod(String methodId) {
+    switch (methodId.toLowerCase()) {
+      case 'google':
+        return const Color(0xFFEA4335);
+      case 'apple':
+        return Colors.white;
+      case 'facebook':
+        return const Color(0xFF1877F2);
+      case 'twitter':
+        return Colors.lightBlue;
+      case 'email':
+        return Colors.green;
+      case 'phone':
+        return Colors.purple;
+      default:
+        return const Color(0xFF8B5CF6);
+    }
+  }
+}
+
+
+FICHIER: flutter_lib/services/auth_service.dart
+--------------------------------------------------------------------------------
+import 'dart:convert';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+class AuthService {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+  // Instance du stockage sécurisé
+  final _storage = const FlutterSecureStorage();
+
+  // Clé pour le stockage
+  static const _tokenKey = 'firebase_id_token';
+  static const _userIdentityKey = 'connected_user_identity';
+  static const _userDisplayNameKey = 'connected_user_displayname';
+
+
+  // Callbacks injectés
+  final Future<void> Function(GoogleSignInAuthenticationEvent)? onAuthenticationEvent;
+  final Future<void> Function(Object)? onAuthenticationError;
+
+  AuthService({
+    this.onAuthenticationEvent,
+    this.onAuthenticationError,
+  });
+
+  // final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  // Get current user
+  User? get currentUser => _firebaseAuth.currentUser;
+
+  // Stream pour écouter les changements d'authentification
+  Stream<User?> get authStateChanges => _firebaseAuth.authStateChanges();
+
+  bool _isSignInInitialized = false;
+
+  //
+
+  // GOOGLE SIGNIN
+
+  // String? clientId = '1084343369802-ju6glrsj87do2hf4h3o7cp2u6ak7c8hr.apps.googleusercontent.com';
+  String? clientId;
+  String? serverClientId = '1084343369802-36565dmgarm2gkos54eb6j9q6so0s9bf.apps.googleusercontent.com';
+  List<String> scopes = <String>[
+    // 'https://www.googleapis.com/auth/contacts.readonly',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+  ];
+  final GoogleSignIn signIn = GoogleSignIn.instance;
+
+  Future<void> _handleAuthenticationEvent(GoogleSignInAuthenticationEvent event) async {
+    final GoogleSignInAccount? user = switch (event) {
+      GoogleSignInAuthenticationEventSignIn() => event.user,
+      GoogleSignInAuthenticationEventSignOut() => null,
+    };
+
+    // Check for existing authorization.
+    // #docregion CheckAuthorization
+    final GoogleSignInClientAuthorization? authorization = await user?.authorizationClient.authorizationForScopes(scopes);
+    // #enddocregion CheckAuthorization
+
+    if (user != null && authorization != null) {
+      print(user);
+      print("===== user =======");
+
+      try {
+        final OAuthCredential googleCredential = GoogleAuthProvider.credential(
+          accessToken: authorization.accessToken,
+          idToken: user.authentication.idToken,
+        );
+
+        final UserCredential googleUserCredential = await FirebaseAuth.instance.signInWithCredential(googleCredential);
+
+        IdTokenResult tokenResult = await FirebaseAuth.instance.currentUser!.getIdTokenResult();
+
+        if (tokenResult.token != null) {
+
+
+
+          await _storage.write(key: _tokenKey, value: tokenResult.token);
+          await _storage.write(key: _userIdentityKey, value: user.displayName);
+          await _storage.write(key: _userDisplayNameKey, value: user.displayName);
+
+          // Appeler le callback injecté si présent
+          if (onAuthenticationEvent != null) {
+            await onAuthenticationEvent!(event);
+          }
+
+          print(tokenResult.token);
+          print("====== tokenResult.token =======");
+
+
+        }
+
+
+      } catch (error) {
+        print(error);
+        print('error');
+
+        // Appeler le callback d'erreur
+        if (onAuthenticationError != null) {
+          await onAuthenticationError!(error);
+        }
+
+      }
+    }
+  }
+
+  Future<void> _handleAuthenticationError(Object e) async {
+    print(e);
+
+    // Appeler le callback injecté si présent
+    if (onAuthenticationError != null) {
+      await onAuthenticationError!(e);
+    }
+  }
+
+  Future<void> initGoogleSignIn() async {
+    if (_isSignInInitialized) return; // Déjà fait → on sort
+
+    _isSignInInitialized = true;
+
+    await signIn.initialize(clientId: clientId, serverClientId: serverClientId).then((_) async {
+      signIn.authenticationEvents.listen(_handleAuthenticationEvent).onError(_handleAuthenticationError);
+    });
+  }
+
+  // Connexion avec Google
+  Future<User?> signInWithGoogle() async {
+    await initGoogleSignIn();
+
+    if (GoogleSignIn.instance.supportsAuthenticate()) {
+      try {
+        await GoogleSignIn.instance.authenticate();
+      } catch (e) {
+        print("Erreur Google Sign-In : $e");
+      }
+    }
+  }
+
+  // Déconnexion
+  Future<void> signOut() async {}
+
+  // Vérifier si l'utilisateur est connecté
+  bool isLoggedIn() {
+    return _firebaseAuth.currentUser != null;
+  }
+}
+
+
+
+FIN
+============
+Total fichiers: 16
