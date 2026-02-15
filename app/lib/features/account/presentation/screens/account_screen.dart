@@ -30,6 +30,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   XFile? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
+  // Variable pour suivre si des changements ont été faits
+  bool _hasChanges = false;
+
   @override
   void initState() {
     super.initState();
@@ -51,11 +54,21 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     _aboutMeController.text = profile.aboutMe ?? '';
   }
 
+  // Méthode pour détecter les changements
+  void _onFieldChanged() {
+    if (!_hasChanges) {
+      setState(() {
+        _hasChanges = true;
+      });
+    }
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
       setState(() {
         _selectedImage = image;
+        _hasChanges = true;
       });
       // Upload automatique
       ref
@@ -119,8 +132,49 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
+        _hasChanges = true;
       });
     }
+  }
+
+  // Méthode pour gérer le retour avec confirmation
+  Future<bool> _onWillPop() async {
+    if (!_hasChanges) {
+      return true;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E3F),
+        title: const Text(
+          'Modifications non enregistrées',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter ?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Rester',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6366F1),
+            ),
+            child: const Text('Quitter'),
+          ),
+        ],
+      ),
+    );
+
+    return confirm ?? false;
   }
 
   @override
@@ -128,119 +182,85 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final profileState = ref.watch(userProfileControllerProvider);
     final authState = ref.watch(authStateNotifierProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F0F23),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white),
-          onPressed: () async {
-            final confirm = await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                backgroundColor: const Color(0xFF1E1E3F),
-                title: const Text('Déconnexion', style: TextStyle(color: Colors.white)),
-                content: const Text(
-                  'Voulez-vous vraiment vous déconnecter ?',
-                  style: TextStyle(color: Colors.white70),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Annuler', style: TextStyle(color: Colors.white70)),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF6366F1),
-                    ),
-                    child: const Text('Déconnexion'),
-                  ),
-                ],
-              ),
-            );
-            if (confirm == true) {
-              await ref.read(authServiceProvider).signOut();
-              if (context.mounted) {
-                context.go('/social_login');
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0F0F23),
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          // Bouton retour à gauche
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () async {
+              if (await _onWillPop()) {
+                context.go('/venues');
               }
-            }
-          },
-        ),
-        title: const Text(
-          'Mon Compte',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () {
-              // Pour l'instant, juste un toast ou rien
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Paramètres bientôt disponibles'),
-                  backgroundColor: Color(0xFF6366F1),
-                ),
-              );
             },
+            tooltip: 'Retour aux bars',
           ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: const Color(0xFF6366F1),
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white60,
-          tabs: const [
-            Tab(icon: Icon(Icons.person), text: 'Profil'),
-            Tab(icon: Icon(Icons.description), text: 'À propos'),
-            Tab(icon: Icon(Icons.photo), text: 'Photo'),
-          ],
-        ),
-      ),
-      body: profileState.when(
-        data: (profile) {
-          _loadProfileData(profile);
-          return TabBarView(
+          title: const Text(
+            'Mon Compte',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
+          // Plus de bouton settings à droite
+          actions: const [], // Vide car plus de bouton settings
+          bottom: TabBar(
             controller: _tabController,
-            children: [
-              // Onglet 1 : Informations du compte
-              _buildProfileTab(profile),
-
-              // Onglet 2 : About Me
-              _buildAboutMeTab(profile),
-
-              // Onglet 3 : Photo
-              _buildPhotoTab(profile),
+            indicatorColor: const Color(0xFF6366F1),
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white60,
+            tabs: const [
+              Tab(icon: Icon(Icons.person), text: 'Profil'),
+              Tab(icon: Icon(Icons.description), text: 'À propos'),
+              Tab(icon: Icon(Icons.photo), text: 'Photo'),
             ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
-        error: (err, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                'Erreur: $err',
-                style: const TextStyle(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => ref.refresh(userProfileControllerProvider.notifier).refresh(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1),
+          ),
+        ),
+        body: profileState.when(
+          data: (profile) {
+            _loadProfileData(profile);
+            return TabBarView(
+              controller: _tabController,
+              children: [
+                // Onglet 1 : Informations du compte
+                _buildProfileTab(profile),
+
+                // Onglet 2 : About Me
+                _buildAboutMeTab(profile),
+
+                // Onglet 3 : Photo
+                _buildPhotoTab(profile),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF6366F1))),
+          error: (err, stack) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'Erreur: $err',
+                  style: const TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
                 ),
-                child: const Text('Réessayer'),
-              ),
-            ],
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => ref.refresh(userProfileControllerProvider.notifier).refresh(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6366F1),
+                  ),
+                  child: const Text('Réessayer'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -291,6 +311,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
             TextFormField(
               controller: _usernameController,
               style: const TextStyle(color: Colors.white),
+              onChanged: (value) => _onFieldChanged(),
               decoration: InputDecoration(
                 labelText: 'Nom d\'utilisateur',
                 labelStyle: const TextStyle(color: Colors.white70),
@@ -374,13 +395,17 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                           : null,
                       gender: _selectedGender,
                       birthdate: _selectedDate,
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Profil mis à jour'),
-                        backgroundColor: Color(0xFF6366F1),
-                      ),
-                    );
+                    ).then((_) {
+                      setState(() {
+                        _hasChanges = false;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Profil mis à jour'),
+                          backgroundColor: Color(0xFF6366F1),
+                        ),
+                      );
+                    });
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -406,6 +431,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       onTap: () {
         setState(() {
           _selectedGender = value;
+          _hasChanges = true;
         });
       },
       child: Container(
@@ -452,6 +478,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               maxLines: null,
               expands: true,
               style: const TextStyle(color: Colors.white),
+              onChanged: (value) => _onFieldChanged(),
               decoration: InputDecoration(
                 hintText: 'Parle-nous un peu de toi...',
                 hintStyle: const TextStyle(color: Colors.white38),
@@ -472,13 +499,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               onPressed: () {
                 ref
                     .read(userProfileControllerProvider.notifier)
-                    .updateAboutMe(_aboutMeController.text);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('À propos mis à jour'),
-                    backgroundColor: Color(0xFF6366F1),
-                  ),
-                );
+                    .updateAboutMe(_aboutMeController.text)
+                    .then((_) {
+                  setState(() {
+                    _hasChanges = false;
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('À propos mis à jour'),
+                      backgroundColor: Color(0xFF6366F1),
+                    ),
+                  );
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF6366F1),
