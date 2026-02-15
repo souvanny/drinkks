@@ -11,7 +11,7 @@ class TablesScreen extends ConsumerWidget {
   final String venueId;
   final Dio _dio = Dio(); // À idéalement injecter via un provider
 
-  const TablesScreen({
+  TablesScreen({
     super.key,
     required this.venueId,
   });
@@ -22,6 +22,7 @@ class TablesScreen extends ConsumerWidget {
       const storage = FlutterSecureStorage();
 
       // Récupérer les informations de l'utilisateur connecté
+      final jwt = await storage.read(key: 'firebase_id_token');
       final connectedUserName = await storage.read(key: 'connected_user_displayname');
       final connectedUserIdentity = await storage.read(key: 'connected_user_identity');
 
@@ -44,10 +45,12 @@ class TablesScreen extends ConsumerWidget {
 
       // Appel à l'API
       final response = await _dio.post(
-        '/api/sfu/generate-token',
+        'http://192.168.1.56:8101/api/sfu/generate-token',
         data: payload,
         options: Options(
           headers: {
+            // 'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE3NzExMTMyNjQsImV4cCI6MTc3MTExNjg2NCwicm9sZXMiOlsiUk9MRV9BRE1JTiIsIlJPTEVfVVNFUiJdLCJ1c2VybmFtZSI6InVzZXJAZXhhbXBsZS5jb20ifQ.UW06Nun53EMjnO5abOcpmn9NKl1iL_zymJnHP2XvPFRXZ9Gn5eSb3bm_MtHu1V60cf3ZHIs5n_1SdnKNuWEVzJfgJc_bBP1NXiFSyyopHARoi7lNdDBeCKVebHzAD0QWHfvSPuk5NVKDgGuFlnm5CKs4D8UqNnHo103UYFLg-BtZbI_Nn4vyVL6F1EBp0OmuQNpOuD0ZeFal0CzM690M4W1MdsRIjhXutxa0juSZhINDiBE_WFFyGENiJ4kY5lCXVcpJhdCjYKvzK3Gysw438WTpKRx9ce7rwsq7abD9GgcuytdAMURRmsbT6vYR_jgHGdJgpFWyhLkya5atJHszig',
+            'Authorization': 'Bearer '  + jwt.toString(),
             'Content-Type': 'application/json',
           },
         ),

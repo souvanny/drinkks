@@ -10,7 +10,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Finder\Finder;
 
 #[Route('/api/generate-prompt')]
-#[OA\Tag(name: 'IA Assistant', description: 'Génération de prompts pour l\'IA')]
+#[OA\Tag(name: 'ia assistant', description: 'Génération de prompts pour l\'IA')]
 class GeneratePromptController extends AbstractController
 {
     #[Route('', name: 'generate_prompt', methods: ['GET'])]

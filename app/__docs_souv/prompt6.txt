@@ -1,0 +1,4 @@
+Comment gérer avec flutter le token firebase après authentification.
+Comment je dois le gérer avec symfony et lexikJwt.
+
+

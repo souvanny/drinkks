@@ -166,4 +166,9 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
 
         return $user;
     }
+
+    public function getUserByAuthUid(string $firebaseAuthId): ?UserEntity
+    {
+        return $this->findOneBy(['authUid' => $firebaseAuthId]);
+    }
 }

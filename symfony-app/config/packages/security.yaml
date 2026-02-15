@@ -67,6 +67,7 @@ security:
     access_control:
         - { path: ^/api/doc, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/generate-password, roles: PUBLIC_ACCESS }
+        - { path: ^/api/users/jwt-by-firebase-token, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/users, roles: ROLE_USER }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

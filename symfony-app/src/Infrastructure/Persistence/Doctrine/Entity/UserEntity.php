@@ -20,28 +20,40 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 180, unique: true)]
-    private string $email;
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $uid = null;
+
+    #[ORM\Column(name: 'auth_uid', type: 'string', length: 100, nullable: true)]
+    private ?string $authUid = null;
 
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
-    #[ORM\Column(type: 'string')]
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $email = null;
+
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $username = null;
+
+    #[ORM\Column(type: 'string', length: 255)]
     private string $password;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
-    private ?string $firstname = null;
+    #[ORM\Column(name: 'about_me', type: 'text', nullable: true)]
+    private ?string $aboutMe = null;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
-    private ?string $lastname = null;
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $gender = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
-    private bool $isActive = true;
+    #[ORM\Column(type: 'date', nullable: true)]
+    private ?\DateTime $birthdate = null;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(type: 'integer', options: ['default' => 1])]
+    private int $status = 1;
+
+    #[ORM\Column(name: 'created_at', type: 'datetime')]
     private \DateTimeInterface $createdAt;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
+    #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
 
     #[ORM\PrePersist]
@@ -69,19 +81,94 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
         $this->id = $id;
     }
 
-    public function getEmail(): string
+    public function getUid(): ?string
+    {
+        return $this->uid;
+    }
+
+    public function setUid(?string $uid): void
+    {
+        $this->uid = $uid;
+    }
+
+    public function getAuthUid(): ?string
+    {
+        return $this->authUid;
+    }
+
+    public function setAuthUid(?string $authUid): void
+    {
+        $this->authUid = $authUid;
+    }
+
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
-    public function setEmail(string $email): void
+    public function setEmail(?string $email): void
     {
         $this->email = $email;
     }
 
+    public function getUsername(): ?string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(?string $username): void
+    {
+        $this->username = $username;
+    }
+
+    public function getAboutMe(): ?string
+    {
+        return $this->aboutMe;
+    }
+
+    public function setAboutMe(?string $aboutMe): void
+    {
+        $this->aboutMe = $aboutMe;
+    }
+
+    public function getGender(): ?int
+    {
+        return $this->gender;
+    }
+
+    public function setGender(?int $gender): void
+    {
+        $this->gender = $gender;
+    }
+
+    public function getBirthdate(): ?\DateTime
+    {
+        return $this->birthdate;
+    }
+
+    public function setBirthdate(?\DateTime $birthdate): void
+    {
+        $this->birthdate = $birthdate;
+    }
+
+    public function isStatus(): bool
+    {
+        return $this->status;
+    }
+
+    public function getStatus(): int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(int $status): void
+    {
+        $this->status = $status;
+    }
+
     public function getUserIdentifier(): string
     {
-        return $this->email;
+        return $this->email ?? '';
     }
 
     public function getRoles(): array
@@ -110,36 +197,6 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
     {
     }
 
-    public function getFirstname(): ?string
-    {
-        return $this->firstname;
-    }
-
-    public function setFirstname(?string $firstname): void
-    {
-        $this->firstname = $firstname;
-    }
-
-    public function getLastname(): ?string
-    {
-        return $this->lastname;
-    }
-
-    public function setLastname(?string $lastname): void
-    {
-        $this->lastname = $lastname;
-    }
-
-    public function isActive(): bool
-    {
-        return $this->isActive;
-    }
-
-    public function setIsActive(bool $isActive): void
-    {
-        $this->isActive = $isActive;
-    }
-
     public function getCreatedAt(): \DateTimeInterface
     {
         return $this->createdAt;
@@ -158,5 +215,18 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): void
     {
         $this->updatedAt = $updatedAt;
+    }
+
+    /**
+     * Méthodes d'aide pour la compatibilité avec l'ancien nommage
+     */
+    public function isActive(): bool
+    {
+        return $this->status;
+    }
+
+    public function setIsActive(bool $isActive): void
+    {
+        $this->status = $isActive;
     }
 }
