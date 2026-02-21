@@ -35,12 +35,15 @@ final routerProvider = Provider<GoRouter>((ref) {
     observers: [ref.read(localizationRouterObserverProvider)],
     redirect: (context, state) {
       // Permettre l'accès à /venues et /venues/* sans authentification
+      if (state.matchedLocation.startsWith('/login')) {
+        return null; // Pas de redirection, autoriser l'accès
+      }
       if (state.matchedLocation.startsWith('/venues')) {
         return null; // Pas de redirection, autoriser l'accès
       }
-      if (state.matchedLocation.startsWith('/account')) {
-        return null; // Pas de redirection, autoriser l'accès
-      }
+      // if (state.matchedLocation.startsWith('/account')) {
+      //   return null; // Pas de redirection, autoriser l'accès
+      // }
 
       // CORRECTION 2: Utiliser isAuthenticated du nouveau provider
       final isLoggedIn = authState.isAuthenticated;

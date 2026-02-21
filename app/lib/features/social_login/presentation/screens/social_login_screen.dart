@@ -18,6 +18,41 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
   String? _errorMessage;
   bool _showMethods = false;
 
+  @override
+  void initState() {
+    super.initState();
+
+    // Planifier la vérification APRÈS le build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _checkAuthenticationState();
+      }
+    });
+  }
+
+  Future<void> _checkAuthenticationState() async {
+    if (!mounted) return;
+
+    // Attendre un peu que tout soit stabilisé
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    final authState = ref.read(authStateNotifierProvider);
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+
+    print('🔍 [SOCIAL_LOGIN] Vérification état:');
+    print('   - authState: $authState');
+    print('   - firebaseUser: ${firebaseUser?.uid ?? 'null'}');
+
+    if (authState.isFullyAuthenticated && firebaseUser != null) {
+      print('✅ Utilisateur connecté, redirection');
+      if (mounted) {
+        context.go('/venues');
+      }
+    } else {
+      print('⏸️ Utilisateur non connecté, reste sur login');
+    }
+  }
+
   Future<void> _signInWithGoogle() async {
     if (_isGoogleSigningIn) return;
 
@@ -73,50 +108,18 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    // CORRECTION: Utiliser WidgetsBinding.instance.addPostFrameCallback avec un mounted check
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _checkAuthenticationState();
-      }
-    });
-  }
-
-  void _checkAuthenticationState() {
-    if (!mounted) return;
-
-    // CORRECTION: Sauvegarder la référence à ref dans une variable locale
-    final localRef = ref;
-    final authState = localRef.read(authStateProvider);
-
-    authState.whenData((user) {
-      print(user);
-      print('--- user ---');
-
-      if (user != null && mounted) {
-        print('✅ Utilisateur déjà connecté, redirection vers /venues');
-        context.go('/venues');
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     final socialLoginState = ref.watch(socialLoginControllerProvider);
 
-    // CORRECTION: Utiliser ref.listen avec mounted check
-    ref.listen(authStateNotifierProvider, (previous, next) {
-      if (!mounted) return;
+    // Surveiller les changements d'état en temps réel
+    ref.listen<AuthState>(authStateNotifierProvider, (previous, next) {
+      print('🔄 [SOCIAL_LOGIN] Auth state changed:');
+      print('   - previous: $previous');
+      print('   - current: $next');
 
-      if (next.isFullyAuthenticated) {
-        // Redirection uniquement quand Firebase ET JWT sont OK
+      if (next.isFullyAuthenticated && mounted) {
+        print('✅ Redirection déclenchée par listener');
         context.go('/venues');
-      } else if (next.hasError) {
-        // Gérer l'erreur
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: ${next.error}')),
-        );
       }
     });
 
@@ -193,7 +196,6 @@ class _SocialLoginScreenState extends ConsumerState<SocialLoginScreen> {
       ),
     );
   }
-
 
   Widget _buildLogoHeader(Color primaryColor, Color accentColor) {
     return Column(

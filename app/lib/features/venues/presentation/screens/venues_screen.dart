@@ -1,9 +1,6 @@
-// features/venues/presentation/screens/venues_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:livekit_client/livekit_client.dart';
 import '../../../../providers/auth_provider.dart';
 
 class VenuesScreen extends ConsumerStatefulWidget {
@@ -14,9 +11,11 @@ class VenuesScreen extends ConsumerStatefulWidget {
 }
 
 class _VenuesScreenState extends ConsumerState<VenuesScreen> {
+  bool _isLoggingOut = false;
 
-  // Méthode pour gérer la déconnexion
   Future<void> _handleLogout(BuildContext context) async {
+    if (_isLoggingOut) return;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -48,11 +47,52 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       ),
     );
 
-    if (confirm == true) {
-      await ref.read(authServiceProvider).signOut();
-      if (context.mounted) {
-        // Redirection vers la page de login social
-        context.go('/social_login');
+    if (confirm == true && !_isLoggingOut) {
+      setState(() => _isLoggingOut = true);
+
+      try {
+        print('🔴 [VENUES] Début de la déconnexion');
+
+        // Récupérer le notifier
+        final notifier = ref.read(authStateNotifierProvider.notifier);
+
+        // Appeler la méthode de déconnexion du notifier
+        await notifier.signOut();
+
+        // Attendre un peu pour la propagation
+        await Future.delayed(const Duration(milliseconds: 300));
+
+        // Vérification
+        final authState = ref.read(authStateNotifierProvider);
+        final firebaseUser = ref.read(authServiceProvider).currentUser;
+
+        print('👤 [VENUES] État après déconnexion: $authState');
+        print('👤 [VENUES] Firebase user: ${firebaseUser?.uid ?? 'null'}');
+
+        if (context.mounted) {
+          // Navigation forcée vers login
+          context.go('/login');
+        }
+
+      } catch (e, stack) {
+        print('❌ [VENUES] Erreur déconnexion: $e');
+        print('📚 [VENUES] Stack: $stack');
+
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erreur déconnexion: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+
+          // Même en cas d'erreur, forcer la navigation
+          context.go('/login');
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoggingOut = false);
+        }
       }
     }
   }
@@ -63,15 +103,28 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
     const primaryColor = Color(0xFF6366F1);
     const textPrimary = Colors.white;
 
+    // Surveiller l'état d'auth (pour debug)
+    ref.listen<AuthState>(authStateNotifierProvider, (previous, next) {
+      print('🔄 [VENUES] Auth state changed: $next');
+    });
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // Bouton de déconnexion à gauche
         leading: IconButton(
-          icon: const Icon(Icons.logout, color: textPrimary),
-          onPressed: () => _handleLogout(context),
+          icon: _isLoggingOut
+              ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Colors.white,
+              )
+          )
+              : const Icon(Icons.logout, color: textPrimary),
+          onPressed: _isLoggingOut ? null : () => _handleLogout(context),
           tooltip: 'Se déconnecter',
         ),
         title: Text(
@@ -83,12 +136,10 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
           ),
         ),
         centerTitle: true,
-        // Bouton de compte (roue crantée) à droite
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: textPrimary),
             onPressed: () {
-              // Navigation vers l'espace compte
               context.go('/account');
             },
             tooltip: 'Mon compte',
@@ -100,7 +151,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Message de bienvenue
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: Text(
@@ -112,8 +162,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                 ),
               ),
             ),
-
-            // Liste des bars virtuels
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -144,15 +192,13 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       color: backgroundColor,
       child: InkWell(
         onTap: () {
-          // Navigation vers l'écran des tables avec GoRouter
-          final venueId = venue['id'] ?? 'default'; // Assurez-vous d'avoir un ID
+          final venueId = venue['id'] ?? 'default';
           context.go('/venues/$venueId/tables');
         },
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image du bar
             Container(
               height: 120,
               decoration: BoxDecoration(
@@ -192,8 +238,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                 ),
               ),
             ),
-
-            // Informations
             Padding(
               padding: const EdgeInsets.all(12),
               child: Column(
@@ -209,25 +253,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-
-                  // Nombre de personnes connectées (optionnel)
-                  // Row(
-                  //   children: [
-                  //     Icon(
-                  //       Icons.group,
-                  //       color: primaryColor,
-                  //       size: 16,
-                  //     ),
-                  //     const SizedBox(width: 4),
-                  //     Text(
-                  //       '${venue['activeUsers']} personnes',
-                  //       style: TextStyle(
-                  //         color: textPrimary.withOpacity(0.6),
-                  //         fontSize: 12,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                 ],
               ),
             ),

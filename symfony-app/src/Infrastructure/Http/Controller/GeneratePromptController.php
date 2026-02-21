@@ -74,6 +74,12 @@ class GeneratePromptController extends AbstractController
         // Traitement des dossiers (paths)
         $resolvedPaths = [];
         if ($pathsParam) {
+            $pathsParam = str_replace(" ", "", $pathsParam);
+            $pathsParam = str_replace("\n", "", $pathsParam);
+            $pathsParam = trim($pathsParam);
+            $pathsParam = rtrim($pathsParam, ',');
+
+
             $rawPaths = array_map('trim', explode(',', $pathsParam));
 
             foreach ($rawPaths as $path) {
@@ -122,6 +128,7 @@ class GeneratePromptController extends AbstractController
         // Traitement des fichiers individuels (files)
         $resolvedFiles = [];
         if ($filesParam) {
+
             $rawFiles = array_map('trim', explode(',', $filesParam));
 
             foreach ($rawFiles as $file) {
