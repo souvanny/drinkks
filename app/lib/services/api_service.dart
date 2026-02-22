@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -24,6 +27,9 @@ class ApiService {
   final FlutterSecureStorage _storage;
   static const _baseUrl = 'http://192.168.1.56:8101/api';
 
+  // Callback pour la déconnexion en cas d'échec de refresh
+  VoidCallback? onUnauthorized;
+
   ApiService({
     required Dio dio,
     required FlutterSecureStorage storage,
@@ -34,13 +40,115 @@ class ApiService {
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
 
-    _dio.interceptors
-        .add(LogInterceptor(requestBody: true, responseBody: true));
+    _dio.interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+
+    // Ajouter l'intercepteur pour le refresh token
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Ne pas ajouter le token pour les endpoints d'auth
+          if (!options.path.contains('/auth/refresh') &&
+              !options.path.contains('/auth/login') &&
+              !options.path.contains('/users/jwt-by-firebase-token')) {
+            final token = await _storage.read(key: 'app_jwt_token');
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
+          }
+          return handler.next(options);
+        },
+        onError: (error, handler) async {
+          // Si erreur 401 et que ce n'est pas déjà une tentative de refresh
+          if (error.response?.statusCode == 401 &&
+              !error.requestOptions.path.contains('/auth/refresh')) {
+
+            try {
+              // Tenter de rafraîchir le token
+              final newToken = await _refreshToken();
+
+              if (newToken != null) {
+                // Rejouer la requête originale avec le nouveau token
+                final options = error.requestOptions;
+                options.headers['Authorization'] = 'Bearer $newToken';
+
+                final response = await _dio.fetch(options);
+                return handler.resolve(response);
+              }
+            } catch (refreshError) {
+              print('❌ Erreur lors du refresh: $refreshError');
+            }
+
+            // Si le refresh échoue, notifier pour déconnecter l'utilisateur
+            if (onUnauthorized != null) {
+              onUnauthorized!();
+            }
+          }
+
+          return handler.next(error);
+        },
+      ),
+    );
   }
 
+  bool _isRefreshing = false;
+  final List<Completer<String?>> _refreshCompleters = [];
 
+  Future<String?> _refreshToken() async {
+    if (_isRefreshing) {
+      // Si un refresh est déjà en cours, attendre son résultat
+      final completer = Completer<String?>();
+      _refreshCompleters.add(completer);
+      return completer.future;
+    }
 
+    _isRefreshing = true;
+    final completer = Completer<String?>();
+    _refreshCompleters.add(completer);
 
+    try {
+      final refreshToken = await _storage.read(key: 'refresh_token');
+
+      if (refreshToken == null) {
+        throw Exception('No refresh token');
+      }
+
+      final response = await _dio.post(
+        '/auth/refresh',
+        data: {'refresh_token': refreshToken},
+        options: Options(
+          extra: {'noToken': true}, // Pour éviter la boucle infinie
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final newToken = response.data['token'];
+        final newRefreshToken = response.data['refresh_token'];
+
+        await _storage.write(key: 'app_jwt_token', value: newToken);
+        if (newRefreshToken != null) {
+          await _storage.write(key: 'refresh_token', value: newRefreshToken);
+        }
+
+        // Résoudre tous les completer en attente
+        for (final c in _refreshCompleters) {
+          c.complete(newToken);
+        }
+
+        return newToken;
+      }
+    } catch (e) {
+      print('❌ Erreur refresh token: $e');
+      // En cas d'erreur, échouer tous les completer
+      for (final c in _refreshCompleters) {
+        c.completeError(e);
+      }
+    } finally {
+      _isRefreshing = false;
+      _refreshCompleters.clear();
+    }
+
+    return null;
+  }
 
   // Méthode générique pour gérer les requêtes avec gestion d'erreur centralisée
   Future<T> safeApiCall<T>({
@@ -103,22 +211,17 @@ class ApiService {
   }
 
   // Méthodes API spécifiques
-  Future<String> getJwtFromFirebaseToken(String firebaseToken) async {
+  Future<Map<String, dynamic>> getJwtFromFirebaseToken(String firebaseToken) async {
     return safeApiCall(
       apiCall: () async {
         final response = await _dio.post(
           '/users/jwt-by-firebase-token',
           data: {'token': firebaseToken},
+          options: Options(extra: {'noToken': true}),
         );
 
         if (response.statusCode == 200) {
-          // Adapter selon le format de réponse de votre API
-          // Supposons que l'API retourne { "jwt": "token_value" }
-          final jwt = response.data['jwt'] ?? response.data['token'] ?? response.data;
-          if (jwt == null) {
-            throw ApiException(message: 'Format de réponse API invalide');
-          }
-          return jwt.toString();
+          return response.data as Map<String, dynamic>;
         } else {
           throw ApiException(
             message: 'Erreur lors de la récupération du JWT',
@@ -130,7 +233,41 @@ class ApiService {
     );
   }
 
-// Nouvelle méthode pour générer le token LiveKit
+  // Nouvelle méthode pour rafraîchir le token
+  Future<Map<String, dynamic>?> refreshJwtToken(String refreshToken) async {
+    try {
+      final response = await _dio.post(
+        '/auth/refresh',
+        data: {'refresh_token': refreshToken},
+        options: Options(extra: {'noToken': true}),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print('❌ Erreur refresh token API: $e');
+    }
+    return null;
+  }
+
+  // Nouvelle méthode pour révoquer le refresh token (logout)
+  Future<void> revokeRefreshToken(String refreshToken) async {
+    try {
+      final token = await _storage.read(key: 'app_jwt_token');
+      await _dio.post(
+        '/auth/logout',
+        data: {'refresh_token': refreshToken},
+        options: Options(
+          headers: token != null ? {'Authorization': 'Bearer $token'} : {},
+          extra: {'noToken': true},
+        ),
+      );
+    } catch (e) {
+      print('⚠️ Erreur lors de la révocation du refresh token: $e');
+    }
+  }
+
   Future<Map<String, dynamic>> generateLiveKitToken({
     required String participantIdentity,
     required String participantName,
@@ -150,7 +287,6 @@ class ApiService {
           "room_config": roomConfig
         };
 
-        // Récupérer le JWT pour l'authentification
         final appJwt = await _storage.read(key: 'app_jwt_token');
 
         if (appJwt == null) {
@@ -158,7 +294,7 @@ class ApiService {
         }
 
         final response = await _dio.post(
-          '/sfu/generate-token', // Note: plus besoin de l'URL complète, baseUrl est déjà configurée
+          '/sfu/generate-token',
           data: payload,
           options: Options(
             headers: {
@@ -183,7 +319,7 @@ class ApiService {
 
 @riverpod
 ApiService apiService(Ref ref) {
-  final dio = Dio(); // À configurer selon vos besoins
+  final dio = Dio();
   final storage = const FlutterSecureStorage();
   return ApiService(dio: dio, storage: storage);
 }

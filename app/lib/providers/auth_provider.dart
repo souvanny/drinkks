@@ -9,10 +9,20 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 
-// Provider pour ApiService
+// Provider pour FlutterSecureStorage (séparé pour éviter les dépendances circulaires)
+final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
+  return const FlutterSecureStorage();
+});
+
+// Provider pour Dio
+final dioProvider = Provider<Dio>((ref) {
+  return Dio();
+});
+
+// Provider pour ApiService (sans référence à authStateNotifierProvider)
 final apiServiceProvider = Provider<ApiService>((ref) {
-  final dio = Dio();
-  final storage = const FlutterSecureStorage();
+  final dio = ref.watch(dioProvider);
+  final storage = ref.watch(secureStorageProvider);
   return ApiService(dio: dio, storage: storage);
 });
 
@@ -47,6 +57,12 @@ final appJwtProvider = FutureProvider<String?>((ref) async {
   return await authService.getAppJwt();
 });
 
+// Provider pour récupérer le refresh token
+final refreshTokenProvider = FutureProvider<String?>((ref) async {
+  final authService = ref.watch(authServiceProvider);
+  return await authService.getRefreshToken();
+});
+
 // ============================================================
 // GESTION COMPLÈTE DE L'AUTH
 // ============================================================
@@ -64,12 +80,14 @@ class AuthState {
   final AuthStatus status;
   final User? user;
   final String? jwtToken;
+  final String? refreshToken;
   final Object? error;
 
   const AuthState({
     required this.status,
     this.user,
     this.jwtToken,
+    this.refreshToken,
     this.error,
   });
 
@@ -83,10 +101,12 @@ class AuthState {
   const AuthState.fullyAuthenticated({
     required User user,
     required String jwtToken,
+    String? refreshToken,
   }) : this(
     status: AuthStatus.fullyAuthenticated,
     user: user,
     jwtToken: jwtToken,
+    refreshToken: refreshToken,
   );
 
   const AuthState.error(Object error) : this(
@@ -105,19 +125,21 @@ class AuthState {
     AuthStatus? status,
     User? user,
     String? jwtToken,
+    String? refreshToken,
     Object? error,
   }) {
     return AuthState(
       status: status ?? this.status,
       user: user ?? this.user,
       jwtToken: jwtToken ?? this.jwtToken,
+      refreshToken: refreshToken ?? this.refreshToken,
       error: error ?? this.error,
     );
   }
 
   @override
   String toString() {
-    return 'AuthState(status: $status, user: ${user?.uid ?? 'null'}, hasJwt: ${jwtToken != null})';
+    return 'AuthState(status: $status, user: ${user?.uid ?? 'null'}, hasJwt: ${jwtToken != null}, hasRefresh: ${refreshToken != null})';
   }
 }
 
@@ -139,6 +161,10 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
   Future<void> _init() async {
     print('🟡 [NOTIFIER] Initialisation...');
 
+    // Configurer le callback unauthorized dans ApiService APRÈS la création
+    // Mais on ne peut pas le faire ici car ça créerait une dépendance circulaire
+    // On va plutôt le faire depuis le main ou depuis un provider séparé
+
     // Écouter DIRECTEMENT le stream Firebase Auth (plus fiable)
     _authSubscription = _authService.authStateChanges.listen(
           (user) {
@@ -147,9 +173,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         if (user != null) {
           print('✅ [NOTIFIER] Utilisateur Firebase connecté');
           state = AuthState.authenticated(user);
-          _checkJwt(user);
+          _checkTokens(user);
         } else {
-          // ⚠️ CRITIQUE: Utilisateur déconnecté
           print('❌ [NOTIFIER] Utilisateur Firebase DÉCONNECTÉ - Réinitialisation');
           state = AuthState.initial;
         }
@@ -164,7 +189,6 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     _ref.listen(authStateProvider, (previous, next) {
       next.whenData((user) {
         print('🟡 [PROVIDER] authStateProvider: ${user?.uid ?? 'null'}');
-        // Le traitement est déjà fait par le listener direct
       });
     });
 
@@ -176,10 +200,12 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
         const maxAttempts = 10;
         var attempts = 0;
         String? jwt;
+        String? refreshToken;
 
         while (attempts < maxAttempts) {
           await Future.delayed(const Duration(milliseconds: 300));
           jwt = await _authService.getAppJwt();
+          refreshToken = await _authService.getRefreshToken();
           if (jwt != null && jwt.isNotEmpty) {
             break;
           }
@@ -192,6 +218,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
           state = AuthState.fullyAuthenticated(
             user: user,
             jwtToken: jwt,
+            refreshToken: refreshToken,
           );
           print('✅ [NOTIFIER] Authentification complète (Firebase + JWT)');
         } else if (user != null) {
@@ -208,41 +235,63 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     };
   }
 
-  Future<void> _checkJwt(User user) async {
+  Future<void> _checkTokens(User user) async {
     try {
       final existingJwt = await _authService.getAppJwt();
+      final existingRefresh = await _authService.getRefreshToken();
+
       if (existingJwt != null && existingJwt.isNotEmpty) {
         state = AuthState.fullyAuthenticated(
           user: user,
           jwtToken: existingJwt,
+          refreshToken: existingRefresh,
         );
-        print('✅ [NOTIFIER] JWT déjà présent');
+        print('✅ [NOTIFIER] Tokens déjà présents');
       }
     } catch (e) {
-      print('❌ [NOTIFIER] Erreur vérification JWT: $e');
+      print('❌ [NOTIFIER] Erreur vérification tokens: $e');
     }
   }
 
-  // MÉTHODE DE DÉCONNEXION AMÉLIORÉE
+  // Nouvelle méthode pour gérer les erreurs 401
+  Future<void> handleUnauthorized() async {
+    print('⚠️ [NOTIFIER] Erreur 401 - Tentative de refresh token...');
+
+    try {
+      final newToken = await _authService.refreshJwtToken();
+
+      if (newToken != null && state.user != null) {
+        final refreshToken = await _authService.getRefreshToken();
+        state = AuthState.fullyAuthenticated(
+          user: state.user!,
+          jwtToken: newToken,
+          refreshToken: refreshToken,
+        );
+        print('✅ [NOTIFIER] Token rafraîchi avec succès');
+      } else {
+        // Impossible de rafraîchir, déconnexion
+        print('❌ [NOTIFIER] Échec du refresh - Déconnexion');
+        await signOut();
+      }
+    } catch (e) {
+      print('❌ [NOTIFIER] Erreur handleUnauthorized: $e');
+      await signOut();
+    }
+  }
+
+  // Méthode de déconnexion améliorée
   Future<void> signOut() async {
     print('🔴 [NOTIFIER] signOut() appelé');
 
     try {
-      // 1. Réinitialisation immédiate de l'état
       state = AuthState.initial;
-      print('✅ [NOTIFIER] État réinitialisé à initial');
-
-      // 2. Déconnexion via le service
       await _authService.signOut();
 
-      // 3. Vérification après déconnexion
       final userAfter = _authService.currentUser;
       print('👤 [NOTIFIER] Utilisateur après service.signOut(): ${userAfter?.uid ?? 'null'}');
 
-      // 4. Attendre un peu pour la propagation
       await Future.delayed(const Duration(milliseconds: 200));
 
-      // 5. Si toujours connecté, forcer la réinitialisation
       if (_authService.currentUser != null) {
         print('⚠️ [NOTIFIER] Utilisateur toujours connecté - tentative de force');
         await _authService.forceSignOut();
@@ -250,12 +299,9 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       }
 
       print('✅ [NOTIFIER] signOut() terminé');
-
     } catch (e, stack) {
       print('❌ [NOTIFIER] Erreur signOut: $e');
       print('📚 [NOTIFIER] Stack: $stack');
-
-      // En cas d'erreur, forcer la réinitialisation
       state = AuthState.initial;
       rethrow;
     }
@@ -300,6 +346,11 @@ final appJwtSyncProvider = Provider<String?>((ref) {
   return authState.jwtToken;
 });
 
+final refreshTokenSyncProvider = Provider<String?>((ref) {
+  final authState = ref.watch(authStateNotifierProvider);
+  return authState.refreshToken;
+});
+
 final currentUserSyncProvider = Provider<User?>((ref) {
   final authState = ref.watch(authStateNotifierProvider);
   return authState.user;
@@ -313,4 +364,12 @@ final isAuthenticatingProvider = Provider<bool>((ref) {
 final authErrorProvider = Provider<Object?>((ref) {
   final authState = ref.watch(authStateNotifierProvider);
   return authState.error;
+});
+
+// Provider séparé pour configurer le callback unauthorized (à utiliser dans main.dart)
+final unauthorizedCallbackProvider = Provider<void Function()>((ref) {
+  return () {
+    // Cette fonction sera appelée quand une erreur 401 non récupérable survient
+    ref.read(authStateNotifierProvider.notifier).handleUnauthorized();
+  };
 });

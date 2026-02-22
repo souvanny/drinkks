@@ -1,7 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/providers/network_providers.dart';
-import '../../../../providers/auth_provider.dart';
+import '../../../../providers/auth_provider.dart' hide dioProvider;
 import '../models/user_profile_model.dart';
 
 part 'user_profile_remote_data_source.g.dart';

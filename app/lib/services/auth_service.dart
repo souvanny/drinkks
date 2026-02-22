@@ -11,6 +11,7 @@ class AuthService {
 
   static const _tokenKey = 'firebase_id_token';
   static const _appJwtKey = 'app_jwt_token';
+  static const _refreshTokenKey = 'refresh_token';
   static const _userIdentityKey = 'connected_user_identity';
   static const _userDisplayNameKey = 'connected_user_displayname';
 
@@ -66,8 +67,19 @@ class AuthService {
 
           try {
             print('🔄 Récupération du JWT applicatif...');
-            final appJwt = await _apiService.getJwtFromFirebaseToken(tokenResult.token!);
-            await _storage.write(key: _appJwtKey, value: appJwt);
+            final response = await _apiService.getJwtFromFirebaseToken(tokenResult.token!);
+
+            // La réponse contient maintenant jwt ET refresh_token
+            if (response is Map<String, dynamic>) {
+              await _storage.write(key: _appJwtKey, value: response['jwt']);
+              if (response['refresh_token'] != null) {
+                await _storage.write(key: _refreshTokenKey, value: response['refresh_token']);
+              }
+            } else {
+              // Pour compatibilité avec l'ancien format
+              await _storage.write(key: _appJwtKey, value: response.toString());
+            }
+
             print('✅ JWT applicatif récupéré et stocké');
           } catch (e) {
             print('❌ Erreur lors de la récupération du JWT applicatif: $e');
@@ -124,44 +136,78 @@ class AuthService {
     return await _storage.read(key: _appJwtKey);
   }
 
-  // MÉTHODE DE DÉCONNEXION AMÉLIORÉE AVEC LOGS DÉTAILLÉS
+  Future<String?> getRefreshToken() async {
+    return await _storage.read(key: _refreshTokenKey);
+  }
+
+  // Nouvelle méthode pour rafraîchir le token
+  Future<String?> refreshJwtToken() async {
+    try {
+      final refreshToken = await getRefreshToken();
+
+      if (refreshToken == null) {
+        print('⚠️ Pas de refresh token disponible');
+        return null;
+      }
+
+      print('🔄 Tentative de rafraîchissement du token...');
+      final response = await _apiService.refreshJwtToken(refreshToken);
+
+      if (response != null) {
+        // Stocker le nouveau token
+        await _storage.write(key: _appJwtKey, value: response['token']);
+
+        // Si un nouveau refresh token est fourni (rotation), le stocker
+        if (response['refresh_token'] != null) {
+          await _storage.write(key: _refreshTokenKey, value: response['refresh_token']);
+        }
+
+        print('✅ Token rafraîchi avec succès');
+        return response['token'];
+      }
+    } catch (e) {
+      print('❌ Erreur lors du rafraîchissement du token: $e');
+    }
+
+    return null;
+  }
+
+  // Méthode de déconnexion améliorée
   Future<void> signOut() async {
     print('🔴 DÉBUT DÉCONNEXION - Utilisateur avant: ${_firebaseAuth.currentUser?.uid}');
 
     try {
-      // 1. Déconnexion Google (si connecté)
-      // final GoogleSignInAccount? googleUser = GoogleSignIn.instance.;
-      // if (googleUser != null) {
-      //   print('🟡 Déconnexion Google pour ${googleUser.email}...');
-      //   await GoogleSignIn.instance.signOut();
-      //   print('✅ Google déconnecté');
-      // } else {
-      //   print('ℹ️ Pas de session Google active');
-      // }
+      // 1. Révoquer le refresh token côté serveur
+      final refreshToken = await getRefreshToken();
+      if (refreshToken != null) {
+        try {
+          await _apiService.revokeRefreshToken(refreshToken);
+          print('✅ Refresh token révoqué côté serveur');
+        } catch (e) {
+          print('⚠️ Erreur lors de la révocation du refresh token: $e');
+        }
+      }
 
+      // 2. Déconnexion Google
       await GoogleSignIn.instance.signOut();
 
-
-    // 2. Déconnexion Firebase
+      // 3. Déconnexion Firebase
       print('🟡 Déconnexion Firebase...');
       await _firebaseAuth.signOut();
       print('✅ Firebase signOut() exécuté');
 
-      // 3. Vérification post-déconnexion
+      // 4. Vérification post-déconnexion
       final userAfter = _firebaseAuth.currentUser;
       print('👤 Utilisateur après Firebase.signOut(): $userAfter');
 
-      // 4. Attendre un cycle d'event loop pour propager le changement
+      // 5. Attendre un cycle d'event loop pour propager le changement
       await Future.delayed(const Duration(milliseconds: 100));
-
-      // 5. Vérifier si le stream a été notifié
-      final userAfterDelay = _firebaseAuth.currentUser;
-      print('👤 Utilisateur après délai (100ms): $userAfterDelay');
 
       // 6. Nettoyer le stockage
       print('🟡 Nettoyage du stockage...');
       await _storage.delete(key: _tokenKey);
       await _storage.delete(key: _appJwtKey);
+      await _storage.delete(key: _refreshTokenKey);
       await _storage.delete(key: _userIdentityKey);
       await _storage.delete(key: _userDisplayNameKey);
       print('✅ Stockage nettoyé');
@@ -170,14 +216,12 @@ class AuthService {
       final finalUser = _firebaseAuth.currentUser;
       if (finalUser != null) {
         print('⚠️ ATTENTION: Utilisateur toujours présent après déconnexion!');
-        // Tentative de déconnexion forcée
         await forceSignOut();
       } else {
         print('✅ Utilisateur bien null après déconnexion');
       }
 
       print('✅ DÉCONNEXION TERMINÉE');
-
     } catch (e, stack) {
       print('❌ ERREUR DÉCONNEXION: $e');
       print('📚 Stack: $stack');
@@ -190,16 +234,10 @@ class AuthService {
     print('🔴 FORCE SIGN OUT - Méthode radicale');
 
     try {
-      // Essayer toutes les méthodes possibles
       await _firebaseAuth.signOut();
       await GoogleSignIn.instance.signOut();
-
-      // Nettoyer TOUT le stockage
       await _storage.deleteAll();
-
-      // Attendre un peu
       await Future.delayed(const Duration(milliseconds: 200));
-
       print('✅ Force sign out exécuté');
       print('👤 Utilisateur après force: ${_firebaseAuth.currentUser?.uid ?? 'null'}');
     } catch (e) {
@@ -211,7 +249,6 @@ class AuthService {
     return _firebaseAuth.currentUser != null;
   }
 
-  // Méthode utilitaire pour vérifier l'état
   Future<bool> isUserLoggedIn() async {
     return _firebaseAuth.currentUser != null;
   }
