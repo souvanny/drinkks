@@ -11,30 +11,34 @@ import '../widgets/controls.dart';
 import '../widgets/participant.dart';
 import '../widgets/participant_info.dart';
 
-// import '../exts.dart';
-// import '../utils.dart';
-// import './widgets/controls.dart';
-// import './widgets/participant.dart';
-// import './widgets/participant_info.dart';
-
 class RoomPage extends StatefulWidget {
   final Room room;
   final EventsListener<RoomEvent> listener;
 
   const RoomPage(
-    this.room,
-    this.listener, {
-    super.key,
-  });
+      this.room,
+      this.listener, {
+        super.key,
+      });
 
   @override
   State<StatefulWidget> createState() => _RoomPageState();
 }
 
 class _RoomPageState extends State<RoomPage> {
+  // Couleurs du thème sombre
+  final Color _backgroundColor = const Color(0xFF0F0F23); // Noir bleuté profond
+  final Color _surfaceColor = const Color(0xFF1A1A2E); // Surface légèrement plus claire
+  final Color _primaryColor = const Color(0xFF6366F1); // Indigo doux
+  final Color _accentColor = const Color(0xFF8B5CF6); // Violet accent
+  final Color _textPrimary = Colors.white;
+  final Color _textSecondary = const Color(0xFF94A3B8); // Gris bleuté
+  final Color _borderColor = Colors.white.withOpacity(0.1);
+
   List<ParticipantTrack> participantTracks = [];
   EventsListener<RoomEvent> get _listener => widget.listener;
   bool get fastConnection => widget.room.engine.fastConnectOptions != null;
+
   @override
   void initState() {
     super.initState();
@@ -224,38 +228,131 @@ class _RoomPageState extends State<RoomPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        body: Stack(
-          children: [
-            Column(
-              children: [
-                Expanded(
-                    child: participantTracks.isNotEmpty
-                        ? ParticipantWidget.widgetFor(participantTracks.first, showStatsLayer: true)
-                        : Container()),
-                if (widget.room.localParticipant != null)
-                  SafeArea(
-                    top: false,
-                    child: ControlsWidget(widget.room, widget.room.localParticipant!),
-                  )
-              ],
-            ),
-            Positioned(
-                left: 0,
-                right: 0,
-                top: 0,
-                child: SizedBox(
-                  height: 120,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: math.max(0, participantTracks.length - 1),
-                    itemBuilder: (BuildContext context, int index) => SizedBox(
-                      width: 180,
-                      height: 120,
-                      child: ParticipantWidget.widgetFor(participantTracks[index + 1]),
+    backgroundColor: _backgroundColor,
+    body: Stack(
+      children: [
+        // Participant principal
+        Container(
+          color: _backgroundColor,
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: _borderColor,
+                      width: 0.5,
                     ),
                   ),
-                )),
+                  child: participantTracks.isNotEmpty
+                      ? ParticipantWidget.widgetFor(
+                    participantTracks.first,
+                    showStatsLayer: true,
+                  )
+                      : _buildEmptyParticipant(),
+                ),
+              ),
+              if (widget.room.localParticipant != null)
+                SafeArea(
+                  top: false,
+                  child: ControlsWidget(
+                    widget.room,
+                    widget.room.localParticipant!,
+                  ),
+                )
+            ],
+          ),
+        ),
+
+        // Miniatures des autres participants
+        Positioned(
+          left: 0,
+          right: 0,
+          top: 0,
+          child: Container(
+            height: 140,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  _backgroundColor.withOpacity(0.9),
+                  _backgroundColor.withOpacity(0.0),
+                ],
+              ),
+            ),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              itemCount: math.max(0, participantTracks.length - 1),
+              itemBuilder: (BuildContext context, int index) {
+                return Container(
+                  width: 180,
+                  height: 120,
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: _borderColor,
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(11),
+                    child: ParticipantWidget.widgetFor(participantTracks[index + 1]),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _buildEmptyParticipant() {
+    return Container(
+      color: _surfaceColor,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [
+                    _primaryColor.withOpacity(0.2),
+                    _accentColor.withOpacity(0.2),
+                  ],
+                ),
+              ),
+              child: Icon(
+                Icons.videocam_off,
+                size: 40,
+                color: _primaryColor.withOpacity(0.5),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'En attente de participants...',
+              style: TextStyle(
+                color: _textSecondary,
+                fontSize: 16,
+              ),
+            ),
           ],
         ),
-      );
+      ),
+    );
+  }
 }

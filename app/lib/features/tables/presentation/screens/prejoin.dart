@@ -48,6 +48,15 @@ class _PreJoinPageState extends State<PreJoinPage> {
   static const _prefKeyEnableVideo = 'prejoin-enable-video';
   static const _prefKeyEnableAudio = 'prejoin-enable-audio';
 
+  // Couleurs du thème sombre
+  final Color _backgroundColor = const Color(0xFF0F0F23); // Noir bleuté profond
+  final Color _surfaceColor = const Color(0xFF1A1A2E); // Surface légèrement plus claire
+  final Color _primaryColor = const Color(0xFF6366F1); // Indigo doux
+  final Color _accentColor = const Color(0xFF8B5CF6); // Violet accent
+  final Color _textPrimary = Colors.white;
+  final Color _textSecondary = const Color(0xFF94A3B8); // Gris bleuté
+  final Color _borderColor = Colors.white.withOpacity(0.1);
+
   List<MediaDevice> _audioInputs = [];
   List<MediaDevice> _videoInputs = [];
   StreamSubscription? _subscription;
@@ -77,14 +86,22 @@ class _PreJoinPageState extends State<PreJoinPage> {
         await showDialog(
           context: context,
           builder: (BuildContext context) => AlertDialog(
-            title: const Text('Permissions requises'),
+            backgroundColor: _surfaceColor,
+            title: const Text(
+              'Permissions requises',
+              style: TextStyle(color: Colors.white),
+            ),
             content: const Text(
-                'L\'application a besoin des permissions caméra et microphone pour la visioconférence. '
-                    'Veuillez les activer dans les paramètres.'
+              'L\'application a besoin des permissions caméra et microphone pour la visioconférence. '
+                  'Veuillez les activer dans les paramètres.',
+              style: TextStyle(color: Colors.white70),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  foregroundColor: _textSecondary,
+                ),
                 child: const Text('OK'),
               ),
             ],
@@ -234,7 +251,11 @@ class _PreJoinPageState extends State<PreJoinPage> {
       print('Erreur lors de la création du track audio: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur audio: $e')),
+          SnackBar(
+            content: Text('Erreur audio: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -259,7 +280,11 @@ class _PreJoinPageState extends State<PreJoinPage> {
       print('Erreur lors de la création du track vidéo: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur vidéo: $e')),
+          SnackBar(
+            content: Text('Erreur vidéo: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
         // Désactiver la vidéo en cas d'erreur
         setState(() {
@@ -395,114 +420,163 @@ class _PreJoinPageState extends State<PreJoinPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Select Devices',
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => _actionBack(context),
+      backgroundColor: _backgroundColor,
+      appBar: AppBar(
+        backgroundColor: _surfaceColor,
+        elevation: 0,
+        title: const Text(
+          'Configuration',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        body: Container(
-            alignment: Alignment.center,
-            child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 20,
-                  ),
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: SizedBox(
-                            width: 320,
-                            height: 240,
-                            child: Container(
-                              alignment: Alignment.center,
-                              color: Colors.black54,
-                              child: _videoTrack != null
-                                  ? VideoTrackRenderer(
-                                renderMode: VideoRenderMode.auto,
-                                _videoTrack!,
-                              )
-                                  : Container(
-                                alignment: Alignment.center,
-                                child: LayoutBuilder(
-                                  builder: (ctx, constraints) => Icon(
-                                    Icons.videocam_off,
-                                    color: LKColors.lkBlue,
-                                    size: math.min(constraints.maxHeight, constraints.maxWidth) * 0.3,
-                                  ),
-                                ),
-                              ),
-                            ))),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Camera:'),
-                          Switch(
-                            value: _enableVideo,
-                            onChanged: (value) => _setEnableVideo(value),
-                          ),
-                        ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => _actionBack(context),
+        ),
+      ),
+      body: Container(
+        alignment: Alignment.center,
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 20,
+            ),
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Aperçu vidéo
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Container(
+                    width: 320,
+                    height: 240,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: _borderColor,
+                        width: 1,
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 25),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton2<MediaDevice>(
-                          isExpanded: true,
-                          disabledHint: const Text('Disable Camera'),
-                          hint: const Text(
-                            'Select Camera',
-                          ),
-                          items: _enableVideo
-                              ? _videoInputs
-                              .map((MediaDevice item) => DropdownMenuItem<MediaDevice>(
-                            value: item,
-                            child: Text(
-                              item.label,
-                              style: const TextStyle(
-                                fontSize: 14,
-                              ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: Container(
+                        color: _surfaceColor,
+                        child: _videoTrack != null
+                            ? VideoTrackRenderer(
+                          renderMode: VideoRenderMode.auto,
+                          _videoTrack!,
+                        )
+                            : Container(
+                          alignment: Alignment.center,
+                          child: LayoutBuilder(
+                            builder: (ctx, constraints) => Icon(
+                              Icons.videocam_off,
+                              color: _primaryColor.withOpacity(0.5),
+                              size: math.min(constraints.maxHeight, constraints.maxWidth) * 0.3,
                             ),
-                          ))
-                              .toList()
-                              : [],
-                          value: _selectedVideoDevice,
-                          onChanged: (MediaDevice? value) async {
-                            if (value != null) {
-                              _selectedVideoDevice = value;
-                              await _changeLocalVideoTrack();
-                              setState(() {});
-                            }
-                          },
-                          buttonStyleData: const ButtonStyleData(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            height: 40,
-                            width: 140,
-                          ),
-                          menuItemStyleData: const MenuItemStyleData(
-                            height: 40,
                           ),
                         ),
                       ),
                     ),
-                    if (_enableVideo)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 25),
-                        child: DropdownButtonHideUnderline(
+                  ),
+                ),
+
+                // Section Caméra
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _surfaceColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _borderColor,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Caméra',
+                            style: TextStyle(
+                              color: _textPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Switch(
+                            value: _enableVideo,
+                            onChanged: (value) => _setEnableVideo(value),
+                            activeColor: _primaryColor,
+                            activeTrackColor: _primaryColor.withOpacity(0.3),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (_enableVideo) ...[
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton2<MediaDevice>(
+                            isExpanded: true,
+                            hint: Text(
+                              'Sélectionner une caméra',
+                              style: TextStyle(color: _textSecondary),
+                            ),
+                            items: _videoInputs
+                                .map((MediaDevice item) => DropdownMenuItem<MediaDevice>(
+                              value: item,
+                              child: Text(
+                                item.label,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: _textPrimary,
+                                ),
+                              ),
+                            ))
+                                .toList(),
+                            value: _selectedVideoDevice,
+                            onChanged: (MediaDevice? value) async {
+                              if (value != null) {
+                                _selectedVideoDevice = value;
+                                await _changeLocalVideoTrack();
+                                setState(() {});
+                              }
+                            },
+                            buttonStyleData: ButtonStyleData(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              height: 48,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: _borderColor),
+                                color: _backgroundColor,
+                              ),
+                            ),
+                            menuItemStyleData: const MenuItemStyleData(
+                              height: 48,
+                            ),
+                            dropdownStyleData: DropdownStyleData(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: _surfaceColor,
+                                border: Border.all(color: _borderColor),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        DropdownButtonHideUnderline(
                           child: DropdownButton2<VideoParameters>(
                             isExpanded: true,
-                            hint: const Text(
-                              'Select Video Dimensions',
+                            hint: Text(
+                              'Résolution vidéo',
+                              style: TextStyle(color: _textSecondary),
                             ),
                             items: [
                               VideoParametersPresets.h480_43,
@@ -514,8 +588,9 @@ class _PreJoinPageState extends State<PreJoinPage> {
                               value: item,
                               child: Text(
                                 '${item.dimensions.width}x${item.dimensions.height}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
+                                  color: _textPrimary,
                                 ),
                               ),
                             ))
@@ -528,93 +603,162 @@ class _PreJoinPageState extends State<PreJoinPage> {
                                 setState(() {});
                               }
                             },
-                            buttonStyleData: const ButtonStyleData(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
-                              height: 40,
-                              width: 140,
+                            buttonStyleData: ButtonStyleData(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              height: 48,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: _borderColor),
+                                color: _backgroundColor,
+                              ),
                             ),
                             menuItemStyleData: const MenuItemStyleData(
-                              height: 40,
+                              height: 48,
+                            ),
+                            dropdownStyleData: DropdownStyleData(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: _surfaceColor,
+                                border: Border.all(color: _borderColor),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Row(
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Section Microphone
+                Container(
+                  margin: const EdgeInsets.only(bottom: 24),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: _surfaceColor,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: _borderColor,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Microphone:'),
+                          Text(
+                            'Microphone',
+                            style: TextStyle(
+                              color: _textPrimary,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                           Switch(
                             value: _enableAudio,
                             onChanged: (value) => _setEnableAudio(value),
+                            activeColor: _primaryColor,
+                            activeTrackColor: _primaryColor.withOpacity(0.3),
                           ),
                         ],
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 25),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton2<MediaDevice>(
-                          isExpanded: true,
-                          disabledHint: const Text('Disable Microphone'),
-                          hint: const Text(
-                            'Select Microphone',
-                          ),
-                          items: _enableAudio
-                              ? _audioInputs
-                              .map((MediaDevice item) => DropdownMenuItem<MediaDevice>(
-                            value: item,
-                            child: Text(
-                              item.label,
-                              style: const TextStyle(
-                                fontSize: 14,
-                              ),
+                      const SizedBox(height: 12),
+                      if (_enableAudio)
+                        DropdownButtonHideUnderline(
+                          child: DropdownButton2<MediaDevice>(
+                            isExpanded: true,
+                            hint: Text(
+                              'Sélectionner un microphone',
+                              style: TextStyle(color: _textSecondary),
                             ),
-                          ))
-                              .toList()
-                              : [],
-                          value: _selectedAudioDevice,
-                          onChanged: (MediaDevice? value) async {
-                            if (value != null) {
-                              _selectedAudioDevice = value;
-                              await _changeLocalAudioTrack();
-                              setState(() {});
-                            }
-                          },
-                          buttonStyleData: const ButtonStyleData(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            height: 40,
-                            width: 140,
-                          ),
-                          menuItemStyleData: const MenuItemStyleData(
-                            height: 40,
-                          ),
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: _busy ? null : () => _join(context),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (_busy)
-                            const Padding(
-                              padding: EdgeInsets.only(right: 10),
-                              child: SizedBox(
-                                height: 15,
-                                width: 15,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
+                            items: _audioInputs
+                                .map((MediaDevice item) => DropdownMenuItem<MediaDevice>(
+                              value: item,
+                              child: Text(
+                                item.label,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: _textPrimary,
                                 ),
                               ),
+                            ))
+                                .toList(),
+                            value: _selectedAudioDevice,
+                            onChanged: (MediaDevice? value) async {
+                              if (value != null) {
+                                _selectedAudioDevice = value;
+                                await _changeLocalAudioTrack();
+                                setState(() {});
+                              }
+                            },
+                            buttonStyleData: ButtonStyleData(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              height: 48,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: _borderColor),
+                                color: _backgroundColor,
+                              ),
                             ),
-                          const Text('JOIN'),
-                        ],
-                      ),
+                            menuItemStyleData: const MenuItemStyleData(
+                              height: 48,
+                            ),
+                            dropdownStyleData: DropdownStyleData(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: _surfaceColor,
+                                border: Border.all(color: _borderColor),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                // Bouton Rejoindre
+                ElevatedButton(
+                  onPressed: _busy ? null : () => _join(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _primaryColor,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(double.infinity, 54),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                  ]),
-                ))));
+                    elevation: 0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (_busy)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        ),
+                      Text(
+                        _busy ? 'Connexion...' : 'Rejoindre la conversation',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
