@@ -151,6 +151,7 @@ class AuthService {
     return await _storage.read(key: _refreshTokenKey);
   }
 
+  /*
   // Nouvelle méthode pour rafraîchir le token
   Future<String?> refreshJwtToken() async {
     try {
@@ -182,6 +183,8 @@ class AuthService {
 
     return null;
   }
+
+   */
 
   // Méthode de déconnexion améliorée
   Future<void> signOut() async {

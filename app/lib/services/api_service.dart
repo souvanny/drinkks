@@ -260,6 +260,7 @@ class ApiService {
     );
   }
 
+  /*
   // Nouvelle méthode pour rafraîchir le token
   Future<Map<String, dynamic>?> refreshJwtToken(String refreshToken) async {
     try {
@@ -277,6 +278,8 @@ class ApiService {
     }
     return null;
   }
+
+   */
 
   // Nouvelle méthode pour révoquer le refresh token (logout)
   Future<void> revokeRefreshToken(String refreshToken) async {

@@ -253,6 +253,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  /*
   // Nouvelle méthode pour gérer les erreurs 401
   Future<void> handleUnauthorized() async {
     print('⚠️ [NOTIFIER] Erreur 401 - Tentative de refresh token...');
@@ -278,6 +279,8 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       await signOut();
     }
   }
+
+   */
 
   // Méthode de déconnexion améliorée
   Future<void> signOut() async {
@@ -366,6 +369,7 @@ final authErrorProvider = Provider<Object?>((ref) {
   return authState.error;
 });
 
+/*
 // Provider séparé pour configurer le callback unauthorized (à utiliser dans main.dart)
 final unauthorizedCallbackProvider = Provider<void Function()>((ref) {
   return () {
@@ -373,3 +377,5 @@ final unauthorizedCallbackProvider = Provider<void Function()>((ref) {
     ref.read(authStateNotifierProvider.notifier).handleUnauthorized();
   };
 });
+
+ */
