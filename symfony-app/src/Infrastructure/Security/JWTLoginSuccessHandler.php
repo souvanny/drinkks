@@ -1,4 +1,5 @@
 <?php
+// src/Infrastructure/Security/JWTLoginSuccessHandler.php
 
 namespace App\Infrastructure\Security;
 
@@ -10,7 +11,6 @@ use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Cookie\JWTCookieProvider;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
@@ -21,18 +21,17 @@ class JWTLoginSuccessHandler implements AuthenticationSuccessHandlerInterface
     public function __construct(
         protected JWTTokenManagerInterface $jwtManager,
         protected EventDispatcherInterface $dispatcher,
+        protected RefreshTokenService $refreshTokenService,
         iterable $cookieProviders = [],
         bool $removeTokenFromBodyWhenCookiesUsed = true
     ) {
         $this->jwtManager = $jwtManager;
         $this->dispatcher = $dispatcher;
+        $this->refreshTokenService = $refreshTokenService;
         $this->cookieProviders = $cookieProviders;
         $this->removeTokenFromBodyWhenCookiesUsed = $removeTokenFromBodyWhenCookiesUsed;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): Response
     {
         return $this->handleAuthenticationSuccess($token->getUser());
@@ -44,14 +43,21 @@ class JWTLoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             $jwt = $this->jwtManager->create($user);
         }
 
+        // Générer un refresh token si l'utilisateur est une instance de UserEntity
+        $refreshToken = null;
+        if ($user instanceof UserEntity) {
+            $refreshTokenEntity = $this->refreshTokenService->createRefreshToken($user);
+            $refreshToken = $refreshTokenEntity->getRefreshToken();
+        }
+
         $jwtCookies = [];
         foreach ($this->cookieProviders as $cookieProvider) {
             $jwtCookies[] = $cookieProvider->createCookie($jwt);
         }
 
-
         $responseData = [
             'token' => $jwt,
+            'refresh_token' => $refreshToken,
             'user' => [
                 'email' => $user->getUserIdentifier(),
                 'roles' => $user->getRoles(),
@@ -72,5 +78,4 @@ class JWTLoginSuccessHandler implements AuthenticationSuccessHandlerInterface
 
         return $response;
     }
-
 }

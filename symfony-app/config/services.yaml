@@ -42,3 +42,12 @@ services:
         App\Shared\Domain\Event\EventHandlerInterface:
             tags:
                 - { name: messenger.message_handler, bus: event.bus }
+
+    App\Infrastructure\Security\RefreshTokenService:
+        arguments:
+            $ttl: 2592000 # 30 jours
+
+    App\Infrastructure\Security\JWTLoginSuccessHandler:
+        arguments:
+            $refreshTokenService: '@App\Infrastructure\Security\RefreshTokenService'
+            $cookieProviders: []

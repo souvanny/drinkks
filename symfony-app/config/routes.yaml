@@ -23,3 +23,13 @@ app.swagger_ui:
 
 api_login_check:
     path: /api/login_check
+
+api_auth_refresh:
+    path: /api/auth/refresh
+    controller: App\Infrastructure\Http\Controller\RefreshTokenController
+    methods: POST
+
+api_auth_logout:
+    path: /api/auth/logout
+    controller: App\Infrastructure\Http\Controller\LogoutController
+    methods: POST
