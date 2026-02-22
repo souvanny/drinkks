@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -60,19 +62,28 @@ class AuthService {
 
         IdTokenResult tokenResult = await FirebaseAuth.instance.currentUser!.getIdTokenResult();
 
+        print('============================ tokenResult.token ==================================');
+        print('============================ tokenResult.token ==================================');
+        print('============================ tokenResult.token ==================================');
+        log(tokenResult.token.toString());
+
         if (tokenResult.token != null) {
           await _storage.write(key: _tokenKey, value: tokenResult.token);
           await _storage.write(key: _userIdentityKey, value: user.displayName);
           await _storage.write(key: _userDisplayNameKey, value: user.displayName);
 
           try {
-            print('🔄 Récupération du JWT applicatif...');
+            print('🔄 Récupération du JWT applicatif... =======================================');
             final response = await _apiService.getJwtFromFirebaseToken(tokenResult.token!);
 
             // La réponse contient maintenant jwt ET refresh_token
             if (response is Map<String, dynamic>) {
-              await _storage.write(key: _appJwtKey, value: response['jwt']);
+              print('TOKEN ==============');
+              log('***** from firebase token : ' + response['token'].toString());
+              await _storage.write(key: _appJwtKey, value: response['token']);
               if (response['refresh_token'] != null) {
+                print('REFRESH TOKEN ==============');
+                print(response['refresh_token']);
                 await _storage.write(key: _refreshTokenKey, value: response['refresh_token']);
               }
             } else {

@@ -26,11 +26,11 @@ class RefreshTokenController extends AbstractController
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
-                type: 'object',
                 required: ['refresh_token'],
                 properties: [
                     new OA\Property(property: 'refresh_token', type: 'string', example: '550e8400-e29b-41d4-a716-446655440000')
-                ]
+                ],
+                type: 'object'
             )
         ),
         responses: [
@@ -38,11 +38,11 @@ class RefreshTokenController extends AbstractController
                 response: 200,
                 description: 'Nouveau token JWT et nouveau refresh token',
                 content: new OA\JsonContent(
-                    type: 'object',
                     properties: [
                         new OA\Property(property: 'token', type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5...'),
                         new OA\Property(property: 'refresh_token', type: 'string', example: '550e8400-e29b-41d4-a716-446655440000')
-                    ]
+                    ],
+                    type: 'object'
                 )
             ),
             new OA\Response(response: 401, description: 'Refresh token invalide')
@@ -51,6 +51,11 @@ class RefreshTokenController extends AbstractController
     public function __invoke(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
+
+//        echo "popipopipopipopipopipopipopipopi\n";
+//        print_r($data);
+//        exit;
+
         $refreshTokenString = $data['refresh_token'] ?? null;
 
         if (!$refreshTokenString) {

@@ -4,6 +4,7 @@
 namespace App\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Infrastructure\Persistence\Doctrine\Entity\RefreshTokenEntity;
+use App\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:dio/dio.dart';
@@ -36,6 +37,7 @@ class ApiService {
   })  : _dio = dio,
         _storage = storage {
     _dio.options.baseUrl = _baseUrl;
+    _dio.options.headers['accept'] = 'application/json';
     _dio.options.headers['Content-Type'] = 'application/json';
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 10);
@@ -46,15 +48,34 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+
+          print("******************* ON REQUEST *******************************");
+          print(options.path);
+
+
           // Ne pas ajouter le token pour les endpoints d'auth
+          // if (!options.path.contains('/auth/refresh') &&
           if (!options.path.contains('/auth/refresh') &&
+          // if (
               !options.path.contains('/auth/login') &&
               !options.path.contains('/users/jwt-by-firebase-token')) {
+
+            print("******************* TEST 1 *******************************");
+
             final token = await _storage.read(key: 'app_jwt_token');
+
+            print("******************* TEST 2 *******************************");
+            // print(token);
+
             if (token != null) {
+              print("******************* TEST 3 *******************************");
               options.headers['Authorization'] = 'Bearer $token';
             }
           }
+
+          print("******************* ON REQUEST END *******************************");
+          log(options.headers['Authorization'].toString());
+
           return handler.next(options);
         },
         onError: (error, handler) async {
@@ -65,6 +86,8 @@ class ApiService {
             try {
               // Tenter de rafraîchir le token
               final newToken = await _refreshToken();
+              // final refreshToken = await _storage.read(key: 'refresh_token');
+              // final newToken = await refreshJwtToken(refreshToken.toString());
 
               if (newToken != null) {
                 // Rejouer la requête originale avec le nouveau token
@@ -112,11 +135,15 @@ class ApiService {
         throw Exception('No refresh token');
       }
 
+      final appJwtToken = await _storage.read(key: 'app_jwt_token');
+
       final response = await _dio.post(
         '/auth/refresh',
         data: {'refresh_token': refreshToken},
         options: Options(
-          extra: {'noToken': true}, // Pour éviter la boucle infinie
+          extra: {'noToken': true},
+          headers: {'Authorization': 'Bearer $appJwtToken'}
+
         ),
       );
 

@@ -35,6 +35,14 @@ security:
 
 
     firewalls:
+
+        refresh:
+            pattern: ^/api/auth/refresh
+            stateless: true
+            custom_authenticators:
+                - App\Infrastructure\Security\RefreshTokenAuthenticator
+            provider: app_user_provider
+
         api_doc:
             pattern: ^/api/doc
             stateless: true
