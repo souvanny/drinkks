@@ -41,9 +41,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (state.matchedLocation.startsWith('/venues')) {
         return null; // Pas de redirection, autoriser l'accès
       }
-      // if (state.matchedLocation.startsWith('/account')) {
-      //   return null; // Pas de redirection, autoriser l'accès
-      // }
+      if (state.matchedLocation.startsWith('/account')) {
+        return null; // Pas de redirection, autoriser l'accès
+      }
 
       // CORRECTION 2: Utiliser isAuthenticated du nouveau provider
       final isLoggedIn = authState.isAuthenticated;
