@@ -56,4 +56,4 @@ final class UserProfileRemoteDataSourceProvider
 }
 
 String _$userProfileRemoteDataSourceHash() =>
-    r'64d4c19c04bba420484565a11a27cc96bad83f1a';
+    r'4a53c5e6e9864d6047e571648f9820215a0204fb';

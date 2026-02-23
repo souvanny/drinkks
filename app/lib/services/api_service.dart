@@ -345,6 +345,80 @@ class ApiService {
       errorMessage: 'Impossible de générer le token LiveKit',
     );
   }
+
+
+
+
+  // Profile methods
+  Future<Map<String, dynamic>> getProfile() async {
+    return safeApiCall(
+      apiCall: () async {
+        final response = await _dio.get('/account/me');
+        return response.data as Map<String, dynamic>;
+      },
+      errorMessage: 'Impossible de récupérer le profil',
+    );
+  }
+
+  Future<Map<String, dynamic>> getAboutMe() async {
+    return safeApiCall(
+      apiCall: () async {
+        final response = await _dio.get('/account/about-me');
+        return response.data as Map<String, dynamic>;
+      },
+      errorMessage: 'Impossible de récupérer "à propos"',
+    );
+  }
+
+  Future<Map<String, dynamic>> getPhoto() async {
+    return safeApiCall(
+      apiCall: () async {
+        final response = await _dio.get('/account/photo');
+        return response.data as Map<String, dynamic>;
+      },
+      errorMessage: 'Impossible de récupérer la photo',
+    );
+  }
+
+  Future<void> updateProfile({
+    String? username,
+    int? gender,
+    DateTime? birthdate,
+  }) async {
+    return safeApiCall(
+      apiCall: () async {
+        final data = <String, dynamic>{};
+        if (username != null) data['username'] = username;
+        if (gender != null) data['gender'] = gender;
+        if (birthdate != null) data['birthdate'] = birthdate.toIso8601String();
+
+        await _dio.put('/account/me', data: data);
+      },
+      errorMessage: 'Impossible de mettre à jour le profil',
+    );
+  }
+
+  Future<void> updateAboutMe(String aboutMe) async {
+    return safeApiCall(
+      apiCall: () async {
+        await _dio.put('/account/about-me', data: {'about_me': aboutMe});
+      },
+      errorMessage: 'Impossible de mettre à jour "à propos"',
+    );
+  }
+
+  Future<void> updatePhoto(String photoPath) async {
+    return safeApiCall(
+      apiCall: () async {
+        final formData = FormData.fromMap({
+          'photo': await MultipartFile.fromFile(photoPath),
+        });
+        await _dio.put('/account/photo', data: formData);
+      },
+      errorMessage: 'Impossible de mettre à jour la photo',
+    );
+  }
+
 }
 
 @riverpod

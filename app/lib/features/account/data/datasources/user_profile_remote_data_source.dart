@@ -1,7 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:dio/dio.dart';
-import '../../../../core/providers/network_providers.dart';
-import '../../../../providers/auth_provider.dart' hide dioProvider;
+import '../../../../services/account_service.dart'; // ← Nouvel import
 import '../models/user_profile_model.dart';
 
 part 'user_profile_remote_data_source.g.dart';
@@ -21,37 +19,32 @@ abstract class UserProfileRemoteDataSource {
 
 @riverpod
 UserProfileRemoteDataSource userProfileRemoteDataSource(Ref ref) {
-  final dio = ref.watch(dioProvider);
-  final authState = ref.watch(authStateNotifierProvider);
-  return UserProfileRemoteDataSourceImpl(dio, authState.jwtToken);
+  // Plus besoin de dio et jwtToken directement
+  final accountService = ref.watch(accountServiceProvider);
+  return UserProfileRemoteDataSourceImpl(accountService);
 }
 
 class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
-  final Dio _dio;
-  final String? _jwtToken;
+  final AccountService _accountService; // ← Utilisation du service
 
-  UserProfileRemoteDataSourceImpl(this._dio, this._jwtToken) {
-    if (_jwtToken != null) {
-      _dio.options.headers['Authorization'] = 'Bearer $_jwtToken';
-    }
-  }
+  UserProfileRemoteDataSourceImpl(this._accountService);
 
   @override
   Future<UserProfileModel> getProfile() async {
-    final response = await _dio.get('/api/account/me');
-    return UserProfileModel.fromJson(response.data);
+    final response = await _accountService.getProfile();
+    return UserProfileModel.fromJson(response);
   }
 
   @override
   Future<String> getAboutMe() async {
-    final response = await _dio.get('/api/account/about-me');
-    return response.data['about_me'] ?? '';
+    final response = await _accountService.getAboutMe();
+    return response['about_me'] ?? '';
   }
 
   @override
   Future<String> getPhoto() async {
-    final response = await _dio.get('/api/account/photo');
-    return response.data['photo_url'] ?? '';
+    final response = await _accountService.getPhoto();
+    return response['photo_url'] ?? '';
   }
 
   @override
@@ -60,24 +53,20 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
     int? gender,
     DateTime? birthdate,
   }) async {
-    final data = <String, dynamic>{};
-    if (username != null) data['username'] = username;
-    if (gender != null) data['gender'] = gender;
-    if (birthdate != null) data['birthdate'] = birthdate.toIso8601String();
-
-    await _dio.put('/api/account/me', data: data);
+    await _accountService.updateProfile(
+      username: username,
+      gender: gender,
+      birthdate: birthdate,
+    );
   }
 
   @override
   Future<void> updateAboutMe(String aboutMe) async {
-    await _dio.put('/api/account/about-me', data: {'about_me': aboutMe});
+    await _accountService.updateAboutMe(aboutMe);
   }
 
   @override
   Future<void> updatePhoto(String photoPath) async {
-    final formData = FormData.fromMap({
-      'photo': await MultipartFile.fromFile(photoPath),
-    });
-    await _dio.put('/api/account/photo', data: formData);
+    await _accountService.updatePhoto(photoPath);
   }
 }

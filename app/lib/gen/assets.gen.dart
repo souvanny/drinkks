@@ -48,11 +48,22 @@ class $AssetsImagesGen {
   /// Directory path: assets/images/logos
   $AssetsImagesLogosGen get logos => const $AssetsImagesLogosGen();
 
+  /// File path: assets/images/splash.png
+  AssetGenImage get splash => const AssetGenImage('assets/images/splash.png');
+
+  /// File path: assets/images/splash_icon.png
+  AssetGenImage get splashIcon =>
+      const AssetGenImage('assets/images/splash_icon.png');
+
+  /// File path: assets/images/splash_icon2.png
+  AssetGenImage get splashIcon2 =>
+      const AssetGenImage('assets/images/splash_icon2.png');
+
   /// Directory path: assets/images/venues
   $AssetsImagesVenuesGen get venues => const $AssetsImagesVenuesGen();
 
   /// List of all assets
-  List<String> get values => [logoPng];
+  List<dynamic> get values => [logoPng, splash, splashIcon, splashIcon2];
 }
 
 class $AssetsImagesBnGen {
