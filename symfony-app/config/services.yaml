@@ -51,3 +51,11 @@ services:
         arguments:
             $refreshTokenService: '@App\Infrastructure\Security\RefreshTokenService'
             $cookieProviders: []
+
+
+    App\Infrastructure\Http\Controller\UsersGetJwtTokenFromFirebaseAuthAction:
+        arguments:
+            $queryBus: '@App\Shared\Infrastructure\Bus\QueryBus'
+            $refreshTokenService: '@App\Infrastructure\Security\RefreshTokenService'
+            $userRepository: '@App\Infrastructure\Persistence\Doctrine\Repository\UserRepository'
+            $passwordHasher: '@Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface'

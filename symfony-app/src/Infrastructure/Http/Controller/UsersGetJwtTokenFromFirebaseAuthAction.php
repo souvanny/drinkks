@@ -13,11 +13,16 @@ use App\Users\Application\DTO\UserDTO;
 use App\Users\Application\Query\GetJwtForSignup\GetJwtForSignupQuery;
 use App\Users\Application\Query\GetJwtFromUser\GetJwtFromUserQuery;
 use App\Users\Application\Query\GetUserByFirebaseToken\GetUserByFirebaseTokenQuery;
+use Lcobucci\JWT\Encoding\JoseEncoder;
+use Lcobucci\JWT\Token\Parser;
+use Lcobucci\JWT\Token\Plain;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Uid\Uuid;
 
 #[Route('/api/users/jwt-by-firebase-token', name: 'UsersGetJwtTokenFromFirebaseAuth', methods: ['POST'])]
 class UsersGetJwtTokenFromFirebaseAuthAction
@@ -25,8 +30,8 @@ class UsersGetJwtTokenFromFirebaseAuthAction
     public function __construct(
         private readonly QueryBusInterface $queryBus,
         private readonly RefreshTokenService $refreshTokenService,
-        private readonly UserRepository $userRepository
-
+        private readonly UserRepository $userRepository,
+        private readonly UserPasswordHasherInterface $passwordHasher
     ) {
     }
 
@@ -34,10 +39,7 @@ class UsersGetJwtTokenFromFirebaseAuthAction
     public function __invoke(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-
         $token = $data['token'];
-
-//        die($token);
 
         /** @var UserDTO $userDTO */
         $userDTO = $this->queryBus->execute(new GetUserByFirebaseTokenQuery($token));
@@ -63,32 +65,37 @@ class UsersGetJwtTokenFromFirebaseAuthAction
             ])], Response::HTTP_FORBIDDEN);
         } else {
             $refreshToken = null;
+            $userEntity = null;
 
             if ('' == $userDTO->email) {
-                // Nouvel utilisateur - générer JWT pour signup
-                $jwtToken = $this->queryBus->execute(new GetJwtForSignupQuery($userDTO));
-                // Pas de refresh token pour les utilisateurs en cours d'inscription
+                // Nouvel utilisateur - le créer à partir du token Firebase
+                $userEntity = $this->createUserFromFirebaseToken($token);
+
+                // Sauvegarder l'utilisateur
+                $this->userRepository->getEntityManager()->persist($userEntity);
+                $this->userRepository->getEntityManager()->flush();
+
+                // Re-créer le UserDTO avec les nouvelles informations
+                $userDTO = UserDTO::fromEntity($userEntity);
+
+                // Générer le JWT pour le nouvel utilisateur
+                $jwtToken = $this->queryBus->execute(new GetJwtFromUserQuery($userDTO));
             } else {
                 // Utilisateur existant - générer JWT normal
                 $jwtToken = $this->queryBus->execute(new GetJwtFromUserQuery($userDTO));
 
                 // Récupérer l'entité utilisateur pour générer le refresh token
-                // Note: Vous aurez besoin d'un repository pour trouver l'utilisateur par authUid
                 $userEntity = $this->getUserEntityByAuthUid($userDTO->authUid);
+            }
 
-                $refreshToken = "AA : " . $userDTO->authUid;
+            // Générer le refresh token si on a une entité utilisateur
+            if ($userEntity) {
+                // Révoquer tous les anciens refresh tokens (single session)
+                $this->refreshTokenService->revokeAllUserTokens($userEntity);
 
-                if ($userEntity) {
-                    // Option 1: Révoquer tous les anciens refresh tokens (single session)
-                    $this->refreshTokenService->revokeAllUserTokens($userEntity);
-
-                    // Option 2: Garder l'ancien token (multi-session) - décommentez la ligne suivante
-                    // $this->refreshTokenService->revokeAllUserTokens($userEntity);
-
-                    // Créer un nouveau refresh token
-                    $refreshTokenEntity = $this->refreshTokenService->createRefreshToken($userEntity);
-                    $refreshToken = $refreshTokenEntity->getRefreshToken();
-                }
+                // Créer un nouveau refresh token
+                $refreshTokenEntity = $this->refreshTokenService->createRefreshToken($userEntity);
+                $refreshToken = $refreshTokenEntity->getRefreshToken();
             }
 
             $response = [
@@ -97,7 +104,7 @@ class UsersGetJwtTokenFromFirebaseAuthAction
                 'auth_uid' => $userDTO->authUid,
             ];
 
-            // Ajouter le refresh token seulement pour les utilisateurs existants
+            // Ajouter le refresh token
             if ($refreshToken) {
                 $response['refresh_token'] = $refreshToken;
             }
@@ -107,17 +114,58 @@ class UsersGetJwtTokenFromFirebaseAuthAction
     }
 
     /**
+     * Crée un nouvel utilisateur à partir du token Firebase
+     */
+    private function createUserFromFirebaseToken(string $firebaseToken): UserEntity
+    {
+        // Parser le token Firebase pour extraire les informations
+        $parser = new Parser(new JoseEncoder());
+        /** @var Plain $token */
+        $token = $parser->parse($firebaseToken);
+
+        // Récupérer les claims
+        $claims = $token->claims();
+
+        // Extraire l'email et le sub (auth_uid)
+        $email = $claims->get('email');
+        $authUid = $claims->get('sub');
+
+        if (!$email || !$authUid) {
+            throw new \Exception('Email ou sub manquant dans le token Firebase');
+        }
+
+        // Générer un mot de passe fort aléatoire (l'utilisateur s'authentifiera via Firebase)
+        $randomPassword = bin2hex(random_bytes(16)); // 32 caractères hexadécimaux
+
+        // Créer la nouvelle entité
+        $userEntity = new UserEntity();
+
+        // Générer un UID unique pour l'utilisateur
+        $userEntity->setUid(Uuid::v4()->toString());
+        $userEntity->setAuthUid($authUid);
+        $userEntity->setEmail($email);
+        $userEntity->setUsername($email); // Utiliser l'email comme username par défaut
+        $userEntity->setAboutMe('');
+        $userEntity->setGender(0);
+        $userEntity->setBirthdate(new \DateTime('today')); // 👈 Date du jour au lieu de null
+        $userEntity->setStatus(1); // 1 = actif (valeur par défaut)
+        $userEntity->setRoles(['ROLE_USER']);
+
+        // Hasher le mot de passe aléatoire
+        $hashedPassword = $this->passwordHasher->hashPassword($userEntity, $randomPassword);
+        $userEntity->setPassword($hashedPassword);
+
+        // Définir la date de création (sera aussi gérée par le PrePersist)
+        $userEntity->setCreatedAt(new \DateTime());
+
+        return $userEntity;
+    }
+
+    /**
      * Méthode utilitaire pour récupérer l'entité User à partir de l'authUid
-     * À adapter selon votre structure de repository
      */
     private function getUserEntityByAuthUid(string $authUid): ?UserEntity
     {
-        // Implémentez cette méthode selon votre architecture
-        // Par exemple, si vous avez un repository UserRepository:
-        // return $this->userRepository->findOneBy(['authUid' => $authUid]);
-
-        // Pour l'instant, on retourne null si pas implémenté
-        // IMPORTANT: Vous devez injecter le repository approprié dans le constructeur
         return $this->userRepository->findOneBy(['authUid' => $authUid]);
     }
 }
