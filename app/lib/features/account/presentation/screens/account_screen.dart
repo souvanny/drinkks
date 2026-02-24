@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../domain/entities/user_profile_entity.dart';
 import '../controllers/user_profile_controller.dart';
+import 'package:flutter/foundation.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
   const AccountScreen({super.key});
@@ -953,7 +954,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     );
   }
 
+
   Widget _buildPhotoTab(UserProfileEntity profile) {
+
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -973,14 +976,17 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                     image: FileImage(File(_selectedImage!.path)),
                     fit: BoxFit.cover,
                   )
-                      : (profile.photoUrl != null
+                      : (profile.photoUrl != null && profile.hasPhoto
                       ? DecorationImage(
-                    image: NetworkImage(profile.photoUrl!),
+                    image: NetworkImage('http://192.168.1.56:8101' + profile.photoUrl!),
                     fit: BoxFit.cover,
+                    onError: (error, stackTrace) {
+                      print('Erreur chargement photo: $error');
+                    },
                   )
                       : null),
                 ),
-                child: _selectedImage == null && profile.photoUrl == null
+                child: _selectedImage == null && !profile.hasPhoto
                     ? const Center(
                   child: Icon(
                     Icons.person,
@@ -1036,10 +1042,22 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               ),
               child: const Text('Supprimer la photo'),
             ),
+          // Afficher l'URL de la photo en debug
+          if (profile.photoUrl != null && kDebugMode)
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Text(
+                'URL: ${profile.photoUrl}',
+                style: const TextStyle(color: Colors.white54, fontSize: 10),
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       ),
     );
   }
+
+
 
   Widget _buildPhotoButton({
     required IconData icon,

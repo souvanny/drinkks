@@ -34,9 +34,9 @@ api_auth_logout:
     controller: App\Infrastructure\Http\Controller\LogoutController
     methods: POST
 
-app_file_upload:
-    path: /uploads/photos/{filename}
-    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+#app_file_upload:
+#    path: /uploads/photos/{filename}
+#    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
 #    defaults:
 #        path: /uploads/photos/%filename%
 #        permanent: false

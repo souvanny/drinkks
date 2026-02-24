@@ -60,6 +60,11 @@ security:
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
             provider: app_user_provider
 
+        api_public:
+            pattern: ^/api/photo
+            stateless: true
+            security: false  # Pas d'authentification requise
+
         api:
             pattern: ^/api
             stateless: true

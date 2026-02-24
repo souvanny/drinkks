@@ -63,3 +63,7 @@ services:
     App\Infrastructure\Http\Controller\AccountController:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    App\Infrastructure\Http\Controller\PhotoController:
+        arguments:
+            $projectDir: '%kernel.project_dir%'

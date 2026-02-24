@@ -31,6 +31,7 @@ class AccountController extends AbstractController
     ) {}
 
 
+
     #[Route('/me', name: 'account_get_me', methods: ['GET'])]
     #[OA\Get(
         summary: 'Récupère les informations du compte',
@@ -45,7 +46,8 @@ class AccountController extends AbstractController
                         new OA\Property(property: 'gender', type: 'integer', nullable: true),
                         new OA\Property(property: 'birthdate', type: 'string', format: 'date', nullable: true),
                         new OA\Property(property: 'about_me', type: 'string', nullable: true),
-                        new OA\Property(property: 'has_photo', type: 'boolean', description: 'Indique si l\'utilisateur a une photo'),
+                        new OA\Property(property: 'has_photo', type: 'boolean'),
+                        new OA\Property(property: 'photo_url', type: 'string', nullable: true),
                     ]
                 )
             )
@@ -58,8 +60,14 @@ class AccountController extends AbstractController
         try {
             $hasPhoto = $user->hasPhoto();
         } catch (\Error $e) {
-            // Si erreur d'initialisation, on force à false
             $hasPhoto = false;
+        }
+
+        // Construire l'URL de la photo si elle existe
+        $photoUrl = null;
+        if ($hasPhoto) {
+            // On suppose que la photo est en jpg, mais on pourrait détecter l'extension réelle
+            $photoUrl = '/api/photo/' . $user->getAuthUid() . '.jpg';
         }
 
         return $this->json([
@@ -69,6 +77,7 @@ class AccountController extends AbstractController
             'birthdate' => $user->getBirthdate()?->format('Y-m-d'),
             'about_me' => $user->getAboutMe(),
             'has_photo' => $hasPhoto,
+            'photo_url' => $photoUrl, // NOUVEAU
         ]);
     }
 
@@ -154,63 +163,6 @@ class AccountController extends AbstractController
         ]);
     }
 
-    #[Route('/photo', name: 'account_update_photo', methods: ['PUT'])]
-    public function updatePhoto(Request $request, #[CurrentUser] UserEntity $user): JsonResponse
-    {
-        /** @var UploadedFile|null $photo */
-        $photo = $request->files->get('photo');
-
-        if (!$photo) {
-            return $this->json(['error' => 'Aucune photo fournie'], Response::HTTP_BAD_REQUEST);
-        }
-
-        // Validation du fichier
-        if (!$this->validatePhoto($photo)) {
-            return $this->json([
-                'error' => 'Format de fichier invalide. Types acceptés: JPEG, PNG, GIF, WEBP. Taille max: 5MB'
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        try {
-            // Créer le dossier d'upload s'il n'existe pas
-            $uploadDir = $this->projectDir . self::PHOTO_UPLOAD_DIR;
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-
-            // Générer un nom de fichier unique basé sur l'auth_uid
-            $extension = $photo->guessExtension() ?? 'jpg';
-            $filename = $user->getAuthUid() . '.' . $extension;
-            $filepath = $uploadDir . '/' . $filename;
-
-            // Supprimer l'ancienne photo si elle existe
-            if ($user->hasPhoto()) {
-                $this->deleteOldPhoto($user);
-            }
-
-            // Déplacer le fichier
-            $photo->move($uploadDir, $filename);
-
-            // Mettre à jour le statut has_photo
-            $user->updatePhotoStatus(true);
-            $this->userRepository->save($user);
-
-            // Construire l'URL de la photo
-            $photoUrl = '/uploads/photos/' . $filename;
-
-            return $this->json([
-                'success' => true,
-                'photo_url' => $photoUrl,
-                'has_photo' => true,
-                'message' => 'Photo téléchargée avec succès'
-            ]);
-
-        } catch (\Exception $e) {
-            return $this->json([
-                'error' => 'Erreur lors du téléchargement: ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
 
     #[Route('/photo', name: 'account_delete_photo', methods: ['DELETE'])]
     public function deletePhoto(#[CurrentUser] UserEntity $user): JsonResponse
@@ -272,4 +224,63 @@ class AccountController extends AbstractController
             }
         }
     }
+
+    #[Route('/photo', name: 'account_update_photo', methods: ['PUT'])]
+    public function updatePhoto(Request $request, #[CurrentUser] UserEntity $user): JsonResponse
+    {
+        /** @var UploadedFile|null $photo */
+        $photo = $request->files->get('photo');
+
+        if (!$photo) {
+            return $this->json(['error' => 'Aucune photo fournie'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Validation du fichier
+        if (!$this->validatePhoto($photo)) {
+            return $this->json([
+                'error' => 'Format de fichier invalide. Types acceptés: JPEG, PNG, GIF, WEBP. Taille max: 5MB'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            // Créer le dossier d'upload s'il n'existe pas
+            $uploadDir = $this->projectDir . self::PHOTO_UPLOAD_DIR;
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            // Générer un nom de fichier basé sur l'auth_uid
+            $extension = $photo->guessExtension() ?? 'jpg';
+            $filename = $user->getAuthUid() . '.' . $extension;
+            $filepath = $uploadDir . '/' . $filename;
+
+            // Supprimer l'ancienne photo si elle existe
+            if ($user->hasPhoto()) {
+                $this->deleteOldPhoto($user);
+            }
+
+            // Déplacer le fichier
+            $photo->move($uploadDir, $filename);
+
+            // Mettre à jour le statut has_photo
+            $user->updatePhotoStatus(true);
+            $this->userRepository->save($user);
+
+            // Construire l'URL de la photo via notre nouveau controller
+            $photoUrl = '/api/photo/' . $filename;
+
+            return $this->json([
+                'success' => true,
+                'photo_url' => $photoUrl,
+                'has_photo' => true,
+                'message' => 'Photo téléchargée avec succès'
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'error' => 'Erreur lors du téléchargement: ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }
