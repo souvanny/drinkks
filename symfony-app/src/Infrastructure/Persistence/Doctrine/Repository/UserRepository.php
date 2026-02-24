@@ -19,7 +19,7 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
         parent::__construct($registry, UserEntity::class);
     }
 
-    public function save(User $user): void
+    public function save(UserEntity $user): void
     {
         $userEntity = $this->toDoctrineEntity($user);
 
@@ -32,7 +32,7 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
         }
     }
 
-    public function delete(User $user): void
+    public function delete(UserEntity $user): void
     {
         $userEntity = $this->find($user->getId());
         if ($userEntity) {
@@ -41,13 +41,13 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
         }
     }
 
-    public function findById(int $id): ?User
+    public function findById(int $id): ?UserEntity
     {
         $userEntity = $this->find($id);
         return $userEntity ? $this->toDomainEntity($userEntity) : null;
     }
 
-    public function findByEmail(Email $email): ?User
+    public function findByEmail(Email $email): ?UserEntity
     {
         $userEntity = $this->findOneBy(['email' => $email->getValue()]);
         return $userEntity ? $this->toDomainEntity($userEntity) : null;
@@ -112,7 +112,7 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
     /**
      * Convertit une entité Domain en entité Doctrine
      */
-    private function toDoctrineEntity(User $domainUser): UserEntity
+    private function toDoctrineEntity(UserEntity $domainUser): UserEntity
     {
         $userEntity = new UserEntity();
 
@@ -125,11 +125,11 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
             }
         }
 
-        $userEntity->setEmail($domainUser->getEmail()->getValue());
+        $userEntity->setEmail($domainUser->getEmail());
         $userEntity->setRoles($domainUser->getRoles());
         $userEntity->setPassword($domainUser->getPassword());
-        $userEntity->setFirstname($domainUser->getFirstname());
-        $userEntity->setLastname($domainUser->getLastname());
+//        $userEntity->setFirstname($domainUser->getFirstname());
+//        $userEntity->setLastname($domainUser->getLastname());
         $userEntity->setIsActive($domainUser->isActive());
         $userEntity->setCreatedAt($domainUser->getCreatedAt());
 
@@ -143,26 +143,27 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
     /**
      * Convertit une entité Doctrine en entité Domain
      */
-    private function toDomainEntity(UserEntity $userEntity): User
+    private function toDomainEntity(UserEntity $userEntity): UserEntity
     {
-        $user = new User(
+        $user = new UserEntity(
             new Email($userEntity->getEmail()),
             $userEntity->getPassword(),
-            $userEntity->getFirstname(),
-            $userEntity->getLastname()
+//            $userEntity->getFirstname(),
+//            $userEntity->getLastname()
         );
 
         $user->setId($userEntity->getId());
 
         // Restaurer les rôles (sans ROLE_USER par défaut qui sera ajouté automatiquement)
         $roles = array_filter($userEntity->getRoles(), fn($r) => $r !== 'ROLE_USER');
-        foreach ($roles as $role) {
-            $user->addRole($role);
-        }
+//        foreach ($roles as $role) {
+//            $user->addRole($role);
+//        }
+        $user->setRoles($roles);
 
-        if (!$userEntity->isActive()) {
-            $user->deactivate();
-        }
+//        if (!$userEntity->isActive()) {
+//            $user->deactivate();
+//        }
 
         return $user;
     }

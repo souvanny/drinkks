@@ -42,6 +42,7 @@ class AccountController extends AbstractController
             )
         ]
     )]
+    #[Route('/me', name: 'account_get_me', methods: ['GET'])]
     public function getMe(#[CurrentUser] UserEntity $user): JsonResponse
     {
         return $this->json([
@@ -49,6 +50,7 @@ class AccountController extends AbstractController
             'displayName' => $user->getDisplayName() ?? $user->getUsername(),
             'gender' => $user->getGender(),
             'birthdate' => $user->getBirthdate()?->format('Y-m-d'),
+            'about_me' => $user->getAboutMe(), // 👈 AJOUTER CETTE LIGNE
         ]);
     }
 

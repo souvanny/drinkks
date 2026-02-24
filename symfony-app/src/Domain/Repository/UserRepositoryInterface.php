@@ -2,39 +2,39 @@
 
 namespace App\Domain\Repository;
 
-use App\Domain\Entity\User;
 use App\Domain\ValueObject\Email;
+use App\Infrastructure\Persistence\Doctrine\Entity\UserEntity;
 
 /**
  * Repository Interface (Port) - Contrat du domaine
  */
 interface UserRepositoryInterface
 {
-    public function save(User $user): void;
+    public function save(UserEntity $user): void;
 
-    public function delete(User $user): void;
+    public function delete(UserEntity $user): void;
 
-    public function findById(int $id): ?User;
+    public function findById(int $id): ?UserEntity;
 
-    public function findByEmail(Email $email): ?User;
+    public function findByEmail(Email $email): ?UserEntity;
 
     /**
-     * @return User[]
+     * @return UserEntity[]
      */
     public function findAll(): array;
 
     /**
-     * @return User[]
+     * @return UserEntity[]
      */
     public function findActiveUsers(): array;
 
     /**
-     * @return User[]
+     * @return UserEntity[]
      */
     public function findByRole(string $role): array;
 
     /**
-     * @return User[]
+     * @return UserEntity[]
      */
     public function search(string $searchTerm): array;
 
