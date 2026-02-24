@@ -1,0 +1,4 @@
+Presque.
+Sur appuie du bouton valider, s'il y a une erreur, et qu'on appuie sur Ressayer,
+ça revient sur la page d'edition, tout en rechargeant les infos et donc tout se remt à zéro.
+Je voudrais corriger ça.

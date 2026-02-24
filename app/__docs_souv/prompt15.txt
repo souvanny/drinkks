@@ -1,0 +1,5 @@
+Ok parfait.
+Maintenant je voudrais, qu'une fois les infos chargées, et après à chaque modification d'un champs, vérifeir que tout est correct sinon afficher une passille, marquer d'une couleur lorsque 'il y a une erreur.
+- si username est corforme par rapport à ce qu'un username dervait être (par exemple uniquement caract alphabétique, nombre, underscore et arobase).
+- si gender ne vaut ni 1, ni 2
+- si l'âge est inférieur à 18 ans

@@ -38,10 +38,21 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   // Stocker les données originales pour comparaison
   UserProfileEntity? _originalProfile;
 
+  // États de validation
+  bool _isUsernameValid = true;
+  bool _isGenderValid = true;
+  bool _isAgeValid = true;
+  String? _usernameError;
+  String? _genderError;
+  String? _ageError;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Ajouter un listener pour valider en temps réel
+    _usernameController.addListener(_validateUsername);
   }
 
   @override
@@ -50,6 +61,83 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     _usernameController.dispose();
     _aboutMeController.dispose();
     super.dispose();
+  }
+
+  // Méthodes de validation
+  void _validateUsername() {
+    final username = _usernameController.text;
+
+    if (username.isEmpty) {
+      _isUsernameValid = true; // Optionnel, pas d'erreur si vide
+      _usernameError = null;
+    } else {
+      // Règles: caractères alphabétiques, nombres, underscore et arobase
+      // Pas d'espaces, pas de caractères spéciaux
+      final usernameRegex = RegExp(r'^[a-zA-Z0-9_@\.]+$');
+
+      if (!usernameRegex.hasMatch(username)) {
+        _isUsernameValid = false;
+        _usernameError = 'Caractères autorisés: lettres, chiffres, _ et @';
+      } else if (username.length < 3) {
+        _isUsernameValid = false;
+        _usernameError = 'Le nom d\'utilisateur doit faire au moins 3 caractères';
+      } else if (username.length > 30) {
+        _isUsernameValid = false;
+        _usernameError = 'Le nom d\'utilisateur ne doit pas dépasser 30 caractères';
+      } else {
+        _isUsernameValid = true;
+        _usernameError = null;
+      }
+    }
+
+    setState(() {});
+  }
+
+  void _validateGender() {
+    if (_selectedGender == null) {
+      _isGenderValid = true; // Optionnel, pas d'erreur si non sélectionné
+      _genderError = null;
+    } else if (_selectedGender != 1 && _selectedGender != 2) {
+      _isGenderValid = false;
+      _genderError = 'Genre invalide';
+    } else {
+      _isGenderValid = true;
+      _genderError = null;
+    }
+  }
+
+  void _validateAge() {
+    if (_selectedDate == null) {
+      _isAgeValid = true; // Optionnel, pas d'erreur si non sélectionné
+      _ageError = null;
+    } else {
+      final now = DateTime.now();
+      final age = now.year - _selectedDate!.year;
+      final hasHadBirthdayThisYear =
+          now.month > _selectedDate!.month ||
+              (now.month == _selectedDate!.month && now.day >= _selectedDate!.day);
+
+      final actualAge = hasHadBirthdayThisYear ? age : age - 1;
+
+      if (actualAge < 18) {
+        _isAgeValid = false;
+        _ageError = 'Vous devez avoir au moins 18 ans';
+      } else {
+        _isAgeValid = true;
+        _ageError = null;
+      }
+    }
+  }
+
+  void _validateAll() {
+    _validateUsername();
+    _validateGender();
+    _validateAge();
+  }
+
+  bool get _isFormValid {
+    _validateAll();
+    return _isUsernameValid && _isGenderValid && _isAgeValid;
   }
 
   void _loadProfileData(UserProfileEntity profile) {
@@ -63,14 +151,17 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final newUsername = profile.username ?? '';
     if (_usernameController.text != newUsername && !_isEditing) {
       _usernameController.text = newUsername;
+      _validateUsername();
     }
 
     if (_selectedGender != profile.gender && !_isEditing) {
       _selectedGender = profile.gender;
+      _validateGender();
     }
 
     if (_selectedDate != profile.birthdate && !_isEditing) {
       _selectedDate = profile.birthdate;
+      _validateAge();
     }
 
     final newAboutMe = profile.aboutMe ?? '';
@@ -81,6 +172,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
   // Méthode pour détecter les changements
   void _onFieldChanged() {
+    _validateAll();
     if (!_hasChanges) {
       setState(() {
         _hasChanges = true;
@@ -164,6 +256,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
+        _validateAge();
         _hasChanges = true;
         _isEditing = true;
         // S'assurer que les autres valeurs restent
@@ -176,6 +269,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         _usernameController.text = currentUsername;
         _selectedGender = currentGender;
         _selectedDate = currentDate;
+        _validateAge();
       });
     }
   }
@@ -249,6 +343,30 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
             ),
           ),
           centerTitle: true,
+          actions: [
+            // Badge d'erreur global
+            if (!_isFormValid && _hasChanges)
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.error, color: Colors.white, size: 16),
+                      SizedBox(width: 4),
+                      Text(
+                        'Champs invalides',
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
           bottom: TabBar(
             controller: _tabController,
             indicatorColor: const Color(0xFF6366F1),
@@ -353,42 +471,78 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               ),
               const SizedBox(height: 16),
 
-              // Username
+              // Username avec validation
               Focus(
                 onFocusChange: (hasFocus) {
                   setState(() {
                     _isEditing = hasFocus;
                   });
                 },
-                child: TextFormField(
-                  controller: _usernameController,
-                  style: const TextStyle(color: Colors.white),
-                  onChanged: (value) {
-                    _isEditing = true;
-                    _onFieldChanged();
-                  },
-                  decoration: InputDecoration(
-                    labelText: 'Nom d\'utilisateur',
-                    labelStyle: const TextStyle(color: Colors.white70),
-                    prefixIcon: const Icon(Icons.person, color: Color(0xFF6366F1)),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _usernameController,
+                            style: const TextStyle(color: Colors.white),
+                            onChanged: (value) {
+                              _isEditing = true;
+                              _onFieldChanged();
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Nom d\'utilisateur',
+                              labelStyle: TextStyle(
+                                color: _isUsernameValid ? Colors.white70 : Colors.red,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.person,
+                                color: _isUsernameValid ? Color(0xFF6366F1) : Colors.red,
+                              ),
+                              suffixIcon: _usernameController.text.isNotEmpty
+                                  ? Icon(
+                                _isUsernameValid ? Icons.check_circle : Icons.error,
+                                color: _isUsernameValid ? Colors.green : Colors.red,
+                              )
+                                  : null,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              errorText: _isUsernameValid ? null : _usernameError,
+                              errorStyle: const TextStyle(color: Colors.red),
+                              filled: true,
+                              fillColor: const Color(0xFF1E1E3F),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    filled: true,
-                    fillColor: const Color(0xFF1E1E3F),
-                  ),
+                  ],
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Genre
+              // Genre avec validation
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Genre',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  Row(
+                    children: [
+                      Text(
+                        'Genre',
+                        style: TextStyle(
+                          color: _isGenderValid ? Colors.white70 : Colors.red,
+                          fontSize: 16,
+                        ),
+                      ),
+                      if (_selectedGender != null && !_isGenderValid)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Icon(Icons.error, color: Colors.red, size: 16),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -402,37 +556,85 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                       ),
                     ],
                   ),
+                  if (!_isGenderValid && _genderError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        _genderError!,
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 16),
 
-              // Date de naissance
-              InkWell(
-                onTap: () => _selectDate(context),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E3F),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
+              // Date de naissance avec validation
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      const Icon(Icons.cake, color: Color(0xFF6366F1)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _selectedDate != null
-                              ? 'Date de naissance: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                              : 'Sélectionner votre date de naissance',
-                          style: TextStyle(
-                            color: _selectedDate != null ? Colors.white : Colors.white60,
-                          ),
+                      Text(
+                        'Date de naissance',
+                        style: TextStyle(
+                          color: _isAgeValid ? Colors.white70 : Colors.red,
+                          fontSize: 16,
                         ),
                       ),
-                      const Icon(Icons.arrow_drop_down, color: Color(0xFF6366F1)),
+                      if (_selectedDate != null && !_isAgeValid)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Icon(Icons.error, color: Colors.red, size: 16),
+                        ),
                     ],
                   ),
-                ),
+                  const SizedBox(height: 8),
+                  InkWell(
+                    onTap: () => _selectDate(context),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E3F),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _isAgeValid ? Colors.transparent : Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.cake,
+                            color: _isAgeValid ? Color(0xFF6366F1) : Colors.red,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _selectedDate != null
+                                  ? 'Date de naissance: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                                  : 'Sélectionner votre date de naissance',
+                              style: TextStyle(
+                                color: _selectedDate != null ? Colors.white : Colors.white60,
+                              ),
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            color: _isAgeValid ? Color(0xFF6366F1) : Colors.red,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (!_isAgeValid && _ageError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        _ageError!,
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 24),
 
@@ -441,7 +643,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () async {
+                  onPressed: _isFormValid
+                      ? () async {
                     if (_formKey.currentState!.validate()) {
                       setState(() {
                         _isEditing = false;
@@ -470,9 +673,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                         );
                       }
                     }
-                  },
+                  }
+                      : null, // Désactivé si formulaire invalide
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6366F1),
+                    backgroundColor: _isFormValid ? const Color(0xFF6366F1) : Colors.grey,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -491,10 +695,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   }
 
   Widget _buildGenderOption(String label, int value) {
+    final isSelected = _selectedGender == value;
+    final hasError = !_isGenderValid && _selectedGender != null;
+
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedGender = value;
+          _validateGender();
           _hasChanges = true;
           _isEditing = true;
         });
@@ -502,20 +710,31 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: _selectedGender == value
-              ? const Color(0xFF6366F1)
+          color: isSelected
+              ? (hasError ? Colors.red : const Color(0xFF6366F1))
               : const Color(0xFF1E1E3F),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: _selectedGender == value
-                ? const Color(0xFF6366F1)
-                : Colors.transparent,
+            color: isSelected
+                ? (hasError ? Colors.red : const Color(0xFF6366F1))
+                : (hasError ? Colors.red : Colors.transparent),
+            width: 1,
           ),
         ),
         child: Center(
-          child: Text(
-            label,
-            style: const TextStyle(color: Colors.white),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Colors.white),
+              ),
+              if (isSelected && hasError)
+                const Padding(
+                  padding: EdgeInsets.only(left: 4),
+                  child: Icon(Icons.error, color: Colors.white, size: 14),
+                ),
+            ],
           ),
         ),
       ),
