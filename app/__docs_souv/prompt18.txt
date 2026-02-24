@@ -1,9 +1,14 @@
+Parfait.
+Voici le dernier AccountScreen modifié.
+
+Je voudrais un loader pendant le chargement de la photo, dans l'onglet photo.
+Quand on modifie la photo, ou quand on la supprime, il ne faut pas le message d'avertissement 'Modifications non enregistrées'.
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart'; // NOUVEAU
 import '../../../../providers/auth_provider.dart';
 import '../../domain/entities/user_profile_entity.dart';
 import '../controllers/user_profile_controller.dart';
@@ -31,10 +36,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   XFile? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
-  // État de chargement pour la photo
-  bool _isPhotoLoading = false;
-
-  // Variable pour suivre si des changements ont été faits (UNIQUEMENT pour les champs texte)
+  // Variable pour suivre si des changements ont été faits
   bool _hasChanges = false;
 
   // Flag pour éviter les écrasements pendant l'édition
@@ -208,7 +210,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     _validateAll();
   }
 
-  // Méthode pour détecter les changements (UNIQUEMENT pour les champs texte)
+  // Méthode pour détecter les changements
   void _onFieldChanged() {
     _validateAll();
     if (!_hasChanges) {
@@ -224,21 +226,17 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     if (image != null) {
       setState(() {
         _selectedImage = image;
-        _isPhotoLoading = true;
-        // NE PAS mettre _hasChanges à true
+        _hasChanges = true;
       });
       _savePendingChanges();
 
+      // Upload automatique avec gestion d'erreur
       try {
         await ref
             .read(userProfileControllerProvider.notifier)
             .updatePhoto(image.path);
 
         if (mounted) {
-          setState(() {
-            _isPhotoLoading = false;
-          });
-
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Photo téléchargée avec succès'),
@@ -248,10 +246,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         }
       } catch (e) {
         if (mounted) {
-          setState(() {
-            _isPhotoLoading = false;
-          });
-
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Erreur: $e'),
@@ -289,6 +283,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                 _pickImage(ImageSource.camera);
               },
             ),
+            // NOUVEAU: Option pour supprimer la photo
             if (_originalProfile?.hasPhoto == true)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
@@ -304,21 +299,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     );
   }
 
+  // NOUVEAU: Méthode pour supprimer la photo
   Future<void> _deletePhoto() async {
     try {
       setState(() {
         _selectedImage = null;
-        _isPhotoLoading = true;
       });
 
-      // TODO: Appeler l'API de suppression
+      // TODO: Appeler l'API de suppression quand elle sera implémentée
+      // Pour l'instant, on rafraîchit juste le profil
       await _refreshProfile();
 
       if (mounted) {
-        setState(() {
-          _isPhotoLoading = false;
-        });
-
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Photo supprimée'),
@@ -328,10 +320,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _isPhotoLoading = false;
-        });
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur lors de la suppression: $e'),
@@ -343,6 +331,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    // Sauvegarder l'état avant d'ouvrir le datepicker
     final currentDisplayName = _displayNameController.text;
     final currentGender = _selectedGender;
     final currentDate = _selectedDate;
@@ -367,16 +356,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       },
     );
 
+    // Restaurer l'état quoi qu'il arrive
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
         _validateAge();
         _hasChanges = true;
         _isEditing = true;
+        // S'assurer que les autres valeurs restent
         _displayNameController.text = currentDisplayName;
         _selectedGender = currentGender;
       });
     } else {
+      // Si annulé, restaurer toutes les valeurs
       setState(() {
         _displayNameController.text = currentDisplayName;
         _selectedGender = currentGender;
@@ -387,6 +379,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     _savePendingChanges();
   }
 
+  // Méthode pour gérer le retour avec confirmation
   Future<bool> _onWillPop() async {
     if (!_hasChanges) {
       return true;
@@ -426,13 +419,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     return confirm ?? false;
   }
 
+  // Méthode de rafraîchissement améliorée
   Future<void> _refreshProfile() async {
-    _savePendingChanges();
+    _savePendingChanges(); // Sauvegarder avant refresh
 
     try {
       await ref.refresh(userProfileControllerProvider.notifier).refresh();
+      // Après le refresh, restaurer les modifications
       _restorePendingChanges();
     } catch (e) {
+      // En cas d'erreur, restaurer quand même
       _restorePendingChanges();
       rethrow;
     }
@@ -468,6 +464,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
           ),
           centerTitle: true,
           actions: [
+            // Badge d'erreur global
             if (!_isFormValid && _hasChanges)
               Padding(
                 padding: const EdgeInsets.only(right: 16),
@@ -504,6 +501,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         ),
         body: profileState.when(
           data: (profile) {
+            // Charger les données initiales
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 _loadProfileData(profile);
@@ -787,7 +785,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
                       setState(() {
                         _hasChanges = false;
-                        _pendingChanges.clear();
+                        _pendingChanges.clear(); // Effacer après sauvegarde réussie
                       });
 
                       if (mounted) {
@@ -963,268 +961,135 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   }
 
 
-
-  // ============================================================
-// MÉTHODE PRINCIPALE - Photo Tab
-// ============================================================
   Widget _buildPhotoTab(UserProfileEntity profile) {
-    final String? imageUrl = profile.photoUrl != null && profile.hasPhoto
-        ? 'http://192.168.1.56:8101' + profile.photoUrl!
-        : null;
 
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
           const SizedBox(height: 20),
-
-          // Affichage de la photo avec loader
-          _buildPhotoWithLoader(profile, imageUrl),
-
+          // Affichage de la photo
+          Stack(
+            children: [
+              Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFF6366F1), width: 3),
+                  image: _selectedImage != null
+                      ? DecorationImage(
+                    image: FileImage(File(_selectedImage!.path)),
+                    fit: BoxFit.cover,
+                  )
+                      : (profile.photoUrl != null && profile.hasPhoto
+                      ? DecorationImage(
+                    image: NetworkImage('http://192.168.1.56:8101' + profile.photoUrl!),
+                    fit: BoxFit.cover,
+                    onError: (error, stackTrace) {
+                      print('Erreur chargement photo: $error');
+                    },
+                  )
+                      : null),
+                ),
+                child: _selectedImage == null && !profile.hasPhoto
+                    ? const Center(
+                  child: Icon(
+                    Icons.person,
+                    size: 80,
+                    color: Color(0xFF6366F1),
+                  ),
+                )
+                    : null,
+              ),
+              // Badge "Photo" si l'utilisateur a une photo
+              if (profile.hasPhoto || _selectedImage != null)
+                Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF6366F1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(height: 30),
-
-          // Boutons Galerie et Appareil photo
-          _buildPhotoActionButtons(),
-
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildPhotoButton(
+                icon: Icons.photo_library,
+                label: 'Galerie',
+                onTap: () => _pickImage(ImageSource.gallery),
+              ),
+              _buildPhotoButton(
+                icon: Icons.photo_camera,
+                label: 'Appareil photo',
+                onTap: () => _pickImage(ImageSource.camera),
+              ),
+            ],
+          ),
           const SizedBox(height: 20),
-
-          // Bouton de suppression
-          _buildDeleteButton(profile),
-
-          // Affichage debug de l'URL
-          _buildDebugInfo(imageUrl),
+          // Bouton pour supprimer la photo
+          if (profile.hasPhoto || _selectedImage != null)
+            TextButton(
+              onPressed: _deletePhoto,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Supprimer la photo'),
+            ),
+          // Afficher l'URL de la photo en debug
+          if (profile.photoUrl != null && kDebugMode)
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Text(
+                'URL: ${profile.photoUrl}',
+                style: const TextStyle(color: Colors.white54, fontSize: 10),
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       ),
     );
   }
 
-// ============================================================
-// SOUS-MÉTHODES
-// ============================================================
 
-  /// Construit le conteneur de la photo avec le loader et le badge
-  Widget _buildPhotoWithLoader(UserProfileEntity profile, String? imageUrl) {
-    return Stack(
-      children: [
-        // La photo elle-même
-        _buildPhotoContainer(profile, imageUrl),
 
-        // Loader pendant l'upload/suppression
-        if (_isPhotoLoading) _buildPhotoLoader(),
-
-        // Badge de confirmation (check)
-        if ((profile.hasPhoto || _selectedImage != null) && !_isPhotoLoading)
-          _buildPhotoBadge(),
-      ],
-    );
-  }
-
-  /// Construit le conteneur circulaire de la photo
-  Widget _buildPhotoContainer(UserProfileEntity profile, String? imageUrl) {
-    return Container(
-      width: 200,
-      height: 200,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFF6366F1), width: 3),
-      ),
-      child: ClipOval(
-        child: _getPhotoContent(profile, imageUrl),
-      ),
-    );
-  }
-
-  /// Retourne le contenu de la photo (image locale, réseau ou icône par défaut)
-  Widget _getPhotoContent(UserProfileEntity profile, String? imageUrl) {
-    // Cas 1: Image sélectionnée localement (avant upload)
-    if (_selectedImage != null) {
-      return Image.file(
-        File(_selectedImage!.path),
-        fit: BoxFit.cover,
-      );
-    }
-
-    // Cas 2: Image distante (déjà uploadée)
-    if (imageUrl != null) {
-      return _buildNetworkImage(imageUrl);
-    }
-
-    // Cas 3: Pas de photo, icône par défaut
-    return _buildDefaultAvatar();
-  }
-
-  /// Construit une image réseau avec CachedNetworkImage
-  Widget _buildNetworkImage(String imageUrl) {
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: BoxFit.cover,
-      placeholder: (context, url) => _buildImagePlaceholder(),
-      errorWidget: (context, url, error) {
-        print('Erreur chargement photo: $error');
-        return _buildErrorImage();
-      },
-    );
-  }
-
-  /// Placeholder pendant le chargement de l'image réseau
-  Widget _buildImagePlaceholder() {
-    return Container(
-      color: const Color(0xFF1E1E3F),
-      child: const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF6366F1),
-          strokeWidth: 2,
-        ),
-      ),
-    );
-  }
-
-  /// Affichage en cas d'erreur de chargement
-  Widget _buildErrorImage() {
-    return Container(
-      color: const Color(0xFF1E1E3F),
-      child: const Center(
-        child: Icon(
-          Icons.broken_image,
-          size: 50,
-          color: Colors.white54,
-        ),
-      ),
-    );
-  }
-
-  /// Avatar par défaut (quand pas de photo)
-  Widget _buildDefaultAvatar() {
-    return Container(
-      color: const Color(0xFF1E1E3F),
-      child: const Center(
-        child: Icon(
-          Icons.person,
-          size: 80,
-          color: Color(0xFF6366F1),
-        ),
-      ),
-    );
-  }
-
-  /// Loader superposé pendant l'upload ou la suppression
-  Widget _buildPhotoLoader() {
-    return Positioned.fill(
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.black54,
-        ),
-        child: const Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFF6366F1),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Badge de confirmation (check) quand une photo est présente
-  Widget _buildPhotoBadge() {
-    return Positioned(
-      bottom: 10,
-      right: 10,
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: const BoxDecoration(
-          color: Color(0xFF6366F1),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(
-          Icons.check,
-          color: Colors.white,
-          size: 16,
-        ),
-      ),
-    );
-  }
-
-  /// Boutons pour choisir la source de l'image (galerie ou appareil photo)
-  Widget _buildPhotoActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildPhotoButton(
-          icon: Icons.photo_library,
-          label: 'Galerie',
-          onTap: _isPhotoLoading ? null : () => _pickImage(ImageSource.gallery),
-        ),
-        _buildPhotoButton(
-          icon: Icons.photo_camera,
-          label: 'Appareil photo',
-          onTap: _isPhotoLoading ? null : () => _pickImage(ImageSource.camera),
-        ),
-      ],
-    );
-  }
-
-  /// Bouton de suppression de la photo
-  Widget _buildDeleteButton(UserProfileEntity profile) {
-    if (!(profile.hasPhoto || _selectedImage != null) || _isPhotoLoading) {
-      return const SizedBox.shrink(); // Rien à afficher
-    }
-
-    return TextButton(
-      onPressed: _deletePhoto,
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.red,
-      ),
-      child: const Text('Supprimer la photo'),
-    );
-  }
-
-  /// Informations de debug (URL de la photo)
-  Widget _buildDebugInfo(String? imageUrl) {
-    if (imageUrl == null || !kDebugMode || _isPhotoLoading) {
-      return const SizedBox.shrink();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Text(
-        'URL: $imageUrl',
-        style: const TextStyle(color: Colors.white54, fontSize: 10),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  /// Bouton individuel pour les actions photo
   Widget _buildPhotoButton({
     required IconData icon,
     required String label,
-    required VoidCallback? onTap,
+    required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Opacity(
-        opacity: onTap == null ? 0.5 : 1.0,
-        child: Column(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E3F),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: const Color(0xFF6366F1), size: 30),
+      child: Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E1E3F),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white70),
-            ),
-          ],
-        ),
+            child: Icon(icon, color: const Color(0xFF6366F1), size: 30),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white70),
+          ),
+        ],
       ),
     );
   }
-
-
 }
