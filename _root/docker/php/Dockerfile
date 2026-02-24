@@ -1,6 +1,5 @@
 FROM php:8.4-fpm-alpine3.21
 
-
 # Installer dépendances système
 RUN apk update && apk add --no-cache \
     git \
@@ -24,10 +23,13 @@ RUN docker-php-ext-install \
         opcache \
         bcmath
 
-# Configuration PHP
+# Configuration PHP complète
 RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory-limit.ini \
     && echo "upload_max_filesize=50M" > /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "post_max_size=50M" >> /usr/local/etc/php/conf.d/uploads.ini
+    && echo "post_max_size=50M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "max_execution_time=300" >> /usr/local/etc/php/conf.d/timeouts.ini \
+    && echo "max_input_time=300" >> /usr/local/etc/php/conf.d/timeouts.ini \
+    && echo "max_file_uploads=20" >> /usr/local/etc/php/conf.d/uploads.ini
 
 # Installer Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \

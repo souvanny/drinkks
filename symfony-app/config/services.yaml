@@ -59,3 +59,7 @@ services:
             $refreshTokenService: '@App\Infrastructure\Security\RefreshTokenService'
             $userRepository: '@App\Infrastructure\Persistence\Doctrine\Repository\UserRepository'
             $passwordHasher: '@Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface'
+
+    App\Infrastructure\Http\Controller\AccountController:
+        arguments:
+            $projectDir: '%kernel.project_dir%'

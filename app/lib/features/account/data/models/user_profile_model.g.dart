@@ -16,6 +16,7 @@ _UserProfileModel _$UserProfileModelFromJson(Map<String, dynamic> json) =>
       ),
       aboutMe: json['about_me'] as String?,
       photoUrl: json['photo_url'] as String?,
+      hasPhoto: json['has_photo'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$UserProfileModelToJson(_UserProfileModel instance) =>
@@ -26,4 +27,5 @@ Map<String, dynamic> _$UserProfileModelToJson(_UserProfileModel instance) =>
       'birthdate': const DateTimeConverter().toJson(instance.birthdate),
       'about_me': instance.aboutMe,
       'photo_url': instance.photoUrl,
+      'has_photo': instance.hasPhoto,
     };

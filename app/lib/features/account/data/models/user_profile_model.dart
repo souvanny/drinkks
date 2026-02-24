@@ -15,6 +15,7 @@ abstract class UserProfileModel with _$UserProfileModel {
     @JsonKey(name: 'birthdate') @DateTimeConverter() DateTime? birthdate,
     @JsonKey(name: 'about_me') String? aboutMe,
     @JsonKey(name: 'photo_url') String? photoUrl,
+    @JsonKey(name: 'has_photo') @Default(false) bool hasPhoto, // NOUVEAU
   }) = _UserProfileModel;
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -27,6 +28,7 @@ abstract class UserProfileModel with _$UserProfileModel {
     birthdate: birthdate,
     aboutMe: aboutMe,
     photoUrl: photoUrl,
+    hasPhoto: hasPhoto, // NOUVEAU
   );
 }
 

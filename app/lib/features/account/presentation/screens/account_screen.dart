@@ -20,7 +20,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   final _formKey = GlobalKey<FormState>();
   final _aboutMeController = TextEditingController();
 
-  // Champs pour le premier onglet - Changé username en displayName
+  // Champs pour le premier onglet
   final _displayNameController = TextEditingController();
   int? _selectedGender;
   DateTime? _selectedDate;
@@ -41,7 +41,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   // Stocker les modifications en cours pour les préserver pendant le refresh
   Map<String, dynamic> _pendingChanges = {};
 
-  // États de validation - Changé username en displayName
+  // États de validation
   bool _isDisplayNameValid = true;
   bool _isGenderValid = true;
   bool _isAgeValid = true;
@@ -66,7 +66,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     super.dispose();
   }
 
-  // Méthodes de validation - Changé username en displayName
+  // Méthodes de validation
   void _validateDisplayName() {
     final displayName = _displayNameController.text;
 
@@ -74,7 +74,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       _isDisplayNameValid = true;
       _displayNameError = null;
     } else {
-      // Nouveau regex: lettres, chiffres, espaces, tirets, apostrophes
       final nameRegex = RegExp(r"^[a-zA-Z0-9\s\-']+$");
 
       if (!nameRegex.hasMatch(displayName)) {
@@ -224,10 +223,30 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       });
       _savePendingChanges();
 
-      // Upload automatique
-      ref
-          .read(userProfileControllerProvider.notifier)
-          .updatePhoto(image.path);
+      // Upload automatique avec gestion d'erreur
+      try {
+        await ref
+            .read(userProfileControllerProvider.notifier)
+            .updatePhoto(image.path);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Photo téléchargée avec succès'),
+              backgroundColor: Color(0xFF6366F1),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erreur: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -257,10 +276,51 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                 _pickImage(ImageSource.camera);
               },
             ),
+            // NOUVEAU: Option pour supprimer la photo
+            if (_originalProfile?.hasPhoto == true)
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.red),
+                title: const Text('Supprimer la photo', style: TextStyle(color: Colors.red)),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _deletePhoto();
+                },
+              ),
           ],
         ),
       ),
     );
+  }
+
+  // NOUVEAU: Méthode pour supprimer la photo
+  Future<void> _deletePhoto() async {
+    try {
+      setState(() {
+        _selectedImage = null;
+      });
+
+      // TODO: Appeler l'API de suppression quand elle sera implémentée
+      // Pour l'instant, on rafraîchit juste le profil
+      await _refreshProfile();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Photo supprimée'),
+            backgroundColor: Color(0xFF6366F1),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la suppression: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -521,7 +581,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               ),
               const SizedBox(height: 16),
 
-              // DisplayName avec validation (remplace username)
+              // DisplayName avec validation
               Focus(
                 onFocusChange: (hasFocus) {
                   setState(() {
@@ -574,7 +634,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               ),
               const SizedBox(height: 16),
 
-              // Genre avec validation (3 options)
+              // Genre avec validation
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -899,33 +959,56 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       child: Column(
         children: [
           const SizedBox(height: 20),
-          Container(
-            width: 200,
-            height: 200,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFF6366F1), width: 3),
-              image: _selectedImage != null
-                  ? DecorationImage(
-                image: FileImage(File(_selectedImage!.path)),
-                fit: BoxFit.cover,
-              )
-                  : (profile.photoUrl != null
-                  ? DecorationImage(
-                image: NetworkImage(profile.photoUrl!),
-                fit: BoxFit.cover,
-              )
-                  : null),
-            ),
-            child: _selectedImage == null && profile.photoUrl == null
-                ? const Center(
-              child: Icon(
-                Icons.person,
-                size: 80,
-                color: Color(0xFF6366F1),
+          // Affichage de la photo
+          Stack(
+            children: [
+              Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFF6366F1), width: 3),
+                  image: _selectedImage != null
+                      ? DecorationImage(
+                    image: FileImage(File(_selectedImage!.path)),
+                    fit: BoxFit.cover,
+                  )
+                      : (profile.photoUrl != null
+                      ? DecorationImage(
+                    image: NetworkImage(profile.photoUrl!),
+                    fit: BoxFit.cover,
+                  )
+                      : null),
+                ),
+                child: _selectedImage == null && profile.photoUrl == null
+                    ? const Center(
+                  child: Icon(
+                    Icons.person,
+                    size: 80,
+                    color: Color(0xFF6366F1),
+                  ),
+                )
+                    : null,
               ),
-            )
-                : null,
+              // Badge "Photo" si l'utilisateur a une photo
+              if (profile.hasPhoto || _selectedImage != null)
+                Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF6366F1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 30),
           Row(
@@ -943,6 +1026,16 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               ),
             ],
           ),
+          const SizedBox(height: 20),
+          // Bouton pour supprimer la photo
+          if (profile.hasPhoto || _selectedImage != null)
+            TextButton(
+              onPressed: _deletePhoto,
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+              child: const Text('Supprimer la photo'),
+            ),
         ],
       ),
     );

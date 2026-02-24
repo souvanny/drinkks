@@ -8,6 +8,11 @@ framework:
     #esi: true
     #fragments: true
 
+    assets:
+        packages:
+            uploads:
+                base_path: '/uploads'
+
 when@test:
     framework:
         test: true

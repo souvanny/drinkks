@@ -11,5 +11,6 @@ abstract class UserProfileEntity with _$UserProfileEntity {
     required DateTime? birthdate,
     required String? aboutMe,
     required String? photoUrl,
+    @Default(false) bool hasPhoto, // NOUVEAU: champ hasPhoto avec valeur par défaut false
   }) = _UserProfileEntity;
 }

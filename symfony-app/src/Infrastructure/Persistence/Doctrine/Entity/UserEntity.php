@@ -35,7 +35,7 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $username = null;
 
-    // 👇 NOUVEAU champ displayName
+    // Champ displayName
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $displayName = null;
 
@@ -54,11 +54,25 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer', options: ['default' => 1])]
     private int $status = 1;
 
+    // NOUVEAU: Champ pour indiquer si l'utilisateur a une photo
+    // IMPORTANT: Initialisé à false dans la déclaration ET dans le constructeur
+    #[ORM\Column(name: 'has_photo', type: 'boolean', options: ['default' => false])]
+    private bool $hasPhoto = false;
+
     #[ORM\Column(name: 'created_at', type: 'datetime')]
     private \DateTimeInterface $createdAt;
 
     #[ORM\Column(name: 'updated_at', type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $updatedAt = null;
+
+    /**
+     * Constructeur avec initialisation de toutes les propriétés
+     */
+    public function __construct()
+    {
+        $this->hasPhoto = false;
+        $this->createdAt = new \DateTime();
+    }
 
     #[ORM\PrePersist]
     public function setCreatedAtValue(): void
@@ -125,7 +139,6 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
         $this->username = $username;
     }
 
-    // 👇 NOUVEAU getter/setter pour displayName
     public function getDisplayName(): ?string
     {
         return $this->displayName;
@@ -166,11 +179,6 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
         $this->birthdate = $birthdate;
     }
 
-    public function isStatus(): bool
-    {
-        return $this->status;
-    }
-
     public function getStatus(): int
     {
         return $this->status;
@@ -179,6 +187,25 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
     public function setStatus(int $status): void
     {
         $this->status = $status;
+    }
+
+    // Getter/Setter pour hasPhoto
+    public function hasPhoto(): bool
+    {
+        return $this->hasPhoto;
+    }
+
+    public function setHasPhoto(bool $hasPhoto): self
+    {
+        $this->hasPhoto = $hasPhoto;
+        return $this;
+    }
+
+    // Méthode utilitaire pour mettre à jour le statut photo
+    public function updatePhotoStatus(bool $hasPhoto): void
+    {
+        $this->hasPhoto = $hasPhoto;
+        $this->updatedAt = new \DateTime();
     }
 
     public function getUserIdentifier(): string
@@ -237,11 +264,11 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function isActive(): bool
     {
-        return $this->status;
+        return $this->status === 1;
     }
 
     public function setIsActive(bool $isActive): void
     {
-        $this->status = $isActive;
+        $this->status = $isActive ? 1 : 0;
     }
 }

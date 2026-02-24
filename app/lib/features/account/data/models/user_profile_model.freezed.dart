@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserProfileModel {
 
- String get id;@JsonKey(name: 'displayName') String? get displayName; int? get gender;@JsonKey(name: 'birthdate')@DateTimeConverter() DateTime? get birthdate;@JsonKey(name: 'about_me') String? get aboutMe;@JsonKey(name: 'photo_url') String? get photoUrl;
+ String get id;@JsonKey(name: 'displayName') String? get displayName; int? get gender;@JsonKey(name: 'birthdate')@DateTimeConverter() DateTime? get birthdate;@JsonKey(name: 'about_me') String? get aboutMe;@JsonKey(name: 'photo_url') String? get photoUrl;@JsonKey(name: 'has_photo') bool get hasPhoto;
 /// Create a copy of UserProfileModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $UserProfileModelCopyWith<UserProfileModel> get copyWith => _$UserProfileModelCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.birthdate, birthdate) || other.birthdate == birthdate)&&(identical(other.aboutMe, aboutMe) || other.aboutMe == aboutMe)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.birthdate, birthdate) || other.birthdate == birthdate)&&(identical(other.aboutMe, aboutMe) || other.aboutMe == aboutMe)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.hasPhoto, hasPhoto) || other.hasPhoto == hasPhoto));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,gender,birthdate,aboutMe,photoUrl);
+int get hashCode => Object.hash(runtimeType,id,displayName,gender,birthdate,aboutMe,photoUrl,hasPhoto);
 
 @override
 String toString() {
-  return 'UserProfileModel(id: $id, displayName: $displayName, gender: $gender, birthdate: $birthdate, aboutMe: $aboutMe, photoUrl: $photoUrl)';
+  return 'UserProfileModel(id: $id, displayName: $displayName, gender: $gender, birthdate: $birthdate, aboutMe: $aboutMe, photoUrl: $photoUrl, hasPhoto: $hasPhoto)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $UserProfileModelCopyWith<$Res>  {
   factory $UserProfileModelCopyWith(UserProfileModel value, $Res Function(UserProfileModel) _then) = _$UserProfileModelCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'displayName') String? displayName, int? gender,@JsonKey(name: 'birthdate')@DateTimeConverter() DateTime? birthdate,@JsonKey(name: 'about_me') String? aboutMe,@JsonKey(name: 'photo_url') String? photoUrl
+ String id,@JsonKey(name: 'displayName') String? displayName, int? gender,@JsonKey(name: 'birthdate')@DateTimeConverter() DateTime? birthdate,@JsonKey(name: 'about_me') String? aboutMe,@JsonKey(name: 'photo_url') String? photoUrl,@JsonKey(name: 'has_photo') bool hasPhoto
 });
 
 
@@ -65,7 +65,7 @@ class _$UserProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = freezed,Object? gender = freezed,Object? birthdate = freezed,Object? aboutMe = freezed,Object? photoUrl = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = freezed,Object? gender = freezed,Object? birthdate = freezed,Object? aboutMe = freezed,Object? photoUrl = freezed,Object? hasPhoto = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,8 @@ as String?,gender: freezed == gender ? _self.gender : gender // ignore: cast_nul
 as int?,birthdate: freezed == birthdate ? _self.birthdate : birthdate // ignore: cast_nullable_to_non_nullable
 as DateTime?,aboutMe: freezed == aboutMe ? _self.aboutMe : aboutMe // ignore: cast_nullable_to_non_nullable
 as String?,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,hasPhoto: null == hasPhoto ? _self.hasPhoto : hasPhoto // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -158,10 +159,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String? displayName,  int? gender, @JsonKey(name: 'birthdate')@DateTimeConverter()  DateTime? birthdate, @JsonKey(name: 'about_me')  String? aboutMe, @JsonKey(name: 'photo_url')  String? photoUrl)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String? displayName,  int? gender, @JsonKey(name: 'birthdate')@DateTimeConverter()  DateTime? birthdate, @JsonKey(name: 'about_me')  String? aboutMe, @JsonKey(name: 'photo_url')  String? photoUrl, @JsonKey(name: 'has_photo')  bool hasPhoto)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfileModel() when $default != null:
-return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl);case _:
+return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl,_that.hasPhoto);case _:
   return orElse();
 
 }
@@ -179,10 +180,10 @@ return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.ab
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String? displayName,  int? gender, @JsonKey(name: 'birthdate')@DateTimeConverter()  DateTime? birthdate, @JsonKey(name: 'about_me')  String? aboutMe, @JsonKey(name: 'photo_url')  String? photoUrl)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'displayName')  String? displayName,  int? gender, @JsonKey(name: 'birthdate')@DateTimeConverter()  DateTime? birthdate, @JsonKey(name: 'about_me')  String? aboutMe, @JsonKey(name: 'photo_url')  String? photoUrl, @JsonKey(name: 'has_photo')  bool hasPhoto)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileModel():
-return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl);case _:
+return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl,_that.hasPhoto);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +200,10 @@ return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.ab
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'displayName')  String? displayName,  int? gender, @JsonKey(name: 'birthdate')@DateTimeConverter()  DateTime? birthdate, @JsonKey(name: 'about_me')  String? aboutMe, @JsonKey(name: 'photo_url')  String? photoUrl)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'displayName')  String? displayName,  int? gender, @JsonKey(name: 'birthdate')@DateTimeConverter()  DateTime? birthdate, @JsonKey(name: 'about_me')  String? aboutMe, @JsonKey(name: 'photo_url')  String? photoUrl, @JsonKey(name: 'has_photo')  bool hasPhoto)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileModel() when $default != null:
-return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl);case _:
+return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl,_that.hasPhoto);case _:
   return null;
 
 }
@@ -214,7 +215,7 @@ return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.ab
 @JsonSerializable()
 
 class _UserProfileModel extends UserProfileModel {
-  const _UserProfileModel({required this.id, @JsonKey(name: 'displayName') this.displayName, this.gender, @JsonKey(name: 'birthdate')@DateTimeConverter() this.birthdate, @JsonKey(name: 'about_me') this.aboutMe, @JsonKey(name: 'photo_url') this.photoUrl}): super._();
+  const _UserProfileModel({required this.id, @JsonKey(name: 'displayName') this.displayName, this.gender, @JsonKey(name: 'birthdate')@DateTimeConverter() this.birthdate, @JsonKey(name: 'about_me') this.aboutMe, @JsonKey(name: 'photo_url') this.photoUrl, @JsonKey(name: 'has_photo') this.hasPhoto = false}): super._();
   factory _UserProfileModel.fromJson(Map<String, dynamic> json) => _$UserProfileModelFromJson(json);
 
 @override final  String id;
@@ -223,6 +224,7 @@ class _UserProfileModel extends UserProfileModel {
 @override@JsonKey(name: 'birthdate')@DateTimeConverter() final  DateTime? birthdate;
 @override@JsonKey(name: 'about_me') final  String? aboutMe;
 @override@JsonKey(name: 'photo_url') final  String? photoUrl;
+@override@JsonKey(name: 'has_photo') final  bool hasPhoto;
 
 /// Create a copy of UserProfileModel
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +239,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.birthdate, birthdate) || other.birthdate == birthdate)&&(identical(other.aboutMe, aboutMe) || other.aboutMe == aboutMe)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileModel&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.birthdate, birthdate) || other.birthdate == birthdate)&&(identical(other.aboutMe, aboutMe) || other.aboutMe == aboutMe)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.hasPhoto, hasPhoto) || other.hasPhoto == hasPhoto));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,gender,birthdate,aboutMe,photoUrl);
+int get hashCode => Object.hash(runtimeType,id,displayName,gender,birthdate,aboutMe,photoUrl,hasPhoto);
 
 @override
 String toString() {
-  return 'UserProfileModel(id: $id, displayName: $displayName, gender: $gender, birthdate: $birthdate, aboutMe: $aboutMe, photoUrl: $photoUrl)';
+  return 'UserProfileModel(id: $id, displayName: $displayName, gender: $gender, birthdate: $birthdate, aboutMe: $aboutMe, photoUrl: $photoUrl, hasPhoto: $hasPhoto)';
 }
 
 
@@ -257,7 +259,7 @@ abstract mixin class _$UserProfileModelCopyWith<$Res> implements $UserProfileMod
   factory _$UserProfileModelCopyWith(_UserProfileModel value, $Res Function(_UserProfileModel) _then) = __$UserProfileModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'displayName') String? displayName, int? gender,@JsonKey(name: 'birthdate')@DateTimeConverter() DateTime? birthdate,@JsonKey(name: 'about_me') String? aboutMe,@JsonKey(name: 'photo_url') String? photoUrl
+ String id,@JsonKey(name: 'displayName') String? displayName, int? gender,@JsonKey(name: 'birthdate')@DateTimeConverter() DateTime? birthdate,@JsonKey(name: 'about_me') String? aboutMe,@JsonKey(name: 'photo_url') String? photoUrl,@JsonKey(name: 'has_photo') bool hasPhoto
 });
 
 
@@ -274,7 +276,7 @@ class __$UserProfileModelCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = freezed,Object? gender = freezed,Object? birthdate = freezed,Object? aboutMe = freezed,Object? photoUrl = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = freezed,Object? gender = freezed,Object? birthdate = freezed,Object? aboutMe = freezed,Object? photoUrl = freezed,Object? hasPhoto = null,}) {
   return _then(_UserProfileModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -282,7 +284,8 @@ as String?,gender: freezed == gender ? _self.gender : gender // ignore: cast_nul
 as int?,birthdate: freezed == birthdate ? _self.birthdate : birthdate // ignore: cast_nullable_to_non_nullable
 as DateTime?,aboutMe: freezed == aboutMe ? _self.aboutMe : aboutMe // ignore: cast_nullable_to_non_nullable
 as String?,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,hasPhoto: null == hasPhoto ? _self.hasPhoto : hasPhoto // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
