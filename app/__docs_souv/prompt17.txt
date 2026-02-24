@@ -1,0 +1,4 @@
+Finalement pour usernameRegex ce sera :
+final usernameRegex = RegExp(r'^[a-zA-Z0-9_]+$');
+
+Et puis je voudrais une 3ème option pour gender ("Ne se pronoce pas" = 3)

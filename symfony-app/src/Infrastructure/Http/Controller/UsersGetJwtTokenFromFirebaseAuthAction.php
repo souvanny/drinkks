@@ -114,6 +114,63 @@ class UsersGetJwtTokenFromFirebaseAuthAction
     }
 
     /**
+     * Crée un username à partir de la partie locale de l'email
+     * Enlève tout ce qui est après l'arobase et garde la partie locale avec les points
+     */
+    private function generateUsernameFromEmail(string $email): string
+    {
+        // Récupérer la partie avant l'arobase
+        $parts = explode('@', $email);
+        $localPart = $parts[0] ?? '';
+
+        // Remplacer les caractères non autorisés par des underscores
+        // Garder seulement lettres, chiffres, points et underscores
+        $username = preg_replace('/[^a-zA-Z0-9._]/', '_', $localPart);
+
+        // Supprimer les underscores et points multiples
+        $username = preg_replace('/[._]+/', '.', $username);
+
+        // Supprimer les points au début et à la fin
+        $username = trim($username, '.');
+
+        // Si le username est vide après nettoyage, générer un username par défaut
+        if (empty($username) || strlen($username) < 3) {
+            $username = 'user_' . substr(md5($email), 0, 8);
+        }
+
+        // Tronquer si trop long (max 30 caractères)
+        if (strlen($username) > 30) {
+            $username = substr($username, 0, 30);
+        }
+
+        return $username;
+    }
+
+    /**
+     * Vérifie si un username existe déjà et génère une version unique si nécessaire
+     */
+    private function ensureUniqueUsername(string $baseUsername): string
+    {
+        $username = $baseUsername;
+        $counter = 1;
+
+        while ($this->userRepository->findOneBy(['username' => $username]) !== null) {
+            // Si le username de base avec le compteur dépasse 30 caractères, on tronque le début
+            $suffix = '_' . $counter;
+            $maxBaseLength = 30 - strlen($suffix);
+
+            if (strlen($baseUsername) > $maxBaseLength) {
+                $baseUsername = substr($baseUsername, 0, $maxBaseLength);
+            }
+
+            $username = $baseUsername . $suffix;
+            $counter++;
+        }
+
+        return $username;
+    }
+
+    /**
      * Crée un nouvel utilisateur à partir du token Firebase
      */
     private function createUserFromFirebaseToken(string $firebaseToken): UserEntity
@@ -134,6 +191,10 @@ class UsersGetJwtTokenFromFirebaseAuthAction
             throw new \Exception('Email ou sub manquant dans le token Firebase');
         }
 
+        // Générer le username à partir de l'email
+        $baseUsername = $this->generateUsernameFromEmail($email);
+        $username = $this->ensureUniqueUsername($baseUsername);
+
         // Générer un mot de passe fort aléatoire (l'utilisateur s'authentifiera via Firebase)
         $randomPassword = bin2hex(random_bytes(16)); // 32 caractères hexadécimaux
 
@@ -144,9 +205,9 @@ class UsersGetJwtTokenFromFirebaseAuthAction
         $userEntity->setUid(Uuid::v4()->toString());
         $userEntity->setAuthUid($authUid);
         $userEntity->setEmail($email);
-        $userEntity->setUsername($email); // Utiliser l'email comme username par défaut
+        $userEntity->setUsername($username);
         $userEntity->setAboutMe('');
-        $userEntity->setGender(0);
+        $userEntity->setGender(3); // 👈 3 = "Ne se prononce pas" comme valeur par défaut
         $userEntity->setBirthdate(new \DateTime('today')); // 👈 Date du jour au lieu de null
         $userEntity->setStatus(1); // 1 = actif (valeur par défaut)
         $userEntity->setRoles(['ROLE_USER']);

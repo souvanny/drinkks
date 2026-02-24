@@ -38,6 +38,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   // Stocker les données originales pour comparaison
   UserProfileEntity? _originalProfile;
 
+  // Stocker les modifications en cours pour les préserver pendant le refresh
+  Map<String, dynamic> _pendingChanges = {};
+
   // États de validation
   bool _isUsernameValid = true;
   bool _isGenderValid = true;
@@ -68,16 +71,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final username = _usernameController.text;
 
     if (username.isEmpty) {
-      _isUsernameValid = true; // Optionnel, pas d'erreur si vide
+      _isUsernameValid = true;
       _usernameError = null;
     } else {
-      // Règles: caractères alphabétiques, nombres, underscore et arobase
-      // Pas d'espaces, pas de caractères spéciaux
-      final usernameRegex = RegExp(r'^[a-zA-Z0-9_@\.]+$');
+      // Nouveau regex: uniquement lettres, chiffres et underscore
+      final usernameRegex = RegExp(r'^[a-zA-Z0-9_\.]+$');
 
       if (!usernameRegex.hasMatch(username)) {
         _isUsernameValid = false;
-        _usernameError = 'Caractères autorisés: lettres, chiffres, _ et @';
+        _usernameError = 'Caractères autorisés: lettres, chiffres et _';
       } else if (username.length < 3) {
         _isUsernameValid = false;
         _usernameError = 'Le nom d\'utilisateur doit faire au moins 3 caractères';
@@ -95,9 +97,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
   void _validateGender() {
     if (_selectedGender == null) {
-      _isGenderValid = true; // Optionnel, pas d'erreur si non sélectionné
+      _isGenderValid = true;
       _genderError = null;
-    } else if (_selectedGender != 1 && _selectedGender != 2) {
+    } else if (_selectedGender != 1 && _selectedGender != 2 && _selectedGender != 3) {
       _isGenderValid = false;
       _genderError = 'Genre invalide';
     } else {
@@ -108,7 +110,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
   void _validateAge() {
     if (_selectedDate == null) {
-      _isAgeValid = true; // Optionnel, pas d'erreur si non sélectionné
+      _isAgeValid = true;
       _ageError = null;
     } else {
       final now = DateTime.now();
@@ -142,32 +144,63 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
   void _loadProfileData(UserProfileEntity profile) {
     // Stocker les données originales une seule fois
-    _originalProfile ??= profile;
-
-    // Ne pas écraser pendant l'édition
-    if (_isEditing) return;
-
-    // Ne mettre à jour que si les valeurs sont différentes et que ce n'est pas en édition
-    final newUsername = profile.username ?? '';
-    if (_usernameController.text != newUsername && !_isEditing) {
-      _usernameController.text = newUsername;
-      _validateUsername();
+    if (_originalProfile == null) {
+      _originalProfile = profile;
     }
 
-    if (_selectedGender != profile.gender && !_isEditing) {
+    // Ne pas écraser s'il y a des modifications en cours
+    if (_isEditing || _pendingChanges.isNotEmpty) return;
+
+    // Charger les données uniquement si c'est le premier chargement
+    if (_usernameController.text.isEmpty) {
+      _usernameController.text = profile.username ?? '';
+    }
+
+    if (_selectedGender == null) {
       _selectedGender = profile.gender;
-      _validateGender();
     }
 
-    if (_selectedDate != profile.birthdate && !_isEditing) {
+    if (_selectedDate == null) {
       _selectedDate = profile.birthdate;
-      _validateAge();
     }
 
-    final newAboutMe = profile.aboutMe ?? '';
-    if (_aboutMeController.text != newAboutMe && !_isEditing) {
-      _aboutMeController.text = newAboutMe;
+    if (_aboutMeController.text.isEmpty) {
+      _aboutMeController.text = profile.aboutMe ?? '';
     }
+
+    _validateAll();
+  }
+
+  // Sauvegarder les modifications en cours
+  void _savePendingChanges() {
+    _pendingChanges = {
+      'username': _usernameController.text,
+      'gender': _selectedGender,
+      'birthdate': _selectedDate,
+      'aboutMe': _aboutMeController.text,
+      'hasChanges': _hasChanges,
+    };
+  }
+
+  // Restaurer les modifications en cours
+  void _restorePendingChanges() {
+    if (_pendingChanges.containsKey('username')) {
+      _usernameController.text = _pendingChanges['username'] as String;
+    }
+    if (_pendingChanges.containsKey('gender')) {
+      _selectedGender = _pendingChanges['gender'] as int?;
+    }
+    if (_pendingChanges.containsKey('birthdate')) {
+      _selectedDate = _pendingChanges['birthdate'] as DateTime?;
+    }
+    if (_pendingChanges.containsKey('aboutMe')) {
+      _aboutMeController.text = _pendingChanges['aboutMe'] as String;
+    }
+    if (_pendingChanges.containsKey('hasChanges')) {
+      _hasChanges = _pendingChanges['hasChanges'] as bool;
+    }
+
+    _validateAll();
   }
 
   // Méthode pour détecter les changements
@@ -178,6 +211,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         _hasChanges = true;
       });
     }
+    _savePendingChanges();
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -187,6 +221,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         _selectedImage = image;
         _hasChanges = true;
       });
+      _savePendingChanges();
+
       // Upload automatique
       ref
           .read(userProfileControllerProvider.notifier)
@@ -272,6 +308,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         _validateAge();
       });
     }
+    _savePendingChanges();
   }
 
   // Méthode pour gérer le retour avec confirmation
@@ -312,6 +349,21 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     );
 
     return confirm ?? false;
+  }
+
+  // Méthode de rafraîchissement améliorée
+  Future<void> _refreshProfile() async {
+    _savePendingChanges(); // Sauvegarder avant refresh
+
+    try {
+      await ref.refresh(userProfileControllerProvider.notifier).refresh();
+      // Après le refresh, restaurer les modifications
+      _restorePendingChanges();
+    } catch (e) {
+      // En cas d'erreur, restaurer quand même
+      _restorePendingChanges();
+      rethrow;
+    }
   }
 
   @override
@@ -381,15 +433,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         ),
         body: profileState.when(
           data: (profile) {
-            // Charger les données initiales seulement si ce n'est pas en édition
-            // et si ce sont les premières données
-            if (!_isEditing) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted && !_isEditing) {
-                  _loadProfileData(profile);
-                }
-              });
-            }
+            // Charger les données initiales
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _loadProfileData(profile);
+              }
+            });
 
             return TabBarView(
               controller: _tabController,
@@ -414,7 +463,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => ref.refresh(userProfileControllerProvider.notifier).refresh(),
+                  onPressed: _refreshProfile,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF6366F1),
                   ),
@@ -524,7 +573,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               ),
               const SizedBox(height: 16),
 
-              // Genre avec validation
+              // Genre avec validation (3 options)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -545,15 +594,21 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Row(
+                  Column(
                     children: [
-                      Expanded(
-                        child: _buildGenderOption('Masculin', 1),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildGenderOption('Masculin', 1),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildGenderOption('Féminin', 2),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildGenderOption('Féminin', 2),
-                      ),
+                      const SizedBox(height: 12),
+                      _buildGenderOption('Ne se prononce pas', 3, fullWidth: true),
                     ],
                   ),
                   if (!_isGenderValid && _genderError != null)
@@ -662,6 +717,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
                       setState(() {
                         _hasChanges = false;
+                        _pendingChanges.clear(); // Effacer après sauvegarde réussie
                       });
 
                       if (mounted) {
@@ -674,7 +730,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                       }
                     }
                   }
-                      : null, // Désactivé si formulaire invalide
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _isFormValid ? const Color(0xFF6366F1) : Colors.grey,
                     shape: RoundedRectangleBorder(
@@ -694,7 +750,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     );
   }
 
-  Widget _buildGenderOption(String label, int value) {
+  Widget _buildGenderOption(String label, int value, {bool fullWidth = false}) {
     final isSelected = _selectedGender == value;
     final hasError = !_isGenderValid && _selectedGender != null;
 
@@ -706,8 +762,10 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
           _hasChanges = true;
           _isEditing = true;
         });
+        _savePendingChanges();
       },
       child: Container(
+        width: fullWidth ? double.infinity : null,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
@@ -804,6 +862,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
                   setState(() {
                     _hasChanges = false;
+                    _pendingChanges.clear();
                   });
 
                   if (mounted) {
