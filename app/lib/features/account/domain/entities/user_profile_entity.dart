@@ -6,8 +6,8 @@ part 'user_profile_entity.freezed.dart';
 abstract class UserProfileEntity with _$UserProfileEntity {
   const factory UserProfileEntity({
     required String id,
-    required String? username,
-    required int? gender, // 1 = masculin, 2 = féminin
+    required String? displayName,
+    required int? gender,
     required DateTime? birthdate,
     required String? aboutMe,
     required String? photoUrl,

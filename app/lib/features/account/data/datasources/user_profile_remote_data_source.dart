@@ -1,5 +1,5 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import '../../../../services/account_service.dart'; // ← Nouvel import
+import '../../../../services/account_service.dart';
 import '../models/user_profile_model.dart';
 
 part 'user_profile_remote_data_source.g.dart';
@@ -9,7 +9,7 @@ abstract class UserProfileRemoteDataSource {
   Future<String> getAboutMe();
   Future<String> getPhoto();
   Future<void> updateProfile({
-    String? username,
+    String? displayName,
     int? gender,
     DateTime? birthdate,
   });
@@ -19,13 +19,12 @@ abstract class UserProfileRemoteDataSource {
 
 @riverpod
 UserProfileRemoteDataSource userProfileRemoteDataSource(Ref ref) {
-  // Plus besoin de dio et jwtToken directement
   final accountService = ref.watch(accountServiceProvider);
   return UserProfileRemoteDataSourceImpl(accountService);
 }
 
 class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
-  final AccountService _accountService; // ← Utilisation du service
+  final AccountService _accountService;
 
   UserProfileRemoteDataSourceImpl(this._accountService);
 
@@ -49,12 +48,12 @@ class UserProfileRemoteDataSourceImpl implements UserProfileRemoteDataSource {
 
   @override
   Future<void> updateProfile({
-    String? username,
+    String? displayName,
     int? gender,
     DateTime? birthdate,
   }) async {
     await _accountService.updateProfile(
-      username: username,
+      displayName: displayName,
       gender: gender,
       birthdate: birthdate,
     );

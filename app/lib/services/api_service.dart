@@ -48,33 +48,17 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-
-          print("******************* ON REQUEST *******************************");
-          print(options.path);
-
-
           // Ne pas ajouter le token pour les endpoints d'auth
-          // if (!options.path.contains('/auth/refresh') &&
           if (!options.path.contains('/auth/refresh') &&
-          // if (
               !options.path.contains('/auth/login') &&
               !options.path.contains('/users/jwt-by-firebase-token')) {
 
-            print("******************* TEST 1 *******************************");
-
             final token = await _storage.read(key: 'app_jwt_token');
 
-            print("******************* TEST 2 *******************************");
-            // print(token);
-
             if (token != null) {
-              print("******************* TEST 3 *******************************");
               options.headers['Authorization'] = 'Bearer $token';
             }
           }
-
-          print("******************* ON REQUEST END *******************************");
-          log(options.headers['Authorization'].toString());
 
           return handler.next(options);
         },
@@ -86,8 +70,6 @@ class ApiService {
             try {
               // Tenter de rafraîchir le token
               final newToken = await _refreshToken();
-              // final refreshToken = await _storage.read(key: 'refresh_token');
-              // final newToken = await refreshJwtToken(refreshToken.toString());
 
               if (newToken != null) {
                 // Rejouer la requête originale avec le nouveau token
@@ -141,9 +123,8 @@ class ApiService {
         '/auth/refresh',
         data: {'refresh_token': refreshToken},
         options: Options(
-          extra: {'noToken': true},
-          headers: {'Authorization': 'Bearer $appJwtToken'}
-
+            extra: {'noToken': true},
+            headers: {'Authorization': 'Bearer $appJwtToken'}
         ),
       );
 
@@ -260,27 +241,6 @@ class ApiService {
     );
   }
 
-  /*
-  // Nouvelle méthode pour rafraîchir le token
-  Future<Map<String, dynamic>?> refreshJwtToken(String refreshToken) async {
-    try {
-      final response = await _dio.post(
-        '/auth/refresh',
-        data: {'refresh_token': refreshToken},
-        options: Options(extra: {'noToken': true}),
-      );
-
-      if (response.statusCode == 200) {
-        return response.data as Map<String, dynamic>;
-      }
-    } catch (e) {
-      print('❌ Erreur refresh token API: $e');
-    }
-    return null;
-  }
-
-   */
-
   // Nouvelle méthode pour révoquer le refresh token (logout)
   Future<void> revokeRefreshToken(String refreshToken) async {
     try {
@@ -346,9 +306,6 @@ class ApiService {
     );
   }
 
-
-
-
   // Profile methods
   Future<Map<String, dynamic>> getProfile() async {
     return safeApiCall(
@@ -381,14 +338,14 @@ class ApiService {
   }
 
   Future<void> updateProfile({
-    String? username,
+    String? displayName,
     int? gender,
     DateTime? birthdate,
   }) async {
     return safeApiCall(
       apiCall: () async {
         final data = <String, dynamic>{};
-        if (username != null) data['username'] = username;
+        if (displayName != null) data['displayName'] = displayName;
         if (gender != null) data['gender'] = gender;
         if (birthdate != null) data['birthdate'] = birthdate.toIso8601String();
 
@@ -418,7 +375,6 @@ class ApiService {
       errorMessage: 'Impossible de mettre à jour la photo',
     );
   }
-
 }
 
 @riverpod

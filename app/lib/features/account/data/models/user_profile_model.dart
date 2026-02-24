@@ -10,7 +10,7 @@ abstract class UserProfileModel with _$UserProfileModel {
 
   const factory UserProfileModel({
     required String id,
-    String? username,
+    @JsonKey(name: 'displayName') String? displayName,
     int? gender,
     @JsonKey(name: 'birthdate') @DateTimeConverter() DateTime? birthdate,
     @JsonKey(name: 'about_me') String? aboutMe,
@@ -22,7 +22,7 @@ abstract class UserProfileModel with _$UserProfileModel {
 
   UserProfileEntity toEntity() => UserProfileEntity(
     id: id,
-    username: username,
+    displayName: displayName,
     gender: gender,
     birthdate: birthdate,
     aboutMe: aboutMe,

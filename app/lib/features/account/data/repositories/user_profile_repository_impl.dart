@@ -34,12 +34,12 @@ class UserProfileRepositoryImpl implements UserProfileRepository {
 
   @override
   Future<void> updateProfile({
-    String? username,
+    String? displayName,
     int? gender,
     DateTime? birthdate,
   }) async {
     await _remoteDataSource.updateProfile(
-      username: username,
+      displayName: displayName,
       gender: gender,
       birthdate: birthdate,
     );

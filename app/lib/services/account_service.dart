@@ -22,12 +22,12 @@ class AccountService {
   }
 
   Future<void> updateProfile({
-    String? username,
+    String? displayName,
     int? gender,
     DateTime? birthdate,
   }) async {
     await _apiService.updateProfile(
-      username: username,
+      displayName: displayName,
       gender: gender,
       birthdate: birthdate,
     );

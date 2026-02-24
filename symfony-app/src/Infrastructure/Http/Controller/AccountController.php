@@ -34,7 +34,7 @@ class AccountController extends AbstractController
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'id', type: 'string'),
-                        new OA\Property(property: 'username', type: 'string', nullable: true),
+                        new OA\Property(property: 'displayName', type: 'string', nullable: true),
                         new OA\Property(property: 'gender', type: 'integer', nullable: true),
                         new OA\Property(property: 'birthdate', type: 'string', format: 'date', nullable: true),
                     ]
@@ -46,7 +46,7 @@ class AccountController extends AbstractController
     {
         return $this->json([
             'id' => $user->getEmail() ?? $user->getAuthUid(),
-            'username' => $user->getUsername(),
+            'displayName' => $user->getDisplayName() ?? $user->getUsername(),
             'gender' => $user->getGender(),
             'birthdate' => $user->getBirthdate()?->format('Y-m-d'),
         ]);
@@ -58,7 +58,7 @@ class AccountController extends AbstractController
         requestBody: new OA\RequestBody(
             content: new OA\JsonContent(
                 properties: [
-                    new OA\Property(property: 'username', type: 'string', nullable: true),
+                    new OA\Property(property: 'displayName', type: 'string', nullable: true),
                     new OA\Property(property: 'gender', type: 'integer', nullable: true),
                     new OA\Property(property: 'birthdate', type: 'string', format: 'date', nullable: true),
                 ]
@@ -69,8 +69,8 @@ class AccountController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (isset($data['username'])) {
-            $user->setUsername($data['username']);
+        if (isset($data['displayName'])) {
+            $user->setDisplayName($data['displayName']);
         }
 
         if (isset($data['gender'])) {

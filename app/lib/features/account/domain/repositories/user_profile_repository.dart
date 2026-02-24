@@ -1,11 +1,11 @@
-import '../entities/user_profile_entity.dart';
+import '../../domain/entities/user_profile_entity.dart';
 
 abstract class UserProfileRepository {
   Future<UserProfileEntity> getProfile();
   Future<String?> getAboutMe();
   Future<String?> getPhoto();
   Future<void> updateProfile({
-    String? username,
+    String? displayName,
     int? gender,
     DateTime? birthdate,
   });

@@ -20,7 +20,7 @@ class UserProfileController extends _$UserProfileController {
   }
 
   Future<void> updateProfile({
-    String? username,
+    String? displayName,
     int? gender,
     DateTime? birthdate,
   }) async {
@@ -28,7 +28,7 @@ class UserProfileController extends _$UserProfileController {
     state = await AsyncValue.guard(() async {
       final repository = ref.read(userProfileRepositoryProvider);
       await repository.updateProfile(
-        username: username,
+        displayName: displayName,
         gender: gender,
         birthdate: birthdate,
       );

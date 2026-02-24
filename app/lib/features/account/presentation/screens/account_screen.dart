@@ -20,8 +20,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   final _formKey = GlobalKey<FormState>();
   final _aboutMeController = TextEditingController();
 
-  // Champs pour le premier onglet
-  final _usernameController = TextEditingController();
+  // Champs pour le premier onglet - Changé username en displayName
+  final _displayNameController = TextEditingController();
   int? _selectedGender;
   DateTime? _selectedDate;
 
@@ -41,11 +41,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   // Stocker les modifications en cours pour les préserver pendant le refresh
   Map<String, dynamic> _pendingChanges = {};
 
-  // États de validation
-  bool _isUsernameValid = true;
+  // États de validation - Changé username en displayName
+  bool _isDisplayNameValid = true;
   bool _isGenderValid = true;
   bool _isAgeValid = true;
-  String? _usernameError;
+  String? _displayNameError;
   String? _genderError;
   String? _ageError;
 
@@ -55,40 +55,41 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     _tabController = TabController(length: 3, vsync: this);
 
     // Ajouter un listener pour valider en temps réel
-    _usernameController.addListener(_validateUsername);
+    _displayNameController.addListener(_validateDisplayName);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _usernameController.dispose();
+    _displayNameController.dispose();
     _aboutMeController.dispose();
     super.dispose();
   }
 
-  // Méthodes de validation
-  void _validateUsername() {
-    final username = _usernameController.text;
+  // Méthodes de validation - Changé username en displayName
+  void _validateDisplayName() {
+    final displayName = _displayNameController.text;
 
-    if (username.isEmpty) {
-      _isUsernameValid = true;
-      _usernameError = null;
+    if (displayName.isEmpty) {
+      _isDisplayNameValid = true;
+      _displayNameError = null;
     } else {
-      // Nouveau regex: uniquement lettres, chiffres et underscore
-      final usernameRegex = RegExp(r'^[a-zA-Z0-9_\.]+$');
+      // Nouveau regex: lettres, chiffres, espaces, tirets, apostrophes
+      final nameRegex = RegExp(r"^[a-zA-Z0-9\s\-']+$");
 
-      if (!usernameRegex.hasMatch(username)) {
-        _isUsernameValid = false;
-        _usernameError = 'Caractères autorisés: lettres, chiffres et _';
-      } else if (username.length < 3) {
-        _isUsernameValid = false;
-        _usernameError = 'Le nom d\'utilisateur doit faire au moins 3 caractères';
-      } else if (username.length > 30) {
-        _isUsernameValid = false;
-        _usernameError = 'Le nom d\'utilisateur ne doit pas dépasser 30 caractères';
+      if (!nameRegex.hasMatch(displayName)) {
+        _isDisplayNameValid = false;
+        _displayNameError =
+        'Caractères autorisés: lettres, chiffres, espaces, tirets et apostrophes';
+      } else if (displayName.length < 2) {
+        _isDisplayNameValid = false;
+        _displayNameError = 'Le nom doit faire au moins 2 caractères';
+      } else if (displayName.length > 50) {
+        _isDisplayNameValid = false;
+        _displayNameError = 'Le nom ne doit pas dépasser 50 caractères';
       } else {
-        _isUsernameValid = true;
-        _usernameError = null;
+        _isDisplayNameValid = true;
+        _displayNameError = null;
       }
     }
 
@@ -132,14 +133,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   }
 
   void _validateAll() {
-    _validateUsername();
+    _validateDisplayName();
     _validateGender();
     _validateAge();
   }
 
   bool get _isFormValid {
     _validateAll();
-    return _isUsernameValid && _isGenderValid && _isAgeValid;
+    return _isDisplayNameValid && _isGenderValid && _isAgeValid;
   }
 
   void _loadProfileData(UserProfileEntity profile) {
@@ -152,8 +153,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     if (_isEditing || _pendingChanges.isNotEmpty) return;
 
     // Charger les données uniquement si c'est le premier chargement
-    if (_usernameController.text.isEmpty) {
-      _usernameController.text = profile.username ?? '';
+    if (_displayNameController.text.isEmpty) {
+      _displayNameController.text = profile.displayName ?? '';
     }
 
     if (_selectedGender == null) {
@@ -174,7 +175,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   // Sauvegarder les modifications en cours
   void _savePendingChanges() {
     _pendingChanges = {
-      'username': _usernameController.text,
+      'displayName': _displayNameController.text,
       'gender': _selectedGender,
       'birthdate': _selectedDate,
       'aboutMe': _aboutMeController.text,
@@ -184,8 +185,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
   // Restaurer les modifications en cours
   void _restorePendingChanges() {
-    if (_pendingChanges.containsKey('username')) {
-      _usernameController.text = _pendingChanges['username'] as String;
+    if (_pendingChanges.containsKey('displayName')) {
+      _displayNameController.text = _pendingChanges['displayName'] as String;
     }
     if (_pendingChanges.containsKey('gender')) {
       _selectedGender = _pendingChanges['gender'] as int?;
@@ -264,7 +265,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
   Future<void> _selectDate(BuildContext context) async {
     // Sauvegarder l'état avant d'ouvrir le datepicker
-    final currentUsername = _usernameController.text;
+    final currentDisplayName = _displayNameController.text;
     final currentGender = _selectedGender;
     final currentDate = _selectedDate;
 
@@ -296,13 +297,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         _hasChanges = true;
         _isEditing = true;
         // S'assurer que les autres valeurs restent
-        _usernameController.text = currentUsername;
+        _displayNameController.text = currentDisplayName;
         _selectedGender = currentGender;
       });
     } else {
       // Si annulé, restaurer toutes les valeurs
       setState(() {
-        _usernameController.text = currentUsername;
+        _displayNameController.text = currentDisplayName;
         _selectedGender = currentGender;
         _selectedDate = currentDate;
         _validateAge();
@@ -520,7 +521,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               ),
               const SizedBox(height: 16),
 
-              // Username avec validation
+              // DisplayName avec validation (remplace username)
               Focus(
                 onFocusChange: (hasFocus) {
                   setState(() {
@@ -534,32 +535,32 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                       children: [
                         Expanded(
                           child: TextFormField(
-                            controller: _usernameController,
+                            controller: _displayNameController,
                             style: const TextStyle(color: Colors.white),
                             onChanged: (value) {
                               _isEditing = true;
                               _onFieldChanged();
                             },
                             decoration: InputDecoration(
-                              labelText: 'Nom d\'utilisateur',
+                              labelText: "Nom d'affichage",
                               labelStyle: TextStyle(
-                                color: _isUsernameValid ? Colors.white70 : Colors.red,
+                                color: _isDisplayNameValid ? Colors.white70 : Colors.red,
                               ),
                               prefixIcon: Icon(
                                 Icons.person,
-                                color: _isUsernameValid ? Color(0xFF6366F1) : Colors.red,
+                                color: _isDisplayNameValid ? Color(0xFF6366F1) : Colors.red,
                               ),
-                              suffixIcon: _usernameController.text.isNotEmpty
+                              suffixIcon: _displayNameController.text.isNotEmpty
                                   ? Icon(
-                                _isUsernameValid ? Icons.check_circle : Icons.error,
-                                color: _isUsernameValid ? Colors.green : Colors.red,
+                                _isDisplayNameValid ? Icons.check_circle : Icons.error,
+                                color: _isDisplayNameValid ? Colors.green : Colors.red,
                               )
                                   : null,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
                               ),
-                              errorText: _isUsernameValid ? null : _usernameError,
+                              errorText: _isDisplayNameValid ? null : _displayNameError,
                               errorStyle: const TextStyle(color: Colors.red),
                               filled: true,
                               fillColor: const Color(0xFF1E1E3F),
@@ -708,8 +709,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                       await ref
                           .read(userProfileControllerProvider.notifier)
                           .updateProfile(
-                        username: _usernameController.text.isNotEmpty
-                            ? _usernameController.text
+                        displayName: _displayNameController.text.isNotEmpty
+                            ? _displayNameController.text
                             : null,
                         gender: _selectedGender,
                         birthdate: _selectedDate,

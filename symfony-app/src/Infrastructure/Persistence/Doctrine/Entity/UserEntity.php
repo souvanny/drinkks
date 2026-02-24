@@ -35,6 +35,10 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $username = null;
 
+    // 👇 NOUVEAU champ displayName
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $displayName = null;
+
     #[ORM\Column(type: 'string', length: 255)]
     private string $password;
 
@@ -119,6 +123,17 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUsername(?string $username): void
     {
         $this->username = $username;
+    }
+
+    // 👇 NOUVEAU getter/setter pour displayName
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(?string $displayName): void
+    {
+        $this->displayName = $displayName;
     }
 
     public function getAboutMe(): ?string

@@ -9,7 +9,7 @@ part of 'user_profile_model.dart';
 _UserProfileModel _$UserProfileModelFromJson(Map<String, dynamic> json) =>
     _UserProfileModel(
       id: json['id'] as String,
-      username: json['username'] as String?,
+      displayName: json['displayName'] as String?,
       gender: (json['gender'] as num?)?.toInt(),
       birthdate: const DateTimeConverter().fromJson(
         json['birthdate'] as String?,
@@ -21,7 +21,7 @@ _UserProfileModel _$UserProfileModelFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$UserProfileModelToJson(_UserProfileModel instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'username': instance.username,
+      'displayName': instance.displayName,
       'gender': instance.gender,
       'birthdate': const DateTimeConverter().toJson(instance.birthdate),
       'about_me': instance.aboutMe,
