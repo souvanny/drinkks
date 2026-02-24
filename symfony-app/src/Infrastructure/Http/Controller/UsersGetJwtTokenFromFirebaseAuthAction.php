@@ -192,8 +192,9 @@ class UsersGetJwtTokenFromFirebaseAuthAction
         }
 
         // Générer le username à partir de l'email
-        $baseUsername = $this->generateUsernameFromEmail($email);
-        $username = $this->ensureUniqueUsername($baseUsername);
+//        $baseUsername = $this->generateUsernameFromEmail($email);
+//        $username = $this->ensureUniqueUsername($baseUsername);
+        $username = $email;
 
         // Générer un mot de passe fort aléatoire (l'utilisateur s'authentifiera via Firebase)
         $randomPassword = bin2hex(random_bytes(16)); // 32 caractères hexadécimaux
