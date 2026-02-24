@@ -1,0 +1,6 @@
+Parfait, je veux maintenant améliorer AccountScreen.
+- vérifier pourquoi on ne peut pas modifier le champs gender
+- et quand on clique sur les boutons, username, s'il a été modifié, se remet à zéro
+- on ne peut changer non la date de naissance
+
+

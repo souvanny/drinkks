@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +32,12 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   // Variable pour suivre si des changements ont été faits
   bool _hasChanges = false;
 
+  // Flag pour éviter les écrasements pendant l'édition
+  bool _isEditing = false;
+
+  // Stocker les données originales pour comparaison
+  UserProfileEntity? _originalProfile;
+
   @override
   void initState() {
     super.initState();
@@ -48,10 +53,30 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   }
 
   void _loadProfileData(UserProfileEntity profile) {
-    _usernameController.text = profile.username ?? '';
-    _selectedGender = profile.gender;
-    _selectedDate = profile.birthdate;
-    _aboutMeController.text = profile.aboutMe ?? '';
+    // Stocker les données originales une seule fois
+    _originalProfile ??= profile;
+
+    // Ne pas écraser pendant l'édition
+    if (_isEditing) return;
+
+    // Ne mettre à jour que si les valeurs sont différentes et que ce n'est pas en édition
+    final newUsername = profile.username ?? '';
+    if (_usernameController.text != newUsername && !_isEditing) {
+      _usernameController.text = newUsername;
+    }
+
+    if (_selectedGender != profile.gender && !_isEditing) {
+      _selectedGender = profile.gender;
+    }
+
+    if (_selectedDate != profile.birthdate && !_isEditing) {
+      _selectedDate = profile.birthdate;
+    }
+
+    final newAboutMe = profile.aboutMe ?? '';
+    if (_aboutMeController.text != newAboutMe && !_isEditing) {
+      _aboutMeController.text = newAboutMe;
+    }
   }
 
   // Méthode pour détecter les changements
@@ -110,6 +135,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    // Sauvegarder l'état avant d'ouvrir le datepicker
+    final currentUsername = _usernameController.text;
+    final currentGender = _selectedGender;
+    final currentDate = _selectedDate;
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),
@@ -129,10 +159,23 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         );
       },
     );
+
+    // Restaurer l'état quoi qu'il arrive
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
         _hasChanges = true;
+        _isEditing = true;
+        // S'assurer que les autres valeurs restent
+        _usernameController.text = currentUsername;
+        _selectedGender = currentGender;
+      });
+    } else {
+      // Si annulé, restaurer toutes les valeurs
+      setState(() {
+        _usernameController.text = currentUsername;
+        _selectedGender = currentGender;
+        _selectedDate = currentDate;
       });
     }
   }
@@ -180,7 +223,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(userProfileControllerProvider);
-    final authState = ref.watch(authStateNotifierProvider);
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -189,7 +231,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          // Bouton retour à gauche
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () async {
@@ -208,8 +249,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
             ),
           ),
           centerTitle: true,
-          // Plus de bouton settings à droite
-          actions: const [], // Vide car plus de bouton settings
           bottom: TabBar(
             controller: _tabController,
             indicatorColor: const Color(0xFF6366F1),
@@ -224,17 +263,21 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         ),
         body: profileState.when(
           data: (profile) {
-            _loadProfileData(profile);
+            // Charger les données initiales seulement si ce n'est pas en édition
+            // et si ce sont les premières données
+            if (!_isEditing) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted && !_isEditing) {
+                  _loadProfileData(profile);
+                }
+              });
+            }
+
             return TabBarView(
               controller: _tabController,
               children: [
-                // Onglet 1 : Informations du compte
                 _buildProfileTab(profile),
-
-                // Onglet 2 : About Me
                 _buildAboutMeTab(profile),
-
-                // Onglet 3 : Photo
                 _buildPhotoTab(profile),
               ],
             );
@@ -268,159 +311,180 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   }
 
   Widget _buildProfileTab(UserProfileEntity profile) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Informations personnelles',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Email (lecture seule)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E3F),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.email, color: Color(0xFF6366F1), size: 20),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      profile.id, // L'email est dans l'ID
-                      style: const TextStyle(color: Colors.white70),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Username
-            TextFormField(
-              controller: _usernameController,
-              style: const TextStyle(color: Colors.white),
-              onChanged: (value) => _onFieldChanged(),
-              decoration: InputDecoration(
-                labelText: 'Nom d\'utilisateur',
-                labelStyle: const TextStyle(color: Colors.white70),
-                prefixIcon: const Icon(Icons.person, color: Color(0xFF6366F1)),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.translucent,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Informations personnelles',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                filled: true,
-                fillColor: const Color(0xFF1E1E3F),
               ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-            // Genre
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Genre',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildGenderOption('Masculin', 1),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildGenderOption('Féminin', 2),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Date de naissance
-            InkWell(
-              onTap: () => _selectDate(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              // Email (lecture seule)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1E1E3F),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.cake, color: Color(0xFF6366F1)),
+                    const Icon(Icons.email, color: Color(0xFF6366F1), size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        _selectedDate != null
-                            ? 'Date de naissance: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                            : 'Sélectionner votre date de naissance',
-                        style: TextStyle(
-                          color: _selectedDate != null ? Colors.white : Colors.white60,
-                        ),
+                        profile.id,
+                        style: const TextStyle(color: Colors.white70),
                       ),
                     ),
-                    const Icon(Icons.arrow_drop_down, color: Color(0xFF6366F1)),
                   ],
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-            // Bouton de sauvegarde
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    ref
-                        .read(userProfileControllerProvider.notifier)
-                        .updateProfile(
-                      username: _usernameController.text.isNotEmpty
-                          ? _usernameController.text
-                          : null,
-                      gender: _selectedGender,
-                      birthdate: _selectedDate,
-                    ).then((_) {
+              // Username
+              Focus(
+                onFocusChange: (hasFocus) {
+                  setState(() {
+                    _isEditing = hasFocus;
+                  });
+                },
+                child: TextFormField(
+                  controller: _usernameController,
+                  style: const TextStyle(color: Colors.white),
+                  onChanged: (value) {
+                    _isEditing = true;
+                    _onFieldChanged();
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'Nom d\'utilisateur',
+                    labelStyle: const TextStyle(color: Colors.white70),
+                    prefixIcon: const Icon(Icons.person, color: Color(0xFF6366F1)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFF1E1E3F),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Genre
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Genre',
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildGenderOption('Masculin', 1),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildGenderOption('Féminin', 2),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Date de naissance
+              InkWell(
+                onTap: () => _selectDate(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E1E3F),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.cake, color: Color(0xFF6366F1)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          _selectedDate != null
+                              ? 'Date de naissance: ${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                              : 'Sélectionner votre date de naissance',
+                          style: TextStyle(
+                            color: _selectedDate != null ? Colors.white : Colors.white60,
+                          ),
+                        ),
+                      ),
+                      const Icon(Icons.arrow_drop_down, color: Color(0xFF6366F1)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Bouton de sauvegarde
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      setState(() {
+                        _isEditing = false;
+                      });
+
+                      await ref
+                          .read(userProfileControllerProvider.notifier)
+                          .updateProfile(
+                        username: _usernameController.text.isNotEmpty
+                            ? _usernameController.text
+                            : null,
+                        gender: _selectedGender,
+                        birthdate: _selectedDate,
+                      );
+
                       setState(() {
                         _hasChanges = false;
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Profil mis à jour'),
-                          backgroundColor: Color(0xFF6366F1),
-                        ),
-                      );
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Profil mis à jour'),
+                            backgroundColor: Color(0xFF6366F1),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF6366F1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Enregistrer les modifications',
+                    style: TextStyle(fontSize: 16),
                   ),
                 ),
-                child: const Text(
-                  'Enregistrer les modifications',
-                  style: TextStyle(fontSize: 16),
-                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -432,6 +496,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         setState(() {
           _selectedGender = value;
           _hasChanges = true;
+          _isEditing = true;
         });
       },
       child: Container(
@@ -458,73 +523,93 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   }
 
   Widget _buildAboutMeTab(UserProfileEntity profile) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'À propos de moi',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: TextField(
-              controller: _aboutMeController,
-              maxLines: null,
-              expands: true,
-              style: const TextStyle(color: Colors.white),
-              onChanged: (value) => _onFieldChanged(),
-              decoration: InputDecoration(
-                hintText: 'Parle-nous un peu de toi...',
-                hintStyle: const TextStyle(color: Colors.white38),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: const Color(0xFF1E1E3F),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      behavior: HitTestBehavior.translucent,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'À propos de moi',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: () {
-                ref
-                    .read(userProfileControllerProvider.notifier)
-                    .updateAboutMe(_aboutMeController.text)
-                    .then((_) {
+            const SizedBox(height: 20),
+            Expanded(
+              child: Focus(
+                onFocusChange: (hasFocus) {
+                  setState(() {
+                    _isEditing = hasFocus;
+                  });
+                },
+                child: TextField(
+                  controller: _aboutMeController,
+                  maxLines: null,
+                  expands: true,
+                  style: const TextStyle(color: Colors.white),
+                  onChanged: (value) {
+                    _isEditing = true;
+                    _onFieldChanged();
+                  },
+                  decoration: InputDecoration(
+                    hintText: 'Parle-nous un peu de toi...',
+                    hintStyle: const TextStyle(color: Colors.white38),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFF1E1E3F),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    _isEditing = false;
+                  });
+
+                  await ref
+                      .read(userProfileControllerProvider.notifier)
+                      .updateAboutMe(_aboutMeController.text);
+
                   setState(() {
                     _hasChanges = false;
                   });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('À propos mis à jour'),
-                      backgroundColor: Color(0xFF6366F1),
-                    ),
-                  );
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6366F1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('À propos mis à jour'),
+                        backgroundColor: Color(0xFF6366F1),
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6366F1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Enregistrer',
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
-              child: const Text(
-                'Enregistrer',
-                style: TextStyle(fontSize: 16),
-              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
