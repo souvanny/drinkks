@@ -1,0 +1,66 @@
+-- Insertion des 50 venues avec répartition équilibrée des types
+insert into venue (uuid, name, description, type, `rank`) values
+-- Type 1 (Jazz/Classique/Bistrot) - 8 venues
+(UUID(), 'Le Lounge Étoilé', 'Ambiance lounge avec vue sur les étoiles', 1, 1),
+(UUID(), 'La Cave Jazz', 'Ambiance intime et musique live', 1, 2),
+(UUID(), 'La Brasserie Art Déco', 'Ambiance années 20 et cocktails classiques', 1, 3),
+(UUID(), 'L''Atelier des Saveurs', 'Cocktails moléculaires et expériences sensorielles', 1, 4),
+(UUID(), 'The Speakeasy', 'Bar clandestin des années 20, entrée discrète', 1, 5),
+(UUID(), 'Le Salon de Thé', 'Ambiance cosy et pâtisseries fines', 1, 6),
+(UUID(), 'Le Glacier', 'Bar de glace éphémère à -10°C', 1, 7),
+(UUID(), 'Le Bar à Jeux', 'Jeux de société et bières locales', 1, 8),
+
+-- Type 2 (Port/Maritime/Vins) - 8 venues
+(UUID(), 'Le Bar du Port', 'Son des vagues et cocktails fruités', 2, 9),
+(UUID(), 'Le Bistrot Parisien', 'Charme français et vins de qualité', 2, 10),
+(UUID(), 'Le Bar à Bulles', 'Champagnes et vins pétillants', 2, 11),
+(UUID(), 'Le Yacht Club', 'Ambiance nautique et fruits de mer', 2, 12),
+(UUID(), 'Le Caveau', 'Cave voûtée et vins millésimés', 2, 13),
+(UUID(), 'Le Cyclade', 'Ambiance des îles grecques et ouzo', 2, 14),
+(UUID(), 'Le Pressoir', 'Cidres et jus de pommes artisanaux', 2, 15),
+(UUID(), 'Le Millésime', 'Bar à vins avec cave apparente', 2, 16),
+
+-- Type 3 (Lounge/Industriel/Urbain) - 8 venues
+(UUID(), 'Le Rooftop Urbain', 'Vue panoramique sur la skyline', 3, 17),
+(UUID(), 'Le Château de Verre', 'Architecture moderne et soirées élégantes', 3, 18),
+(UUID(), 'Le Loft Industriel', 'Style new-yorkais et musique électro', 3, 19),
+(UUID(), 'La Voûte Céleste', 'Plafond étoilé et ambiance romantique', 3, 20),
+(UUID(), 'Le Baroque', 'Décoration opulente et musique classique', 3, 21),
+(UUID(), 'Le Dock', 'Bar portuaire et bières artisanales', 3, 22),
+(UUID(), 'Le Studio', 'Ambiance cinéma et cocktails de scène', 3, 23),
+(UUID(), 'L''Opéra', 'Ambiance théâtrale et cocktails de scène', 3, 24),
+
+-- Type 4 (Rooftop/Panoramique) - 8 venues
+(UUID(), 'Le Club Privé', 'Accès exclusif, ambiance feutrée', 4, 25),
+(UUID(), 'Le Sky Bar', 'Cocktails et vue imprenable sur la ville', 4, 26),
+(UUID(), 'Le 7ème Ciel', 'Bar perché au 7ème étage avec vue dégagée', 4, 27),
+(UUID(), 'Le Refuge Alpin', 'Décor montagnard et vin chaud', 4, 28),
+(UUID(), 'L''Observatoire', 'Télescopes et cocktails astronomiques', 4, 29),
+(UUID(), 'Le Penthouse', 'Dernier étage avec piscine à débordement', 4, 30),
+(UUID(), 'Le Nid', 'Cocon suspendu dans les arbres', 4, 31),
+(UUID(), 'La Galerie', 'Exposition d''art et vernissages', 4, 32),
+
+-- Type 5 (Tropical/Jardin/Exotique) - 8 venues
+(UUID(), 'Le Garden Tropical', 'Jardin virtuel avec cocktails exotiques', 5, 33),
+(UUID(), 'Le Tiki Bar', 'Ambiance polynésienne et cocktails exotiques', 5, 34),
+(UUID(), 'La Plage Éphémère', 'Sable fin et cocktails de plage', 5, 35),
+(UUID(), 'Le Jardin Secret', 'Cachet intimiste et plantes exotiques', 5, 36),
+(UUID(), 'Le Comptoir Marocain', 'Ambiance orientale et thés à la menthe', 5, 37),
+(UUID(), 'La Terrasse Fleurie', 'Jardin suspendu et cocktails floraux', 5, 38),
+(UUID(), 'La Forêt Enchantée', 'Décor forestier et cocktails aux plantes', 5, 39),
+(UUID(), 'Le Récif', 'Aquarium géant et cocktails marins', 5, 40),
+
+-- Type 6 (Privé/Exclusif/Futuriste) - 10 venues (pour arriver à 50)
+(UUID(), 'Le Whisky Lounge', 'Collection de whiskys rares et fauteuils en cuir', 6, 41),
+(UUID(), 'La Distillerie', 'Cocktails maison avec spiritueux artisanaux', 6, 42),
+(UUID(), 'Le Velvet', 'Ambiance chic et musique lounge', 6, 43),
+(UUID(), 'Le Bazar', 'Décoration éclectique du monde entier', 6, 44),
+(UUID(), 'Le Vaisseau', 'Décoration futuriste et cocktails moléculaires', 6, 45),
+(UUID(), 'Le Rétro', 'Décoration vintage et cocktails oubliés', 6, 46),
+(UUID(), 'Le Sanctuaire', 'Ambiance zen et cocktails sans alcool', 6, 47),
+(UUID(), 'Le Lodge', 'Ambiance safari et cocktails exotiques', 6, 48),
+(UUID(), 'Le Montmartre', 'Ambiance bohème et artists', 6, 49),
+(UUID(), 'La Casa', 'Ambiance latina et cocktails tequila', 6, 50);
+
+-- Vérification du nombre d'enregistrements
+select count(*) as total_venues from venue;

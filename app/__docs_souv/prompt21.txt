@@ -1,0 +1,62 @@
+Je voudrais maintenant une cinquante de requête SQL INSERT pour créer les enregistrement
+
+Ci dessous ce qu'il y a en dur dans Fultter en Dart.
+Il faudrait reprendre ces exemple pour les premier enregistrements et en inventer d'autres pour les suivants.
+
+Voici un exemble de requête INSERT :
+
+insert into venue (id_venue, uuid, name, description, type, rank)
+values ();
+
+Il faudra donc en plus :
+- un uuid
+- le rank doit être reseigné et sera incrémenté
+- type est une valeur aléatoire en 1 et 6
+Ignorer de l'exemple id, image et activeUsers.
+Reprendre de l'exemple juste name et description.
+
+
+final List<Map<String, dynamic>> _venues = [
+    {
+      'id': 'lounge',
+      'name': 'Le Lounge Étoilé',
+      'description': 'Ambiance lounge avec vue sur les étoiles',
+      'image': 'assets/images/venues/lounge.png',
+      'activeUsers': 24,
+    },
+    {
+      'id': 'port',
+      'name': 'Le Bar du Port',
+      'description': 'Son des vagues et cocktails fruités',
+      'image': 'assets/images/venues/port.png',
+      'activeUsers': 18,
+    },
+    {
+      'id': 'rooftop',
+      'name': 'Le Rooftop Urbain',
+      'description': 'Vue panoramique sur la skyline',
+      'image': 'assets/images/venues/rooftop.png',
+      'activeUsers': 32,
+    },
+    {
+      'id': 'jazz',
+      'name': 'La Cave Jazz',
+      'description': 'Ambiance intime et musique live',
+      'image': 'assets/images/venues/jazz.png',
+      'activeUsers': 12,
+    },
+    {
+      'id': 'garden',
+      'name': 'Le Garden Tropical',
+      'description': 'Jardin virtuel avec cocktails exotiques',
+      'image': 'assets/images/venues/garden.png',
+      'activeUsers': 28,
+    },
+    {
+      'id': 'club',
+      'name': 'Le Club Privé',
+      'description': 'Accès exclusif, ambiance feutrée',
+      'image': 'assets/images/venues/club.png',
+      'activeUsers': 8,
+    },
+  ];
