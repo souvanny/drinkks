@@ -147,9 +147,9 @@ class UsersGetJwtTokenFromFirebaseAuthAction
         $userEntity->setUsername($email); // Garder username pour compatibilité
         $userEntity->setDisplayName($name ?? $email); // Utiliser le nom Firebase ou fallback sur email
         $userEntity->setAboutMe('');
-        $userEntity->setGender(3);
+        $userEntity->setGender(0);
         $userEntity->setBirthdate(new \DateTime('today'));
-        $userEntity->setStatus(1);
+        $userEntity->setStatus(0);
         $userEntity->setRoles(['ROLE_USER']);
 
         // Hasher le mot de passe aléatoire
