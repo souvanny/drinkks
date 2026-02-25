@@ -3,7 +3,6 @@
 namespace App\Infrastructure\Http\Controller;
 
 use Exception;
-//use Livekit\RoomServiceClient;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -26,6 +25,11 @@ class ListLiveKitRoomsController extends AbstractController
     #[Route('', name: 'sfu_list_rooms', methods: ['GET'])]
     public function listRooms(): JsonResponse
     {
+
+        /**
+         * https://github.com/agence104/livekit-server-sdk-php
+         */
+
         $host = 'https://livekit.project-takagi.fr';
         $svc = new RoomServiceClient($host, 'APITCL53pSLyZaR', 'G2qNPc1PjNjfhdGGzwORQ7v4aLDhsNovnFN36PMXeho');
 
@@ -43,9 +47,6 @@ class ListLiveKitRoomsController extends AbstractController
         $svc->deleteRoom('myroom');
 
         $listRooms = $svc->listRooms();
-
-//        print_r($rooms->getRooms());
-//        exit;
 
         $allParticipants = [];
 
