@@ -809,7 +809,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                   ),
                   child: const Text(
                     'Enregistrer les modifications',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: Colors.white),
                   ),
                 ),
               ),
@@ -952,7 +952,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                 ),
                 child: const Text(
                   'Enregistrer',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),

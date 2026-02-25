@@ -266,4 +266,36 @@ class AuthService {
   Future<bool> isUserLoggedIn() async {
     return _firebaseAuth.currentUser != null;
   }
+
+
+  Future<String?> refreshJwtToken() async {
+    try {
+      final refreshToken = await getRefreshToken();
+
+      if (refreshToken == null) {
+        print('⚠️ Pas de refresh token disponible');
+        return null;
+      }
+
+      print('🔄 Tentative de rafraîchissement du token...');
+      final response = await _apiService.refreshJwtToken(refreshToken);
+
+      if (response != null) {
+        // Stocker le nouveau token
+        await _storage.write(key: _appJwtKey, value: response['token']);
+
+        // Si un nouveau refresh token est fourni (rotation), le stocker
+        if (response['refresh_token'] != null) {
+          await _storage.write(key: _refreshTokenKey, value: response['refresh_token']);
+        }
+
+        print('✅ Token rafraîchi avec succès');
+        return response['token'];
+      }
+    } catch (e) {
+      print('❌ Erreur lors du rafraîchissement du token: $e');
+    }
+
+    return null;
+  }
 }

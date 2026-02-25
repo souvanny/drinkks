@@ -375,6 +375,31 @@ class ApiService {
       errorMessage: 'Impossible de mettre à jour la photo',
     );
   }
+
+
+// Dans flutter_lib/services/api_service.dart
+
+  Future<Map<String, dynamic>?> refreshJwtToken(String refreshToken) async {
+    try {
+      final response = await _dio.post(
+        '/auth/refresh',
+        data: {'refresh_token': refreshToken},
+        options: Options(
+          extra: {'noToken': true},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print('❌ Erreur refresh token API: $e');
+    }
+
+    return null;
+  }
+
+
 }
 
 @riverpod
