@@ -16,6 +16,7 @@ abstract class UserProfileModel with _$UserProfileModel {
     @JsonKey(name: 'about_me') String? aboutMe,
     @JsonKey(name: 'photo_url') String? photoUrl,
     @JsonKey(name: 'has_photo') @Default(false) bool hasPhoto,
+    @JsonKey(name: 'first_access') @Default(true) bool firstAccess, // NOUVEAU
   }) = _UserProfileModel;
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -29,6 +30,7 @@ abstract class UserProfileModel with _$UserProfileModel {
     aboutMe: aboutMe,
     photoUrl: photoUrl,
     hasPhoto: hasPhoto,
+    firstAccess: firstAccess, // NOUVEAU
   );
 }
 

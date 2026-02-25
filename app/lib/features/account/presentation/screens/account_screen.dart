@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart'; // NOUVEAU
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../domain/entities/user_profile_entity.dart';
 import '../controllers/user_profile_controller.dart';
@@ -50,9 +50,18 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   bool _isDisplayNameValid = true;
   bool _isGenderValid = true;
   bool _isAgeValid = true;
+  bool _isAboutMeValid = true;
+  bool _isPhotoValid = true;
+
   String? _displayNameError;
   String? _genderError;
   String? _ageError;
+
+  // Flag pour savoir si la popup de bienvenue a déjà été affichée
+  bool _welcomePopupShown = false;
+
+  // Flag pour savoir si les données sont chargées
+  bool _isDataLoaded = false;
 
   @override
   void initState() {
@@ -61,6 +70,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
     // Ajouter un listener pour valider en temps réel
     _displayNameController.addListener(_validateDisplayName);
+    _aboutMeController.addListener(_validateAboutMe);
   }
 
   @override
@@ -76,8 +86,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     final displayName = _displayNameController.text;
 
     if (displayName.isEmpty) {
-      _isDisplayNameValid = true;
-      _displayNameError = null;
+      _isDisplayNameValid = false;
+      _displayNameError = 'Le nom d\'affichage est requis';
     } else {
       final nameRegex = RegExp(r"^[a-zA-Z0-9\s\-']+$");
 
@@ -97,13 +107,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       }
     }
 
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   void _validateGender() {
-    if (_selectedGender == null) {
-      _isGenderValid = true;
-      _genderError = null;
+    if (_selectedGender == null || _selectedGender == 0) {
+      _isGenderValid = false;
+      _genderError = 'Le genre doit être choisi';
     } else if (_selectedGender != 1 && _selectedGender != 2 && _selectedGender != 3) {
       _isGenderValid = false;
       _genderError = 'Genre invalide';
@@ -115,14 +125,13 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
   void _validateAge() {
     if (_selectedDate == null) {
-      _isAgeValid = true;
-      _ageError = null;
+      _isAgeValid = false;
+      _ageError = 'La date de naissance est requise';
     } else {
       final now = DateTime.now();
       final age = now.year - _selectedDate!.year;
-      final hasHadBirthdayThisYear =
-          now.month > _selectedDate!.month ||
-              (now.month == _selectedDate!.month && now.day >= _selectedDate!.day);
+      final hasHadBirthdayThisYear = now.month > _selectedDate!.month ||
+          (now.month == _selectedDate!.month && now.day >= _selectedDate!.day);
 
       final actualAge = hasHadBirthdayThisYear ? age : age - 1;
 
@@ -136,10 +145,20 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     }
   }
 
+  void _validateAboutMe() {
+    _isAboutMeValid = _aboutMeController.text.isNotEmpty;
+    if (mounted) setState(() {});
+  }
+
+  void _validatePhoto(UserProfileEntity profile) {
+    _isPhotoValid = profile.hasPhoto;
+  }
+
   void _validateAll() {
     _validateDisplayName();
     _validateGender();
     _validateAge();
+    _validateAboutMe();
   }
 
   bool get _isFormValid {
@@ -147,10 +166,42 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     return _isDisplayNameValid && _isGenderValid && _isAgeValid;
   }
 
+  bool get _isProfileComplete {
+    if (!_isDataLoaded) return true; // Par défaut, on considère que c'est complet avant chargement
+    _validateAll();
+    return _isDisplayNameValid &&
+        _isGenderValid &&
+        _isAgeValid &&
+        _isAboutMeValid &&
+        _isPhotoValid;
+  }
+
+  Map<String, bool> _getTabCompletionStatus() {
+    if (!_isDataLoaded) {
+      return {
+        'profile': true,
+        'about': true,
+        'photo': true,
+      };
+    }
+
+    return {
+      'profile': _isDisplayNameValid && _isGenderValid && _isAgeValid,
+      'about': _isAboutMeValid,
+      'photo': _isPhotoValid,
+    };
+  }
+
   void _loadProfileData(UserProfileEntity profile) {
     // Stocker les données originales une seule fois
     if (_originalProfile == null) {
       _originalProfile = profile;
+      _validatePhoto(profile);
+
+      // Marquer que les données sont chargées
+      setState(() {
+        _isDataLoaded = true;
+      });
     }
 
     // Ne pas écraser s'il y a des modifications en cours
@@ -208,7 +259,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     _validateAll();
   }
 
-  // Méthode pour détecter les changements (UNIQUEMENT pour les champs texte)
+  // Méthode pour détecter les changements
   void _onFieldChanged() {
     _validateAll();
     if (!_hasChanges) {
@@ -219,13 +270,124 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     _savePendingChanges();
   }
 
+  // Afficher la popup de bienvenue
+  void _showWelcomePopup() {
+    if (_welcomePopupShown) return;
+
+    _welcomePopupShown = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E3F),
+        title: const Row(
+          children: [
+            Icon(Icons.waving_hand, color: Color(0xFF6366F1), size: 28),
+            SizedBox(width: 8),
+            Text(
+              'Bienvenue !',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'C\'est votre première visite sur l\'application !',
+              style: TextStyle(color: Colors.white70),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Pour profiter pleinement de l\'expérience, veuillez compléter votre profil :',
+              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            _buildRequirementItem(
+              'Nom d\'affichage',
+              _isDisplayNameValid,
+            ),
+            _buildRequirementItem(
+              'Genre',
+              _isGenderValid,
+            ),
+            _buildRequirementItem(
+              'Âge (18 ans minimum)',
+              _isAgeValid,
+            ),
+            _buildRequirementItem(
+              'À propos de moi',
+              _isAboutMeValid,
+            ),
+            _buildRequirementItem(
+              'Photo de profil',
+              _isPhotoValid,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Compris',
+              style: TextStyle(color: Color(0xFF6366F1)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequirementItem(String label, bool isValid) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(
+            isValid ? Icons.check_circle : Icons.error,
+            color: isValid ? Colors.green : Colors.red,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: isValid ? Colors.green : Colors.red,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabBadge(bool isComplete) {
+    if (!_isDataLoaded || isComplete) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(left: 4),
+      padding: const EdgeInsets.all(4),
+      decoration: const BoxDecoration(
+        color: Colors.red,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.error,
+        color: Colors.white,
+        size: 12,
+      ),
+    );
+  }
+
   Future<void> _pickImage(ImageSource source) async {
     final XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
       setState(() {
         _selectedImage = image;
         _isPhotoLoading = true;
-        // NE PAS mettre _hasChanges à true
       });
       _savePendingChanges();
 
@@ -237,6 +399,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         if (mounted) {
           setState(() {
             _isPhotoLoading = false;
+            _isPhotoValid = true; // Photo maintenant valide
           });
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -317,6 +480,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       if (mounted) {
         setState(() {
           _isPhotoLoading = false;
+          _isPhotoValid = false; // Photo supprimée
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -441,6 +605,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(userProfileControllerProvider);
+    final tabStatus = _getTabCompletionStatus();
 
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -468,7 +633,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
           ),
           centerTitle: true,
           actions: [
-            if (!_isFormValid && _hasChanges)
+            if (_isDataLoaded && !_isFormValid && _hasChanges)
               Padding(
                 padding: const EdgeInsets.only(right: 16),
                 child: Container(
@@ -495,10 +660,49 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
             indicatorColor: const Color(0xFF6366F1),
             labelColor: Colors.white,
             unselectedLabelColor: Colors.white60,
-            tabs: const [
-              Tab(icon: Icon(Icons.person), text: 'Profil'),
-              Tab(icon: Icon(Icons.description), text: 'À propos'),
-              Tab(icon: Icon(Icons.photo), text: 'Photo'),
+            tabs: [
+              Tab(
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(Icons.person),
+                    Positioned(
+                      top: -4,
+                      right: -8,
+                      child: _buildTabBadge(tabStatus['profile']!),
+                    ),
+                  ],
+                ),
+                text: 'Profil',
+              ),
+              Tab(
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(Icons.description),
+                    Positioned(
+                      top: -4,
+                      right: -8,
+                      child: _buildTabBadge(tabStatus['about']!),
+                    ),
+                  ],
+                ),
+                text: 'À propos',
+              ),
+              Tab(
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(Icons.photo),
+                    Positioned(
+                      top: -4,
+                      right: -8,
+                      child: _buildTabBadge(tabStatus['photo']!),
+                    ),
+                  ],
+                ),
+                text: 'Photo',
+              ),
             ],
           ),
         ),
@@ -507,6 +711,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
                 _loadProfileData(profile);
+
+                // Afficher la popup si first_access est true, que les données sont chargées,
+                // que le profil n'est pas complet et que la popup n'a pas déjà été affichée
+                if (_isDataLoaded &&
+                    profile.firstAccess &&
+                    !_isProfileComplete &&
+                    !_welcomePopupShown) {
+                  _showWelcomePopup();
+                }
               }
             });
 
@@ -656,7 +869,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                           fontSize: 16,
                         ),
                       ),
-                      if (_selectedGender != null && !_isGenderValid)
+                      if (!_isGenderValid)
                         Padding(
                           padding: const EdgeInsets.only(left: 8),
                           child: Icon(Icons.error, color: Colors.red, size: 16),
@@ -706,7 +919,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                           fontSize: 16,
                         ),
                       ),
-                      if (_selectedDate != null && !_isAgeValid)
+                      if (!_isAgeValid)
                         Padding(
                           padding: const EdgeInsets.only(left: 8),
                           child: Icon(Icons.error, color: Colors.red, size: 16),
@@ -807,9 +1020,9 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Enregistrer les modifications',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style: TextStyle(fontSize: 16, color: _isFormValid ? Colors.white : Colors.grey),
                   ),
                 ),
               ),
@@ -822,7 +1035,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
 
   Widget _buildGenderOption(String label, int value, {bool fullWidth = false}) {
     final isSelected = _selectedGender == value;
-    final hasError = !_isGenderValid && _selectedGender != null;
+    final hasError = !_isGenderValid;
 
     return GestureDetector(
       onTap: () {
@@ -878,13 +1091,22 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'À propos de moi',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                const Text(
+                  'À propos de moi',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (_isDataLoaded && !_isAboutMeValid)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: Icon(Icons.error, color: Colors.red, size: 16),
+                  ),
+              ],
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -908,7 +1130,17 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                     hintStyle: const TextStyle(color: Colors.white38),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      borderSide: BorderSide(
+                        color: _isAboutMeValid ? Colors.transparent : Colors.red,
+                        width: 1,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: _isAboutMeValid ? Colors.transparent : Colors.red,
+                        width: 1,
+                      ),
                     ),
                     filled: true,
                     fillColor: const Color(0xFF1E1E3F),
@@ -921,7 +1153,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () async {
+                onPressed: _isAboutMeValid
+                    ? () async {
                   setState(() {
                     _isEditing = false;
                   });
@@ -943,16 +1176,17 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
                       ),
                     );
                   }
-                },
+                }
+                    : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6366F1),
+                  backgroundColor: _isAboutMeValid ? const Color(0xFF6366F1) : Colors.grey,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Enregistrer',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: TextStyle(fontSize: 16, color: _isAboutMeValid ? Colors.white : Colors.grey),
                 ),
               ),
             ),
@@ -962,11 +1196,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     );
   }
 
-
-
-  // ============================================================
-// MÉTHODE PRINCIPALE - Photo Tab
-// ============================================================
   Widget _buildPhotoTab(UserProfileEntity profile) {
     final String? imageUrl = profile.photoUrl != null && profile.hasPhoto
         ? 'http://192.168.1.56:8101' + profile.photoUrl!
@@ -978,55 +1207,114 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
         children: [
           const SizedBox(height: 20),
 
-          // Affichage de la photo avec loader
-          _buildPhotoWithLoader(profile, imageUrl),
+          // Affichage de la photo avec loader et badge d'erreur si manquante
+          Stack(
+            children: [
+              _buildPhotoContainer(profile, imageUrl),
+              if (_isPhotoLoading) _buildPhotoLoader(),
+              if (_isDataLoaded && !_isPhotoValid && !_isPhotoLoading)
+                Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.error,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              if (_isDataLoaded && _isPhotoValid && !_isPhotoLoading)
+                Positioned(
+                  bottom: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF6366F1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+            ],
+          ),
 
           const SizedBox(height: 30),
 
           // Boutons Galerie et Appareil photo
-          _buildPhotoActionButtons(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildPhotoButton(
+                icon: Icons.photo_library,
+                label: 'Galerie',
+                onTap: _isPhotoLoading ? null : () => _pickImage(ImageSource.gallery),
+              ),
+              _buildPhotoButton(
+                icon: Icons.photo_camera,
+                label: 'Appareil photo',
+                onTap: _isPhotoLoading ? null : () => _pickImage(ImageSource.camera),
+              ),
+            ],
+          ),
 
           const SizedBox(height: 20),
 
           // Bouton de suppression
-          _buildDeleteButton(profile),
+          // if ((profile.hasPhoto || _selectedImage != null) && !_isPhotoLoading)
+          //   TextButton(
+          //     onPressed: _deletePhoto,
+          //     style: TextButton.styleFrom(
+          //       foregroundColor: Colors.red,
+          //     ),
+          //     child: const Text('Supprimer la photo'),
+          //   ),
+
+          // Message d'erreur si photo manquante
+          if (_isDataLoaded && !_isPhotoValid && !_isPhotoLoading)
+            const Padding(
+              padding: EdgeInsets.only(top: 20),
+              child: Text(
+                'Une photo de profil est requise',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
 
           // Affichage debug de l'URL
-          _buildDebugInfo(imageUrl),
+          if (imageUrl != null && kDebugMode && !_isPhotoLoading)
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Text(
+                'URL: $imageUrl',
+                style: const TextStyle(color: Colors.white54, fontSize: 10),
+                textAlign: TextAlign.center,
+              ),
+            ),
         ],
       ),
     );
   }
 
-// ============================================================
-// SOUS-MÉTHODES
-// ============================================================
-
-  /// Construit le conteneur de la photo avec le loader et le badge
-  Widget _buildPhotoWithLoader(UserProfileEntity profile, String? imageUrl) {
-    return Stack(
-      children: [
-        // La photo elle-même
-        _buildPhotoContainer(profile, imageUrl),
-
-        // Loader pendant l'upload/suppression
-        if (_isPhotoLoading) _buildPhotoLoader(),
-
-        // Badge de confirmation (check)
-        if ((profile.hasPhoto || _selectedImage != null) && !_isPhotoLoading)
-          _buildPhotoBadge(),
-      ],
-    );
-  }
-
-  /// Construit le conteneur circulaire de la photo
   Widget _buildPhotoContainer(UserProfileEntity profile, String? imageUrl) {
     return Container(
       width: 200,
       height: 200,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFF6366F1), width: 3),
+        border: Border.all(
+          color: _isDataLoaded && !_isPhotoValid ? Colors.red : const Color(0xFF6366F1),
+          width: 3,
+        ),
       ),
       child: ClipOval(
         child: _getPhotoContent(profile, imageUrl),
@@ -1034,9 +1322,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     );
   }
 
-  /// Retourne le contenu de la photo (image locale, réseau ou icône par défaut)
   Widget _getPhotoContent(UserProfileEntity profile, String? imageUrl) {
-    // Cas 1: Image sélectionnée localement (avant upload)
     if (_selectedImage != null) {
       return Image.file(
         File(_selectedImage!.path),
@@ -1044,57 +1330,35 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       );
     }
 
-    // Cas 2: Image distante (déjà uploadée)
     if (imageUrl != null) {
-      return _buildNetworkImage(imageUrl);
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: const Color(0xFF1E1E3F),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF6366F1),
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) {
+          print('Erreur chargement photo: $error');
+          return Container(
+            color: const Color(0xFF1E1E3F),
+            child: const Center(
+              child: Icon(
+                Icons.broken_image,
+                size: 50,
+                color: Colors.white54,
+              ),
+            ),
+          );
+        },
+      );
     }
 
-    // Cas 3: Pas de photo, icône par défaut
-    return _buildDefaultAvatar();
-  }
-
-  /// Construit une image réseau avec CachedNetworkImage
-  Widget _buildNetworkImage(String imageUrl) {
-    return CachedNetworkImage(
-      imageUrl: imageUrl,
-      fit: BoxFit.cover,
-      placeholder: (context, url) => _buildImagePlaceholder(),
-      errorWidget: (context, url, error) {
-        print('Erreur chargement photo: $error');
-        return _buildErrorImage();
-      },
-    );
-  }
-
-  /// Placeholder pendant le chargement de l'image réseau
-  Widget _buildImagePlaceholder() {
-    return Container(
-      color: const Color(0xFF1E1E3F),
-      child: const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF6366F1),
-          strokeWidth: 2,
-        ),
-      ),
-    );
-  }
-
-  /// Affichage en cas d'erreur de chargement
-  Widget _buildErrorImage() {
-    return Container(
-      color: const Color(0xFF1E1E3F),
-      child: const Center(
-        child: Icon(
-          Icons.broken_image,
-          size: 50,
-          color: Colors.white54,
-        ),
-      ),
-    );
-  }
-
-  /// Avatar par défaut (quand pas de photo)
-  Widget _buildDefaultAvatar() {
     return Container(
       color: const Color(0xFF1E1E3F),
       child: const Center(
@@ -1107,7 +1371,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     );
   }
 
-  /// Loader superposé pendant l'upload ou la suppression
   Widget _buildPhotoLoader() {
     return Positioned.fill(
       child: Container(
@@ -1124,77 +1387,6 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
     );
   }
 
-  /// Badge de confirmation (check) quand une photo est présente
-  Widget _buildPhotoBadge() {
-    return Positioned(
-      bottom: 10,
-      right: 10,
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: const BoxDecoration(
-          color: Color(0xFF6366F1),
-          shape: BoxShape.circle,
-        ),
-        child: const Icon(
-          Icons.check,
-          color: Colors.white,
-          size: 16,
-        ),
-      ),
-    );
-  }
-
-  /// Boutons pour choisir la source de l'image (galerie ou appareil photo)
-  Widget _buildPhotoActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _buildPhotoButton(
-          icon: Icons.photo_library,
-          label: 'Galerie',
-          onTap: _isPhotoLoading ? null : () => _pickImage(ImageSource.gallery),
-        ),
-        _buildPhotoButton(
-          icon: Icons.photo_camera,
-          label: 'Appareil photo',
-          onTap: _isPhotoLoading ? null : () => _pickImage(ImageSource.camera),
-        ),
-      ],
-    );
-  }
-
-  /// Bouton de suppression de la photo
-  Widget _buildDeleteButton(UserProfileEntity profile) {
-    if (!(profile.hasPhoto || _selectedImage != null) || _isPhotoLoading) {
-      return const SizedBox.shrink(); // Rien à afficher
-    }
-
-    return TextButton(
-      onPressed: _deletePhoto,
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.red,
-      ),
-      child: const Text('Supprimer la photo'),
-    );
-  }
-
-  /// Informations de debug (URL de la photo)
-  Widget _buildDebugInfo(String? imageUrl) {
-    if (imageUrl == null || !kDebugMode || _isPhotoLoading) {
-      return const SizedBox.shrink();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Text(
-        'URL: $imageUrl',
-        style: const TextStyle(color: Colors.white54, fontSize: 10),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-
-  /// Bouton individuel pour les actions photo
   Widget _buildPhotoButton({
     required IconData icon,
     required String label,
@@ -1225,6 +1417,4 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
       ),
     );
   }
-
-
 }

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserProfileEntity {
 
- String get id; String? get displayName; int? get gender; DateTime? get birthdate; String? get aboutMe; String? get photoUrl; bool get hasPhoto;
+ String get id; String? get displayName; int? get gender; DateTime? get birthdate; String? get aboutMe; String? get photoUrl; bool get hasPhoto; bool get firstAccess;
 /// Create a copy of UserProfileEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $UserProfileEntityCopyWith<UserProfileEntity> get copyWith => _$UserProfileEntit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.birthdate, birthdate) || other.birthdate == birthdate)&&(identical(other.aboutMe, aboutMe) || other.aboutMe == aboutMe)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.hasPhoto, hasPhoto) || other.hasPhoto == hasPhoto));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserProfileEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.birthdate, birthdate) || other.birthdate == birthdate)&&(identical(other.aboutMe, aboutMe) || other.aboutMe == aboutMe)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.hasPhoto, hasPhoto) || other.hasPhoto == hasPhoto)&&(identical(other.firstAccess, firstAccess) || other.firstAccess == firstAccess));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,gender,birthdate,aboutMe,photoUrl,hasPhoto);
+int get hashCode => Object.hash(runtimeType,id,displayName,gender,birthdate,aboutMe,photoUrl,hasPhoto,firstAccess);
 
 @override
 String toString() {
-  return 'UserProfileEntity(id: $id, displayName: $displayName, gender: $gender, birthdate: $birthdate, aboutMe: $aboutMe, photoUrl: $photoUrl, hasPhoto: $hasPhoto)';
+  return 'UserProfileEntity(id: $id, displayName: $displayName, gender: $gender, birthdate: $birthdate, aboutMe: $aboutMe, photoUrl: $photoUrl, hasPhoto: $hasPhoto, firstAccess: $firstAccess)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $UserProfileEntityCopyWith<$Res>  {
   factory $UserProfileEntityCopyWith(UserProfileEntity value, $Res Function(UserProfileEntity) _then) = _$UserProfileEntityCopyWithImpl;
 @useResult
 $Res call({
- String id, String? displayName, int? gender, DateTime? birthdate, String? aboutMe, String? photoUrl, bool hasPhoto
+ String id, String? displayName, int? gender, DateTime? birthdate, String? aboutMe, String? photoUrl, bool hasPhoto, bool firstAccess
 });
 
 
@@ -62,7 +62,7 @@ class _$UserProfileEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = freezed,Object? gender = freezed,Object? birthdate = freezed,Object? aboutMe = freezed,Object? photoUrl = freezed,Object? hasPhoto = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? displayName = freezed,Object? gender = freezed,Object? birthdate = freezed,Object? aboutMe = freezed,Object? photoUrl = freezed,Object? hasPhoto = null,Object? firstAccess = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -71,6 +71,7 @@ as int?,birthdate: freezed == birthdate ? _self.birthdate : birthdate // ignore:
 as DateTime?,aboutMe: freezed == aboutMe ? _self.aboutMe : aboutMe // ignore: cast_nullable_to_non_nullable
 as String?,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
 as String?,hasPhoto: null == hasPhoto ? _self.hasPhoto : hasPhoto // ignore: cast_nullable_to_non_nullable
+as bool,firstAccess: null == firstAccess ? _self.firstAccess : firstAccess // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -156,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? displayName,  int? gender,  DateTime? birthdate,  String? aboutMe,  String? photoUrl,  bool hasPhoto)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? displayName,  int? gender,  DateTime? birthdate,  String? aboutMe,  String? photoUrl,  bool hasPhoto,  bool firstAccess)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserProfileEntity() when $default != null:
-return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl,_that.hasPhoto);case _:
+return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl,_that.hasPhoto,_that.firstAccess);case _:
   return orElse();
 
 }
@@ -177,10 +178,10 @@ return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.ab
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? displayName,  int? gender,  DateTime? birthdate,  String? aboutMe,  String? photoUrl,  bool hasPhoto)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? displayName,  int? gender,  DateTime? birthdate,  String? aboutMe,  String? photoUrl,  bool hasPhoto,  bool firstAccess)  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileEntity():
-return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl,_that.hasPhoto);case _:
+return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl,_that.hasPhoto,_that.firstAccess);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +198,10 @@ return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.ab
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? displayName,  int? gender,  DateTime? birthdate,  String? aboutMe,  String? photoUrl,  bool hasPhoto)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? displayName,  int? gender,  DateTime? birthdate,  String? aboutMe,  String? photoUrl,  bool hasPhoto,  bool firstAccess)?  $default,) {final _that = this;
 switch (_that) {
 case _UserProfileEntity() when $default != null:
-return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl,_that.hasPhoto);case _:
+return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.aboutMe,_that.photoUrl,_that.hasPhoto,_that.firstAccess);case _:
   return null;
 
 }
@@ -212,7 +213,7 @@ return $default(_that.id,_that.displayName,_that.gender,_that.birthdate,_that.ab
 
 
 class _UserProfileEntity implements UserProfileEntity {
-  const _UserProfileEntity({required this.id, required this.displayName, required this.gender, required this.birthdate, required this.aboutMe, required this.photoUrl, this.hasPhoto = false});
+  const _UserProfileEntity({required this.id, required this.displayName, required this.gender, required this.birthdate, required this.aboutMe, required this.photoUrl, this.hasPhoto = false, this.firstAccess = true});
   
 
 @override final  String id;
@@ -222,6 +223,7 @@ class _UserProfileEntity implements UserProfileEntity {
 @override final  String? aboutMe;
 @override final  String? photoUrl;
 @override@JsonKey() final  bool hasPhoto;
+@override@JsonKey() final  bool firstAccess;
 
 /// Create a copy of UserProfileEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -233,16 +235,16 @@ _$UserProfileEntityCopyWith<_UserProfileEntity> get copyWith => __$UserProfileEn
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.birthdate, birthdate) || other.birthdate == birthdate)&&(identical(other.aboutMe, aboutMe) || other.aboutMe == aboutMe)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.hasPhoto, hasPhoto) || other.hasPhoto == hasPhoto));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserProfileEntity&&(identical(other.id, id) || other.id == id)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.birthdate, birthdate) || other.birthdate == birthdate)&&(identical(other.aboutMe, aboutMe) || other.aboutMe == aboutMe)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.hasPhoto, hasPhoto) || other.hasPhoto == hasPhoto)&&(identical(other.firstAccess, firstAccess) || other.firstAccess == firstAccess));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,displayName,gender,birthdate,aboutMe,photoUrl,hasPhoto);
+int get hashCode => Object.hash(runtimeType,id,displayName,gender,birthdate,aboutMe,photoUrl,hasPhoto,firstAccess);
 
 @override
 String toString() {
-  return 'UserProfileEntity(id: $id, displayName: $displayName, gender: $gender, birthdate: $birthdate, aboutMe: $aboutMe, photoUrl: $photoUrl, hasPhoto: $hasPhoto)';
+  return 'UserProfileEntity(id: $id, displayName: $displayName, gender: $gender, birthdate: $birthdate, aboutMe: $aboutMe, photoUrl: $photoUrl, hasPhoto: $hasPhoto, firstAccess: $firstAccess)';
 }
 
 
@@ -253,7 +255,7 @@ abstract mixin class _$UserProfileEntityCopyWith<$Res> implements $UserProfileEn
   factory _$UserProfileEntityCopyWith(_UserProfileEntity value, $Res Function(_UserProfileEntity) _then) = __$UserProfileEntityCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? displayName, int? gender, DateTime? birthdate, String? aboutMe, String? photoUrl, bool hasPhoto
+ String id, String? displayName, int? gender, DateTime? birthdate, String? aboutMe, String? photoUrl, bool hasPhoto, bool firstAccess
 });
 
 
@@ -270,7 +272,7 @@ class __$UserProfileEntityCopyWithImpl<$Res>
 
 /// Create a copy of UserProfileEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = freezed,Object? gender = freezed,Object? birthdate = freezed,Object? aboutMe = freezed,Object? photoUrl = freezed,Object? hasPhoto = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? displayName = freezed,Object? gender = freezed,Object? birthdate = freezed,Object? aboutMe = freezed,Object? photoUrl = freezed,Object? hasPhoto = null,Object? firstAccess = null,}) {
   return _then(_UserProfileEntity(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,displayName: freezed == displayName ? _self.displayName : displayName // ignore: cast_nullable_to_non_nullable
@@ -279,6 +281,7 @@ as int?,birthdate: freezed == birthdate ? _self.birthdate : birthdate // ignore:
 as DateTime?,aboutMe: freezed == aboutMe ? _self.aboutMe : aboutMe // ignore: cast_nullable_to_non_nullable
 as String?,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
 as String?,hasPhoto: null == hasPhoto ? _self.hasPhoto : hasPhoto // ignore: cast_nullable_to_non_nullable
+as bool,firstAccess: null == firstAccess ? _self.firstAccess : firstAccess // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

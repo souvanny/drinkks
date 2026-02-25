@@ -17,6 +17,7 @@ _UserProfileModel _$UserProfileModelFromJson(Map<String, dynamic> json) =>
       aboutMe: json['about_me'] as String?,
       photoUrl: json['photo_url'] as String?,
       hasPhoto: json['has_photo'] as bool? ?? false,
+      firstAccess: json['first_access'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$UserProfileModelToJson(_UserProfileModel instance) =>
@@ -28,4 +29,5 @@ Map<String, dynamic> _$UserProfileModelToJson(_UserProfileModel instance) =>
       'about_me': instance.aboutMe,
       'photo_url': instance.photoUrl,
       'has_photo': instance.hasPhoto,
+      'first_access': instance.firstAccess,
     };

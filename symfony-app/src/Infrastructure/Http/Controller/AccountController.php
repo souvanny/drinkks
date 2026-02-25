@@ -30,8 +30,6 @@ class AccountController extends AbstractController
         private readonly string $projectDir,
     ) {}
 
-
-
     #[Route('/me', name: 'account_get_me', methods: ['GET'])]
     #[OA\Get(
         summary: 'Récupère les informations du compte',
@@ -47,6 +45,7 @@ class AccountController extends AbstractController
                         new OA\Property(property: 'birthdate', type: 'string', format: 'date', nullable: true),
                         new OA\Property(property: 'about_me', type: 'string', nullable: true),
                         new OA\Property(property: 'has_photo', type: 'boolean'),
+                        new OA\Property(property: 'first_access', type: 'boolean'),
                         new OA\Property(property: 'photo_url', type: 'string', nullable: true),
                     ]
                 )
@@ -70,6 +69,11 @@ class AccountController extends AbstractController
             $firstAccess = false;
         }
 
+        // Si c'est la première fois qu'on accède à /account/me, mettre first_access à false
+        if ($firstAccess) {
+            $user->setFirstAccess(false);
+            $this->userRepository->save($user);
+        }
 
         // Construire l'URL de la photo si elle existe
         $photoUrl = null;
@@ -86,11 +90,9 @@ class AccountController extends AbstractController
             'about_me' => $user->getAboutMe(),
             'has_photo' => $hasPhoto,
             'first_access' => $firstAccess,
-            'photo_url' => $photoUrl, // NOUVEAU
+            'photo_url' => $photoUrl,
         ]);
     }
-
-
 
     #[Route('/me', name: 'account_update_me', methods: ['PUT'])]
     #[OA\Put(
@@ -171,7 +173,6 @@ class AccountController extends AbstractController
             'has_photo' => $user->hasPhoto(),
         ]);
     }
-
 
     #[Route('/photo', name: 'account_delete_photo', methods: ['DELETE'])]
     public function deletePhoto(#[CurrentUser] UserEntity $user): JsonResponse
@@ -291,5 +292,4 @@ class AccountController extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
 }

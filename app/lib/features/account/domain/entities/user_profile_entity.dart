@@ -12,5 +12,6 @@ abstract class UserProfileEntity with _$UserProfileEntity {
     required String? aboutMe,
     required String? photoUrl,
     @Default(false) bool hasPhoto,
+    @Default(true) bool firstAccess, // NOUVEAU : true par défaut
   }) = _UserProfileEntity;
 }
