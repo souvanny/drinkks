@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$VenuesModel {
 
- String get id; String get name;
+ int get id; String get uuid; String get name; String? get description; int? get type; int? get rank;
 /// Create a copy of VenuesModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $VenuesModelCopyWith<VenuesModel> get copyWith => _$VenuesModelCopyWithImpl<Venu
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.rank, rank) || other.rank == rank));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name);
+int get hashCode => Object.hash(runtimeType,id,uuid,name,description,type,rank);
 
 @override
 String toString() {
-  return 'VenuesModel(id: $id, name: $name)';
+  return 'VenuesModel(id: $id, uuid: $uuid, name: $name, description: $description, type: $type, rank: $rank)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $VenuesModelCopyWith<$Res>  {
   factory $VenuesModelCopyWith(VenuesModel value, $Res Function(VenuesModel) _then) = _$VenuesModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String name
+ int id, String uuid, String name, String? description, int? type, int? rank
 });
 
 
@@ -65,11 +65,15 @@ class _$VenuesModelCopyWithImpl<$Res>
 
 /// Create a copy of VenuesModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? uuid = null,Object? name = null,Object? description = freezed,Object? type = freezed,Object? rank = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,
+as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as int?,rank: freezed == rank ? _self.rank : rank // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -154,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String uuid,  String name,  String? description,  int? type,  int? rank)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VenuesModel() when $default != null:
-return $default(_that.id,_that.name);case _:
+return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_that.rank);case _:
   return orElse();
 
 }
@@ -175,10 +179,10 @@ return $default(_that.id,_that.name);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String uuid,  String name,  String? description,  int? type,  int? rank)  $default,) {final _that = this;
 switch (_that) {
 case _VenuesModel():
-return $default(_that.id,_that.name);case _:
+return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_that.rank);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +199,10 @@ return $default(_that.id,_that.name);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String uuid,  String name,  String? description,  int? type,  int? rank)?  $default,) {final _that = this;
 switch (_that) {
 case _VenuesModel() when $default != null:
-return $default(_that.id,_that.name);case _:
+return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_that.rank);case _:
   return null;
 
 }
@@ -210,11 +214,15 @@ return $default(_that.id,_that.name);case _:
 @JsonSerializable()
 
 class _VenuesModel extends VenuesModel {
-  const _VenuesModel({required this.id, required this.name}): super._();
+  const _VenuesModel({required this.id, required this.uuid, required this.name, this.description, this.type, this.rank}): super._();
   factory _VenuesModel.fromJson(Map<String, dynamic> json) => _$VenuesModelFromJson(json);
 
-@override final  String id;
+@override final  int id;
+@override final  String uuid;
 @override final  String name;
+@override final  String? description;
+@override final  int? type;
+@override final  int? rank;
 
 /// Create a copy of VenuesModel
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +237,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.rank, rank) || other.rank == rank));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name);
+int get hashCode => Object.hash(runtimeType,id,uuid,name,description,type,rank);
 
 @override
 String toString() {
-  return 'VenuesModel(id: $id, name: $name)';
+  return 'VenuesModel(id: $id, uuid: $uuid, name: $name, description: $description, type: $type, rank: $rank)';
 }
 
 
@@ -249,7 +257,7 @@ abstract mixin class _$VenuesModelCopyWith<$Res> implements $VenuesModelCopyWith
   factory _$VenuesModelCopyWith(_VenuesModel value, $Res Function(_VenuesModel) _then) = __$VenuesModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name
+ int id, String uuid, String name, String? description, int? type, int? rank
 });
 
 
@@ -266,11 +274,15 @@ class __$VenuesModelCopyWithImpl<$Res>
 
 /// Create a copy of VenuesModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? uuid = null,Object? name = null,Object? description = freezed,Object? type = freezed,Object? rank = freezed,}) {
   return _then(_VenuesModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as int,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,
+as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as int?,rank: freezed == rank ? _self.rank : rank // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

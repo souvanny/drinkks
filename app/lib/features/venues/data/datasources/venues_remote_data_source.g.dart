@@ -55,4 +55,4 @@ final class VenuesRemoteDataSourceProvider
 }
 
 String _$venuesRemoteDataSourceHash() =>
-    r'e3f50d7bfca91f1f7daddcf90adeb4190d66dc72';
+    r'df55f457f4dce1a05d22e11bec5bbf9c8ea1bc21';

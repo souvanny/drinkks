@@ -8,6 +8,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'api_service.g.dart';
 
+
+
 class ApiException implements Exception {
   final String message;
   final int? statusCode;
@@ -97,6 +99,9 @@ class ApiService {
 
   bool _isRefreshing = false;
   final List<Completer<String?>> _refreshCompleters = [];
+
+  Dio get dio => _dio;
+
 
   Future<String?> _refreshToken() async {
     if (_isRefreshing) {

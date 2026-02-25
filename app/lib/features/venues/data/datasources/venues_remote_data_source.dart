@@ -1,40 +1,53 @@
+// flutter_lib/features/venues/data/datasources/venues_remote_data_source.dart
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:dio/dio.dart';
-import '../../../../core/providers/network_providers.dart';
+import '../../../../services/venue_service.dart';
 import '../models/venues_model.dart';
+import '../models/paginated_response_model.dart';
 
 part 'venues_remote_data_source.g.dart';
 
 abstract class VenuesRemoteDataSource {
-  Future<List<VenuesModel>> fetchVenuess();
-  Future<VenuesModel> fetchVenues(String id);
+  Future<PaginatedResponseModel> getVenues({
+    required int page,
+    required int limit,
+    String? search,
+    int? type,
+  });
+  Future<VenuesModel> getVenue(String uuid);
 }
 
 @riverpod
 VenuesRemoteDataSource venuesRemoteDataSource(Ref ref) {
-  final dio = ref.watch(dioProvider);
-  return VenuesRemoteDataSourceImpl(dio);
+  final venueService = ref.watch(venueServiceProvider);
+  return VenuesRemoteDataSourceImpl(venueService);
 }
 
 class VenuesRemoteDataSourceImpl implements VenuesRemoteDataSource {
-  final Dio _dio;
-  
-  VenuesRemoteDataSourceImpl(this._dio);
+  final VenueService _venueService;
+
+  VenuesRemoteDataSourceImpl(this._venueService);
 
   @override
-  Future<List<VenuesModel>> fetchVenuess() async {
-    // final response = await _dio.get('/venuess');
-    // return (response.data as List).map((e) => VenuesModel.fromJson(e)).toList();
-    await Future.delayed(const Duration(seconds: 1));
-    return [
-      const VenuesModel(id: '1', name: 'Item 1'),
-      const VenuesModel(id: '2', name: 'Item 2'),
-    ];
+  Future<PaginatedResponseModel> getVenues({
+    required int page,
+    required int limit,
+    String? search,
+    int? type,
+  }) async {
+    final response = await _venueService.getVenues(
+      page: page,
+      limit: limit,
+      search: search,
+      type: type,
+    );
+
+    return PaginatedResponseModel.fromJson(response);
   }
 
   @override
-  Future<VenuesModel> fetchVenues(String id) async {
-    await Future.delayed(const Duration(seconds: 1));
-    return VenuesModel(id: id, name: 'Item ');
+  Future<VenuesModel> getVenue(String uuid) async {
+    final response = await _venueService.getVenue(uuid);
+    return VenuesModel.fromJson(response);
   }
 }

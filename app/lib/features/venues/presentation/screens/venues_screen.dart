@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../providers/auth_provider.dart';
+import '../controllers/venues_controller.dart';
 
 class VenuesScreen extends ConsumerStatefulWidget {
   const VenuesScreen({super.key});
@@ -12,6 +13,35 @@ class VenuesScreen extends ConsumerStatefulWidget {
 
 class _VenuesScreenState extends ConsumerState<VenuesScreen> {
   bool _isLoggingOut = false;
+  final TextEditingController _searchController = TextEditingController();
+  int? _selectedType;
+  bool _showFilters = false;
+
+  // Mapping des types vers les images
+  static const Map<int, String> _typeToImage = {
+    1: 'assets/images/venues/lounge.png',
+    2: 'assets/images/venues/port.png',
+    3: 'assets/images/venues/rooftop.png',
+    4: 'assets/images/venues/jazz.png',
+    5: 'assets/images/venues/garden.png',
+    6: 'assets/images/venues/club.png',
+  };
+
+  // Mapping des types vers les libellés
+  static const Map<int, String> _typeToLabel = {
+    1: 'Lounge',
+    2: 'Port',
+    3: 'Rooftop',
+    4: 'Jazz',
+    5: 'Jardin',
+    6: 'Club',
+  };
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Future<void> _handleLogout(BuildContext context) async {
     if (_isLoggingOut) return;
@@ -52,28 +82,13 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
 
       try {
         print('🔴 [VENUES] Début de la déconnexion');
-
-        // Récupérer le notifier
         final notifier = ref.read(authStateNotifierProvider.notifier);
-
-        // Appeler la méthode de déconnexion du notifier
         await notifier.signOut();
-
-        // Attendre un peu pour la propagation
         await Future.delayed(const Duration(milliseconds: 300));
 
-        // Vérification
-        final authState = ref.read(authStateNotifierProvider);
-        final firebaseUser = ref.read(authServiceProvider).currentUser;
-
-        print('👤 [VENUES] État après déconnexion: $authState');
-        print('👤 [VENUES] Firebase user: ${firebaseUser?.uid ?? 'null'}');
-
         if (context.mounted) {
-          // Navigation forcée vers login
           context.go('/login');
         }
-
       } catch (e, stack) {
         print('❌ [VENUES] Erreur déconnexion: $e');
         print('📚 [VENUES] Stack: $stack');
@@ -85,8 +100,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
               backgroundColor: Colors.red,
             ),
           );
-
-          // Même en cas d'erreur, forcer la navigation
           context.go('/login');
         }
       } finally {
@@ -97,16 +110,41 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
     }
   }
 
+  void _performSearch() {
+    final controller = ref.read(venuesControllerProvider.notifier);
+    controller.search(_searchController.text);
+  }
+
+  void _selectType(int? type) {
+    setState(() {
+      _selectedType = type;
+    });
+    final controller = ref.read(venuesControllerProvider.notifier);
+    controller.filterByType(type);
+  }
+
+  String? _getImageForType(int? type) {
+    if (type == null || !_typeToImage.containsKey(type)) {
+      return 'assets/images/venues/default.png';
+    }
+    return _typeToImage[type];
+  }
+
+  String _getTypeLabel(int? type) {
+    if (type == null || !_typeToLabel.containsKey(type)) {
+      return 'Inconnu';
+    }
+    return _typeToLabel[type]!;
+  }
+
   @override
   Widget build(BuildContext context) {
     const backgroundColor = Color(0xFF0F0F23);
     const primaryColor = Color(0xFF6366F1);
     const textPrimary = Colors.white;
 
-    // Surveiller l'état d'auth (pour debug)
-    ref.listen<AuthState>(authStateNotifierProvider, (previous, next) {
-      print('🔄 [VENUES] Auth state changed: $next');
-    });
+    final venuesState = ref.watch(venuesControllerProvider);
+    final controller = ref.read(venuesControllerProvider.notifier);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -116,18 +154,18 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
         leading: IconButton(
           icon: _isLoggingOut
               ? const SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              )
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
           )
               : const Icon(Icons.logout, color: textPrimary),
           onPressed: _isLoggingOut ? null : () => _handleLogout(context),
           tooltip: 'Se déconnecter',
         ),
-        title: Text(
+        title: const Text(
           'Nos Bars Virtuels',
           style: TextStyle(
             color: textPrimary,
@@ -144,46 +182,222 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
             },
             tooltip: 'Mon compte',
           ),
+          IconButton(
+            icon: Icon(
+              _showFilters ? Icons.filter_list_off : Icons.filter_list,
+              color: textPrimary,
+            ),
+            onPressed: () {
+              setState(() {
+                _showFilters = !_showFilters;
+              });
+            },
+            tooltip: 'Filtres',
+          ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(100),
+          child: Column(
+            children: [
+              // Barre de recherche
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Rechercher un bar...',
+                    hintStyle: const TextStyle(color: Colors.white54),
+                    prefixIcon: const Icon(Icons.search, color: primaryColor),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.white54),
+                      onPressed: () {
+                        _searchController.clear();
+                        _performSearch();
+                      },
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: const Color(0xFF1E1E3F),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  onSubmitted: (_) => _performSearch(),
+                ),
+              ),
+              // Filtres par type
+              if (_showFilters) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 40,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    children: [
+                      _buildFilterChip('Tous', null, _selectedType == null),
+                      ..._typeToLabel.entries.map(
+                            (entry) => _buildFilterChip(
+                          entry.value,
+                          entry.key,
+                          _selectedType == entry.key,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: Text(
-                'Choisissez votre ambiance',
-                style: TextStyle(
-                  color: textPrimary,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+      body: venuesState.when(
+        data: (venues) {
+          return Column(
+            children: [
+              Expanded(
+                child: venues.isEmpty
+                    ? const Center(
+                  child: Text(
+                    'Aucun bar trouvé',
+                    style: TextStyle(color: Colors.white54),
+                  ),
+                )
+                    : GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: venues.length,
+                  itemBuilder: (context, index) {
+                    final venue = venues[index];
+                    return _buildVenueCard(
+                      venue,
+                      primaryColor,
+                      backgroundColor,
+                      textPrimary,
+                    );
+                  },
                 ),
               ),
-            ),
-            Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.8,
+              // Pagination
+              if (venues.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    border: Border(
+                      top: BorderSide(color: Colors.white.withOpacity(0.1)),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.chevron_left),
+                        color: controller.hasPreviousPage
+                            ? primaryColor
+                            : Colors.white24,
+                        onPressed: controller.hasPreviousPage
+                            ? () => controller.previousPage()
+                            : null,
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1E1E3F),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          'Page ${controller.currentPage} / ${controller.totalPages}',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.chevron_right),
+                        color: controller.hasNextPage
+                            ? primaryColor
+                            : Colors.white24,
+                        onPressed: controller.hasNextPage
+                            ? () => controller.nextPage()
+                            : null,
+                      ),
+                    ],
+                  ),
                 ),
-                itemCount: _venues.length,
-                itemBuilder: (context, index) {
-                  final venue = _venues[index];
-                  return _buildVenueCard(venue, primaryColor, backgroundColor, textPrimary);
-                },
+            ],
+          );
+        },
+        loading: () => const Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF6366F1),
+          ),
+        ),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 48),
+              const SizedBox(height: 16),
+              Text(
+                'Erreur: $error',
+                style: const TextStyle(color: Colors.white),
+                textAlign: TextAlign.center,
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => controller.refresh(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                ),
+                child: const Text('Réessayer'),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildVenueCard(Map<String, dynamic> venue, Color primaryColor, Color backgroundColor, Color textPrimary) {
+  Widget _buildFilterChip(String label, int? value, bool isSelected) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: FilterChip(
+        label: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white70,
+          ),
+        ),
+        selected: isSelected,
+        onSelected: (_) => _selectType(value),
+        backgroundColor: const Color(0xFF1E1E3F),
+        selectedColor: const Color(0xFF6366F1),
+        checkmarkColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVenueCard(
+      dynamic venue,
+      Color primaryColor,
+      Color backgroundColor,
+      Color textPrimary,
+      ) {
+    final imagePath = _getImageForType(venue.type);
+    final typeLabel = _getTypeLabel(venue.type);
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -192,8 +406,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       color: backgroundColor,
       child: InkWell(
         onTap: () {
-          final venueId = venue['id'] ?? 'default';
-          context.go('/venues/$venueId/tables');
+          context.go('/venues/${venue.uuid}/tables');
         },
         borderRadius: BorderRadius.circular(16),
         child: Column(
@@ -207,7 +420,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                   topRight: Radius.circular(16),
                 ),
                 image: DecorationImage(
-                  image: AssetImage(venue['image']),
+                  image: AssetImage(imagePath!),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -229,12 +442,14 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                 alignment: Alignment.bottomLeft,
                 padding: const EdgeInsets.all(12),
                 child: Text(
-                  venue['name'],
+                  venue.name,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
@@ -243,8 +458,29 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Type
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primaryColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      typeLabel,
+                      style: TextStyle(
+                        color: primaryColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Description
                   Text(
-                    venue['description'],
+                    venue.description ?? 'Aucune description',
                     style: TextStyle(
                       color: textPrimary.withOpacity(0.8),
                       fontSize: 12,
@@ -252,7 +488,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -261,49 +496,4 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       ),
     );
   }
-
-  final List<Map<String, dynamic>> _venues = [
-    {
-      'id': 'lounge',
-      'name': 'Le Lounge Étoilé',
-      'description': 'Ambiance lounge avec vue sur les étoiles',
-      'image': 'assets/images/venues/lounge.png',
-      'activeUsers': 24,
-    },
-    {
-      'id': 'port',
-      'name': 'Le Bar du Port',
-      'description': 'Son des vagues et cocktails fruités',
-      'image': 'assets/images/venues/port.png',
-      'activeUsers': 18,
-    },
-    {
-      'id': 'rooftop',
-      'name': 'Le Rooftop Urbain',
-      'description': 'Vue panoramique sur la skyline',
-      'image': 'assets/images/venues/rooftop.png',
-      'activeUsers': 32,
-    },
-    {
-      'id': 'jazz',
-      'name': 'La Cave Jazz',
-      'description': 'Ambiance intime et musique live',
-      'image': 'assets/images/venues/jazz.png',
-      'activeUsers': 12,
-    },
-    {
-      'id': 'garden',
-      'name': 'Le Garden Tropical',
-      'description': 'Jardin virtuel avec cocktails exotiques',
-      'image': 'assets/images/venues/garden.png',
-      'activeUsers': 28,
-    },
-    {
-      'id': 'club',
-      'name': 'Le Club Privé',
-      'description': 'Accès exclusif, ambiance feutrée',
-      'image': 'assets/images/venues/club.png',
-      'activeUsers': 8,
-    },
-  ];
 }

@@ -33,7 +33,7 @@ final class VenuesControllerProvider
   VenuesController create() => VenuesController();
 }
 
-String _$venuesControllerHash() => r'18c03a10919a21dceb170a8eebf95b929dcd9744';
+String _$venuesControllerHash() => r'4c3033fe5573e2906e757753ba64cc06aa98d122';
 
 abstract class _$VenuesController extends $AsyncNotifier<List<VenuesEntity>> {
   FutureOr<List<VenuesEntity>> build();

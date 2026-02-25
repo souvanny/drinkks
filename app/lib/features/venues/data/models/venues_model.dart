@@ -9,12 +9,23 @@ abstract class VenuesModel with _$VenuesModel {
   const VenuesModel._();
 
   const factory VenuesModel({
-    required String id,
+    required int id,
+    required String uuid,
     required String name,
+    String? description,
+    int? type,
+    int? rank,
   }) = _VenuesModel;
 
-  factory VenuesModel.fromJson(Map<String, dynamic> json) => 
+  factory VenuesModel.fromJson(Map<String, dynamic> json) =>
       _$VenuesModelFromJson(json);
 
-  VenuesEntity toEntity() => VenuesEntity(id: id, name: name);
+  VenuesEntity toEntity() => VenuesEntity(
+    id: id,
+    uuid: uuid,
+    name: name,
+    description: description,
+    type: type,
+    rank: rank,
+  );
 }
