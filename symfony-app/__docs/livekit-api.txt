@@ -1,0 +1,4 @@
+curl -X POST <your-host>/twirp/livekit.RoomService/ListRooms \
+	-H "Authorization: Bearer <token-with-roomList>" \
+	-H 'Content-Type: application/json' \
+	-d '{ "names": ["<room-name>"] }'

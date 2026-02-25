@@ -55,7 +55,8 @@ class VenuesController extends _$VenuesController {
 
     _allVenues = await ref.watch(
       getVenuesProvider(
-        search: _currentSearch.isEmpty ? null : _currentSearch,
+        // search: _currentSearch.isEmpty ? null : _currentSearch,
+        search: null,
         type: _currentType,
       ).future,
     );

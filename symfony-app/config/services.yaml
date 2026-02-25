@@ -29,6 +29,12 @@ services:
             $livekitApiSecret: '%env(LIVEKIT_API_SECRET)%'
             $livekitUrl: '%env(LIVEKIT_URL)%'
 
+    App\Infrastructure\Http\Controller\ListLiveKitRoomsController:
+        arguments:
+            $livekitApiKey: '%env(LIVEKIT_API_KEY)%'
+            $livekitApiSecret: '%env(LIVEKIT_API_SECRET)%'
+            $livekitUrl: '%env(LIVEKIT_URL)%'
+
 
     _instanceof:
         App\Shared\Application\Command\CommandHandlerInterface:
