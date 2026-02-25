@@ -26,8 +26,6 @@ class ListLiveKitRoomsController extends AbstractController
     #[Route('', name: 'sfu_list_rooms', methods: ['GET'])]
     public function listRooms(): JsonResponse
     {
-
-
         $host = 'https://livekit.project-takagi.fr';
         $svc = new RoomServiceClient($host, 'APITCL53pSLyZaR', 'G2qNPc1PjNjfhdGGzwORQ7v4aLDhsNovnFN36PMXeho');
 
@@ -44,11 +42,36 @@ class ListLiveKitRoomsController extends AbstractController
         // Delete a room.
         $svc->deleteRoom('myroom');
 
-        $rooms = $svc->listRooms();
+        $listRooms = $svc->listRooms();
 
+//        print_r($rooms->getRooms());
+//        exit;
+
+        $allParticipants = [];
+
+        foreach ($listRooms->getRooms() as $room) {
+//            echo "Salon : **" . $room->getName() . "**\n";
+//            echo "Nombre de participants : " . $room->getNumParticipants() . "\n";
+
+            // 2. Récupérer les utilisateurs connectés pour ce salon spécifique
+            $listParticipants = $svc->listParticipants($room->getName());
+            $allParticipants[$room->getSid()] = $listParticipants->getParticipants();
+
+//            if (count($participants) > 0) {
+//                echo "Utilisateurs présents :\n";
+//                foreach ($participants as $p) {
+//                    // Affiche l'identité et le statut (actif/en attente)
+//                    echo "- " . $p->getIdentity() . " (Statut: " . $p->getState() . ")\n";
+//                }
+//            } else {
+//                echo "- Aucun utilisateur connecté.\n";
+//            }
+//            echo "---\n";
+        }
 
         return $this->json([
             'rooms' => $rooms,
+            'participants' => $allParticipants,
         ], Response::HTTP_OK);
     }
 }
