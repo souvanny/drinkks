@@ -1,3 +1,7 @@
+// flutter_lib/features/venues/presentation/screens/venues_screen.dart
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,6 +20,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
   final TextEditingController _searchController = TextEditingController();
   int? _selectedType;
   bool _showFilters = false;
+  Timer? _searchDebounce;
 
   // Mapping des types vers les images
   static const Map<int, String> _typeToImage = {
@@ -38,9 +43,27 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged() {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        final controller = ref.read(venuesControllerProvider.notifier);
+        controller.onSearchChanged(_searchController.text);
+      }
+    });
   }
 
   Future<void> _handleLogout(BuildContext context) async {
@@ -110,9 +133,9 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
     }
   }
 
-  void _performSearch() {
-    final controller = ref.read(venuesControllerProvider.notifier);
-    controller.search(_searchController.text);
+  void _clearSearch() {
+    _searchController.clear();
+    // Le listener va automatiquement déclencher la mise à jour
   }
 
   void _selectType(int? type) {
@@ -209,13 +232,12 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                     hintText: 'Rechercher un bar...',
                     hintStyle: const TextStyle(color: Colors.white54),
                     prefixIcon: const Icon(Icons.search, color: primaryColor),
-                    suffixIcon: IconButton(
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
                       icon: const Icon(Icons.clear, color: Colors.white54),
-                      onPressed: () {
-                        _searchController.clear();
-                        _performSearch();
-                      },
-                    ),
+                      onPressed: _clearSearch,
+                    )
+                        : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -224,7 +246,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                     fillColor: const Color(0xFF1E1E3F),
                     contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  onSubmitted: (_) => _performSearch(),
                 ),
               ),
               // Filtres par type
@@ -257,12 +278,42 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
         data: (venues) {
           return Column(
             children: [
+              // Indicateur de nombre de résultats
+              if (controller.totalItems > 0)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${controller.totalItems} bar(s) trouvé(s)',
+                        style: TextStyle(
+                          color: textPrimary.withOpacity(0.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Expanded(
                 child: venues.isEmpty
-                    ? const Center(
-                  child: Text(
-                    'Aucun bar trouvé',
-                    style: TextStyle(color: Colors.white54),
+                    ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.search_off,
+                        size: 64,
+                        color: Colors.white.withOpacity(0.3),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        _searchController.text.isEmpty
+                            ? 'Aucun bar disponible'
+                            : 'Aucun résultat pour "${_searchController.text}"',
+                        style: const TextStyle(color: Colors.white54),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                 )
                     : GridView.builder(
@@ -286,7 +337,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                 ),
               ),
               // Pagination
-              if (venues.isNotEmpty)
+              if (controller.totalItems > 0)
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -295,8 +346,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                       top: BorderSide(color: Colors.white.withOpacity(0.1)),
                     ),
                   ),
-
-// Dans la partie pagination du build (vers la fin)
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -332,9 +381,18 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                             ? () => controller.nextPage()
                             : null,
                       ),
+                      const SizedBox(width: 8),
+                      // Bouton de rafraîchissement
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        color: primaryColor,
+                        onPressed: () {
+                          controller.refresh();
+                        },
+                        tooltip: 'Recharger depuis le serveur',
+                      ),
                     ],
                   ),
-
                 ),
             ],
           );
@@ -414,9 +472,11 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // Important
           children: [
+            // Image container avec hauteur fixe
             Container(
-              height: 120,
+              height: 100, // Réduit de 120 à 100
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
@@ -443,12 +503,12 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                   ),
                 ),
                 alignment: Alignment.bottomLeft,
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8), // Réduit de 12 à 8
                 child: Text(
                   venue.name,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 14, // Réduit de 16 à 14
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
@@ -456,37 +516,41 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                 ),
               ),
             ),
+            // Contenu textuel
             Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8), // Réduit de 12 à 8
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min, // Important
                 children: [
                   // Type
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: 6, // Réduit de 8 à 6
+                      vertical: 2, // Réduit de 4 à 2
                     ),
                     decoration: BoxDecoration(
                       color: primaryColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(8), // Réduit de 12 à 8
                     ),
                     child: Text(
                       typeLabel,
                       style: TextStyle(
                         color: primaryColor,
-                        fontSize: 10,
+                        fontSize: 9, // Réduit de 10 à 9
                         fontWeight: FontWeight.bold,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4), // Réduit de 8 à 4
                   // Description
                   Text(
                     venue.description ?? 'Aucune description',
                     style: TextStyle(
                       color: textPrimary.withOpacity(0.8),
-                      fontSize: 12,
+                      fontSize: 10, // Réduit de 12 à 10
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
