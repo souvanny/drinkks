@@ -30,7 +30,7 @@ String _normalizeText(String text) {
 @riverpod
 class VenuesController extends _$VenuesController {
   // Pagination côté client
-  static const int _pageSize = 10; // Changé de 20 à 10
+  static const int _pageSize = 10;
   int _currentPage = 1;
   String _currentSearch = '';
   int? _currentType;
@@ -50,10 +50,13 @@ class VenuesController extends _$VenuesController {
   }
 
   Future<List<VenuesEntity>> _fetchAllVenues() async {
+    // Forcer le rafraîchissement du provider en invalidant son cache
+    ref.invalidate(getVenuesProvider);
+
     _allVenues = await ref.watch(
       getVenuesProvider(
-        search: null, // On ne passe plus le search à l'API
-        type: _currentType, // Le type est toujours géré côté serveur
+        search: _currentSearch.isEmpty ? null : _currentSearch,
+        type: _currentType,
       ).future,
     );
 
@@ -110,7 +113,7 @@ class VenuesController extends _$VenuesController {
   // Méthode appelée à chaque modification du champ de recherche
   void onSearchChanged(String query) {
     _currentSearch = query;
-    _currentPage = 1; // Revenir à la première page
+    _currentPage = 1;
     _applySearchAndFilters();
     state = AsyncValue.data(_paginatedVenues);
   }
@@ -141,8 +144,7 @@ class VenuesController extends _$VenuesController {
 
   Future<void> filterByType(int? type) async {
     _currentType = type;
-    _currentPage = 1; // Revenir à la première page
-    // Recharger depuis l'API car le type est filtré côté serveur
+    _currentPage = 1;
     await refresh();
   }
 
