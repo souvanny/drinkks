@@ -63,6 +63,14 @@ class AccountController extends AbstractController
             $hasPhoto = false;
         }
 
+        $firstAccess = false;
+        try {
+            $firstAccess = $user->isFirstAccess();
+        } catch (\Error $e) {
+            $firstAccess = false;
+        }
+
+
         // Construire l'URL de la photo si elle existe
         $photoUrl = null;
         if ($hasPhoto) {
@@ -77,6 +85,7 @@ class AccountController extends AbstractController
             'birthdate' => $user->getBirthdate()?->format('Y-m-d'),
             'about_me' => $user->getAboutMe(),
             'has_photo' => $hasPhoto,
+            'first_access' => $firstAccess,
             'photo_url' => $photoUrl, // NOUVEAU
         ]);
     }

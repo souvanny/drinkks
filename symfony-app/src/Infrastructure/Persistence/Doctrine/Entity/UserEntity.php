@@ -54,10 +54,10 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer', options: ['default' => 1])]
     private int $status = 1;
 
-    // NOUVEAU: Champ pour indiquer si l'utilisateur a une photo
-    // IMPORTANT: Initialisé à false dans la déclaration ET dans le constructeur
     #[ORM\Column(name: 'has_photo', type: 'boolean', options: ['default' => false])]
     private bool $hasPhoto = false;
+    #[ORM\Column(name: 'first_access', type: 'boolean', options: ['default' => true])]
+    private bool $firstAccess = true;
 
     #[ORM\Column(name: 'created_at', type: 'datetime')]
     private \DateTimeInterface $createdAt;
@@ -200,6 +200,17 @@ class UserEntity implements UserInterface, PasswordAuthenticatedUserInterface
         $this->hasPhoto = $hasPhoto;
         return $this;
     }
+
+    public function isFirstAccess(): bool
+    {
+        return $this->firstAccess;
+    }
+
+    public function setFirstAccess(bool $firstAccess): void
+    {
+        $this->firstAccess = $firstAccess;
+    }
+
 
     // Méthode utilitaire pour mettre à jour le statut photo
     public function updatePhotoStatus(bool $hasPhoto): void
