@@ -63,7 +63,7 @@ class PhotoController extends AbstractController
             'Access-Control-Allow-Origin' => '*', // Permettre l'accès depuis n'importe quelle origine
         ]);
     }
-    
+
     #[Route('/{filename}/download', name: 'photo_download', methods: ['GET'])]
     public function downloadPhoto(string $filename): Response
     {

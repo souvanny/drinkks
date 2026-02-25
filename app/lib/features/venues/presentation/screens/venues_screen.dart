@@ -41,7 +41,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF6366F1),
             ),
-            child: const Text('Déconnexion'),
+            child: const Text('Déconnexion', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),

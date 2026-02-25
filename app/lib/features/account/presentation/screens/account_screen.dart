@@ -417,7 +417,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen>
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF6366F1),
             ),
-            child: const Text('Quitter'),
+            child: const Text('Quitter', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
