@@ -10,17 +10,12 @@ class VenueService {
 
   VenueService({required ApiService apiService}) : _apiService = apiService;
 
-  /// Récupère la liste paginée des venues
-  Future<Map<String, dynamic>> getVenues({
-    required int page,
-    required int limit,
+  /// Récupère toutes les venues (sans pagination serveur)
+  Future<List<dynamic>> getAllVenues({
     String? search,
     int? type,
   }) async {
-    final queryParams = <String, dynamic>{
-      'page': page,
-      'limit': limit,
-    };
+    final queryParams = <String, dynamic>{};
 
     if (search != null && search.isNotEmpty) {
       queryParams['search'] = search;
@@ -30,10 +25,13 @@ class VenueService {
       queryParams['type'] = type;
     }
 
-    return _apiService.dio.get(
+    final response = await _apiService.dio.get(
       '/venue/list',
       queryParameters: queryParams,
-    ).then((response) => response.data as Map<String, dynamic>);
+    );
+
+    // La réponse est maintenant directement une liste
+    return response.data as List<dynamic>;
   }
 
   /// Récupère un venue par son UUID

@@ -295,6 +295,8 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                       top: BorderSide(color: Colors.white.withOpacity(0.1)),
                     ),
                   ),
+
+// Dans la partie pagination du build (vers la fin)
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -332,6 +334,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                       ),
                     ],
                   ),
+
                 ),
             ],
           );

@@ -10,14 +10,10 @@ part 'get_venues_usecase.g.dart';
 @riverpod
 Future<List<VenuesEntity>> getVenues(
     Ref ref, {
-      required int page,
-      required int limit,
       String? search,
       int? type,
     }) {
-  return ref.watch(venuesRepositoryProvider).getVenues(
-    page: page,
-    limit: limit,
+  return ref.watch(venuesRepositoryProvider).getAllVenues(
     search: search,
     type: type,
   );

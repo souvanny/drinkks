@@ -35,21 +35,18 @@ class VenueRepository extends ServiceEntityRepository
     }
 
     /**
-     * Récupère la liste des venues avec pagination
+     * Récupère toutes les venues avec filtres optionnels
      *
-     * @param int $page Numéro de page (commence à 1)
-     * @param int $limit Nombre d'éléments par page
      * @param string|null $search Terme de recherche optionnel
      * @param int|null $type Filtre par type optionnel
-     * @return array{items: VenueEntity[], total: int, page: int, limit: int, pages: int}
+     * @return VenueEntity[]
      */
-    public function findPaginated(int $page = 1, int $limit = 20, ?string $search = null, ?int $type = null): array
+    public function findAllWithFilters(?string $search = null, ?int $type = null): array
     {
         $qb = $this->createQueryBuilder('v')
-            ->orderBy('v.rank', 'DESC')
+            ->orderBy('v.rank', 'ASC')
             ->addOrderBy('v.name', 'ASC');
 
-        // Appliquer les filtres
         if ($search !== null && !empty($search)) {
             $qb->andWhere('v.name LIKE :search OR v.description LIKE :search')
                 ->setParameter('search', '%' . $search . '%');
@@ -60,28 +57,7 @@ class VenueRepository extends ServiceEntityRepository
                 ->setParameter('type', $type);
         }
 
-        // Compter le total
-        $countQb = clone $qb;
-        $total = (int) $countQb->select('COUNT(v.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        // Pagination
-        $offset = ($page - 1) * $limit;
-        $qb->setFirstResult($offset)
-            ->setMaxResults($limit);
-
-        $items = $qb->getQuery()->getResult();
-
-        $pages = (int) ceil($total / $limit);
-
-        return [
-            'items' => $items,
-            'total' => $total,
-            'page' => $page,
-            'limit' => $limit,
-            'pages' => $pages
-        ];
+        return $qb->getQuery()->getResult();
     }
 
     /**
@@ -89,7 +65,7 @@ class VenueRepository extends ServiceEntityRepository
      */
     public function findByType(int $type): array
     {
-        return $this->findBy(['type' => $type], ['rank' => 'DESC', 'name' => 'ASC']);
+        return $this->findBy(['type' => $type], ['rank' => 'ASC', 'name' => 'ASC']);
     }
 
     /**
@@ -97,6 +73,6 @@ class VenueRepository extends ServiceEntityRepository
      */
     public function findTopRated(int $limit = 10): array
     {
-        return $this->findBy([], ['rank' => 'DESC', 'name' => 'ASC'], $limit);
+        return $this->findBy([], ['rank' => 'ASC', 'name' => 'ASC'], $limit);
     }
 }

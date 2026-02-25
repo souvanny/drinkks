@@ -27,20 +27,8 @@ class VenueController extends AbstractController
 
     #[Route('/list', name: 'venue_list', methods: ['GET'])]
     #[OA\Get(
-        summary: 'Liste des venues avec pagination',
+        summary: 'Liste toutes les venues',
         parameters: [
-            new OA\Parameter(
-                name: 'page',
-                in: 'query',
-                description: 'Numéro de page',
-                schema: new OA\Schema(type: 'integer', default: 1)
-            ),
-            new OA\Parameter(
-                name: 'limit',
-                in: 'query',
-                description: 'Nombre d\'éléments par page',
-                schema: new OA\Schema(type: 'integer', default: 20, maximum: 100)
-            ),
             new OA\Parameter(
                 name: 'search',
                 in: 'query',
@@ -57,36 +45,44 @@ class VenueController extends AbstractController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Liste paginée des venues',
+                description: 'Liste de toutes les venues',
                 content: new OA\JsonContent(
-                    properties: [
-                        new OA\Property(property: 'items', type: 'array', items: new OA\Items(
-                            properties: [
-                                new OA\Property(property: 'id', type: 'integer'),
-                                new OA\Property(property: 'uuid', type: 'string'),
-                                new OA\Property(property: 'name', type: 'string'),
-                                new OA\Property(property: 'description', type: 'string', nullable: true),
-                                new OA\Property(property: 'type', type: 'integer', nullable: true),
-                                new OA\Property(property: 'rank', type: 'integer', nullable: true),
-                            ]
-                        )),
-                        new OA\Property(property: 'total', type: 'integer'),
-                        new OA\Property(property: 'page', type: 'integer'),
-                        new OA\Property(property: 'limit', type: 'integer'),
-                        new OA\Property(property: 'pages', type: 'integer'),
-                    ]
+                    type: 'array',
+                    items: new OA\Items(
+                        properties: [
+                            new OA\Property(property: 'id', type: 'integer'),
+                            new OA\Property(property: 'uuid', type: 'string'),
+                            new OA\Property(property: 'name', type: 'string'),
+                            new OA\Property(property: 'description', type: 'string', nullable: true),
+                            new OA\Property(property: 'type', type: 'integer', nullable: true),
+                            new OA\Property(property: 'rank', type: 'integer', nullable: true),
+                        ]
+                    )
                 )
             )
         ]
     )]
     public function list(Request $request): JsonResponse
     {
-        $page = max(1, (int) $request->query->get('page', 1));
-        $limit = min(100, max(1, (int) $request->query->get('limit', 20)));
         $search = $request->query->get('search');
         $type = $request->query->has('type') ? (int) $request->query->get('type') : null;
 
-        $result = $this->venueRepository->findPaginated($page, $limit, $search, $type);
+        // Récupérer toutes les venues avec filtres optionnels
+        $qb = $this->venueRepository->createQueryBuilder('v')
+            ->orderBy('v.rank', 'ASC'); // Tri par rank croissant
+
+        // Appliquer les filtres
+        if ($search !== null && !empty($search)) {
+            $qb->andWhere('v.name LIKE :search OR v.description LIKE :search')
+                ->setParameter('search', '%' . $search . '%');
+        }
+
+        if ($type !== null) {
+            $qb->andWhere('v.type = :type')
+                ->setParameter('type', $type);
+        }
+
+        $venues = $qb->getQuery()->getResult();
 
         // Formater les données pour la réponse
         $items = array_map(function (VenueEntity $venue) {
@@ -98,17 +94,12 @@ class VenueController extends AbstractController
                 'type' => $venue->getType(),
                 'rank' => $venue->getRank(),
             ];
-        }, $result['items']);
+        }, $venues);
 
-        return $this->json([
-            'items' => $items,
-            'total' => $result['total'],
-            'page' => $result['page'],
-            'limit' => $result['limit'],
-            'pages' => $result['pages'],
-        ]);
+        return $this->json($items);
     }
 
+    // Les autres méthodes restent inchangées...
     #[Route('/{uuid}', name: 'venue_get', methods: ['GET'])]
     #[OA\Get(
         summary: 'Récupère un venue par son UUID',

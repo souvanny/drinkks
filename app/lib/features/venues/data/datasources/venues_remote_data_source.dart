@@ -3,14 +3,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../services/venue_service.dart';
 import '../models/venues_model.dart';
-import '../models/paginated_response_model.dart';
 
 part 'venues_remote_data_source.g.dart';
 
 abstract class VenuesRemoteDataSource {
-  Future<PaginatedResponseModel> getVenues({
-    required int page,
-    required int limit,
+  Future<List<VenuesModel>> getAllVenues({
     String? search,
     int? type,
   });
@@ -29,20 +26,18 @@ class VenuesRemoteDataSourceImpl implements VenuesRemoteDataSource {
   VenuesRemoteDataSourceImpl(this._venueService);
 
   @override
-  Future<PaginatedResponseModel> getVenues({
-    required int page,
-    required int limit,
+  Future<List<VenuesModel>> getAllVenues({
     String? search,
     int? type,
   }) async {
-    final response = await _venueService.getVenues(
-      page: page,
-      limit: limit,
+    final response = await _venueService.getAllVenues(
       search: search,
       type: type,
     );
 
-    return PaginatedResponseModel.fromJson(response);
+    // La réponse contient directement la liste des items
+    final List<dynamic> items = response ?? [];
+    return items.map((json) => VenuesModel.fromJson(json)).toList();
   }
 
   @override

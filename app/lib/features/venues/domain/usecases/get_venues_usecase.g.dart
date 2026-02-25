@@ -24,7 +24,7 @@ final class GetVenuesProvider
         $FutureProvider<List<VenuesEntity>> {
   GetVenuesProvider._({
     required GetVenuesFamily super.from,
-    required ({int page, int limit, String? search, int? type}) super.argument,
+    required ({String? search, int? type}) super.argument,
   }) : super(
          retry: null,
          name: r'getVenuesProvider',
@@ -51,15 +51,8 @@ final class GetVenuesProvider
 
   @override
   FutureOr<List<VenuesEntity>> create(Ref ref) {
-    final argument =
-        this.argument as ({int page, int limit, String? search, int? type});
-    return getVenues(
-      ref,
-      page: argument.page,
-      limit: argument.limit,
-      search: argument.search,
-      type: argument.type,
-    );
+    final argument = this.argument as ({String? search, int? type});
+    return getVenues(ref, search: argument.search, type: argument.type);
   }
 
   @override
@@ -73,13 +66,13 @@ final class GetVenuesProvider
   }
 }
 
-String _$getVenuesHash() => r'31b31665348244ac2786515ee31604c48b04d44d';
+String _$getVenuesHash() => r'4f7030d8a859608a5ab87ac585ec35cf1c283280';
 
 final class GetVenuesFamily extends $Family
     with
         $FunctionalFamilyOverride<
           FutureOr<List<VenuesEntity>>,
-          ({int page, int limit, String? search, int? type})
+          ({String? search, int? type})
         > {
   GetVenuesFamily._()
     : super(
@@ -90,15 +83,8 @@ final class GetVenuesFamily extends $Family
         isAutoDispose: true,
       );
 
-  GetVenuesProvider call({
-    required int page,
-    required int limit,
-    String? search,
-    int? type,
-  }) => GetVenuesProvider._(
-    argument: (page: page, limit: limit, search: search, type: type),
-    from: this,
-  );
+  GetVenuesProvider call({String? search, int? type}) =>
+      GetVenuesProvider._(argument: (search: search, type: type), from: this);
 
   @override
   String toString() => r'getVenuesProvider';
