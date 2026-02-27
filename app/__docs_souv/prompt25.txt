@@ -1,0 +1,6 @@
+Finalement, je voudrais pas passer le nom dans la méthode présente dans VenueScreen
+          context.go('/venues/${venue.uuid}/tables', extra: venue.name);
+
+Je voudrais que ce nom proviennt de l'Api, donc de venue_name présent dans la réponse.
+Donc modifier TableScreen dans ce sens.
+Et donc le nom de la venue ne doit donc pas venir de widget.venueName.
