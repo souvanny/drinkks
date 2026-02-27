@@ -199,7 +199,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: textPrimary),
+            icon: const Icon(Icons.person, color: textPrimary),
             onPressed: () {
               context.go('/account');
             },
