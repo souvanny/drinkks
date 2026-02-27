@@ -44,7 +44,7 @@ class TablesController extends _$TablesController {
   }
 
   // Nouvelle méthode pour générer le token
-  Future<Map<String, dynamic>?> generateTokenForTable(Map<String, dynamic> table) async {
+  Future<Map<String, dynamic>?> generateTokenForTable(Map<String, dynamic> table, String venueName) async {
     final authState = ref.read(authStateNotifierProvider);
 
     if (!authState.isFullyAuthenticated) {
@@ -66,7 +66,7 @@ class TablesController extends _$TablesController {
       final tokenData = await _sfuService.generateToken(
         participantIdentity: connectedUserIdentity,
         participantName: connectedUserName,
-        roomName: table['name'],
+        roomName: venueName + ' : ' + table['name'],
       );
 
       print('✅ Token généré avec succès');

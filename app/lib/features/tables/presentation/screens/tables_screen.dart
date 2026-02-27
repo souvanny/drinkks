@@ -80,9 +80,9 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
   }
 
   // Méthode pour générer le token LiveKit
-  Future<void> _generateLiveKitToken(BuildContext context, WidgetRef ref, Map<String, dynamic> table) async {
+  Future<void> _generateLiveKitToken(BuildContext context, WidgetRef ref, Map<String, dynamic> table, String venueName) async {
     try {
-      final tokenData = await ref.read(tablesControllerProvider.notifier).generateTokenForTable(table);
+      final tokenData = await ref.read(tablesControllerProvider.notifier).generateTokenForTable(table, venueName);
 
       if (tokenData == null) {
         if (context.mounted) {
@@ -349,7 +349,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
             emptyColor,
             textPrimary,
             onTap: () {
-              _generateLiveKitToken(context, ref, table);
+              _generateLiveKitToken(context, ref, table, _venueName);
             },
           );
         },
