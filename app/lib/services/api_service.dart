@@ -404,6 +404,19 @@ class ApiService {
     return null;
   }
 
+  Future<Map<String, dynamic>> getVenueTables(String venueUuid) async {
+    return safeApiCall(
+      apiCall: () async {
+        final response = await _dio.get(
+          '/venue/tables/list',
+          queryParameters: {'venue': venueUuid},
+        );
+        return response.data as Map<String, dynamic>;
+      },
+      errorMessage: 'Impossible de récupérer les informations des tables',
+    );
+  }
+
 
 }
 

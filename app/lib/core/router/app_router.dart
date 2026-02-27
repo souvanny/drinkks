@@ -144,11 +144,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'tables',
             builder: (context, state) {
               final venueId = state.pathParameters['venueId']!;
-              return TablesScreen(venueId: venueId);
+              return TablesScreen(venueId: venueId, venueName: '',);
             },
           ),
         ],
       ),
+
+      // Dans votre fichier de routes
+      // GoRoute(
+      //   path: '/venues/:venueId/tables',
+      //   name: 'tables',
+      //   builder: (context, state) {
+      //     final venueId = state.pathParameters['venueId']!;
+      //     final venueName = state.extra as String? ?? 'Lieu';
+      //     return TablesScreen(venueId: venueId, venueName: venueName);
+      //   },
+      // ),
 
       // Initial route - redirects based on auth state
       GoRoute(

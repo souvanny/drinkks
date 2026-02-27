@@ -467,16 +467,15 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       color: backgroundColor,
       child: InkWell(
         onTap: () {
-          context.go('/venues/${venue.uuid}/tables');
+          context.go('/venues/${venue.uuid}/tables', extra: venue.name);
         },
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, // Important
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Image container avec hauteur fixe
             Container(
-              height: 100, // Réduit de 120 à 100
+              height: 100,
               decoration: BoxDecoration(
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
@@ -503,12 +502,12 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                   ),
                 ),
                 alignment: Alignment.bottomLeft,
-                padding: const EdgeInsets.all(8), // Réduit de 12 à 8
+                padding: const EdgeInsets.all(8),
                 child: Text(
                   venue.name,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14, // Réduit de 16 à 14
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                   maxLines: 1,
@@ -516,41 +515,38 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                 ),
               ),
             ),
-            // Contenu textuel
             Padding(
-              padding: const EdgeInsets.all(8), // Réduit de 12 à 8
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min, // Important
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Type
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 6, // Réduit de 8 à 6
-                      vertical: 2, // Réduit de 4 à 2
+                      horizontal: 6,
+                      vertical: 2,
                     ),
                     decoration: BoxDecoration(
                       color: primaryColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8), // Réduit de 12 à 8
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       typeLabel,
                       style: TextStyle(
                         color: primaryColor,
-                        fontSize: 9, // Réduit de 10 à 9
+                        fontSize: 9,
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 4), // Réduit de 8 à 4
-                  // Description
+                  const SizedBox(height: 4),
                   Text(
                     venue.description ?? 'Aucune description',
                     style: TextStyle(
                       color: textPrimary.withOpacity(0.8),
-                      fontSize: 10, // Réduit de 12 à 10
+                      fontSize: 10,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -563,4 +559,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       ),
     );
   }
+
+
 }

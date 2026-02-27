@@ -30,6 +30,9 @@ class VenueEntity
     #[ORM\Column(name: '`rank`', type: 'integer', nullable: true)]
     private ?int $rank = null;
 
+    #[ORM\Column(name: 'nb_seat', type: 'integer', nullable: false, options: ['default' => 0])]
+    private int $nbSeat = 0;
+
     #[ORM\Column(name: 'created_at', type: 'datetime')]
     private \DateTimeInterface $createdAt;
 
@@ -120,6 +123,17 @@ class VenueEntity
     public function setRank(?int $rank): self
     {
         $this->rank = $rank;
+        return $this;
+    }
+
+    public function getNbSeat(): int
+    {
+        return $this->nbSeat;
+    }
+
+    public function setNbSeat(int $nbSeat): self
+    {
+        $this->nbSeat = $nbSeat;
         return $this;
     }
 
