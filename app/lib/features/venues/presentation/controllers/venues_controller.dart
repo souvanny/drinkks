@@ -35,10 +35,10 @@ class VenuesController extends _$VenuesController {
   String _currentSearch = '';
   int? _currentType;
 
-  // Toutes les venues chargées
+  // Toutes les venues chargées (données brutes de l'API)
   List<VenuesEntity> _allVenues = [];
 
-  // Venues filtrées (après recherche)
+  // Venues filtrées (après recherche ET filtre par type)
   List<VenuesEntity> _filteredVenues = [];
 
   // Venues paginées pour la page courante
@@ -55,29 +55,29 @@ class VenuesController extends _$VenuesController {
 
     _allVenues = await ref.watch(
       getVenuesProvider(
-        // search: _currentSearch.isEmpty ? null : _currentSearch,
-        search: null,
-        type: _currentType,
+        search: null, // Plus de filtre serveur
+        type: null,   // Plus de filtre serveur
       ).future,
     );
 
-    _applySearchAndFilters();
+    // Appliquer les filtres en mémoire
+    _applyFilters();
     return _paginatedVenues;
   }
 
-  // Applique la recherche et les filtres, puis met à jour la pagination
-  void _applySearchAndFilters() {
+  // Applique la recherche et les filtres en mémoire, puis met à jour la pagination
+  void _applyFilters() {
     // Commencer avec toutes les venues
     _filteredVenues = List.from(_allVenues);
 
-    // Appliquer le filtre de type (côté serveur déjà, mais on garde au cas où)
+    // 🔵 ÉTAPE 1: Appliquer le filtre de type (en mémoire)
     if (_currentType != null) {
       _filteredVenues = _filteredVenues
           .where((venue) => venue.type == _currentType)
           .toList();
     }
 
-    // Appliquer la recherche locale si nécessaire
+    // 🔵 ÉTAPE 2: Appliquer la recherche locale (en mémoire)
     if (_currentSearch.isNotEmpty) {
       final normalizedSearch = _normalizeText(_currentSearch);
       _filteredVenues = _filteredVenues.where((venue) {
@@ -115,7 +115,7 @@ class VenuesController extends _$VenuesController {
   void onSearchChanged(String query) {
     _currentSearch = query;
     _currentPage = 1;
-    _applySearchAndFilters();
+    _applyFilters(); // ✅ Uniquement filtrage en mémoire
     state = AsyncValue.data(_paginatedVenues);
   }
 
@@ -143,12 +143,15 @@ class VenuesController extends _$VenuesController {
     }
   }
 
+  // 🔵 NOUVELLE MÉTHODE: Filtrage par type en mémoire
   Future<void> filterByType(int? type) async {
     _currentType = type;
     _currentPage = 1;
-    await refresh();
+    _applyFilters(); // ✅ Uniquement filtrage en mémoire
+    state = AsyncValue.data(_paginatedVenues);
   }
 
+  // Méthode pour recharger depuis le serveur
   Future<void> refresh() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _fetchAllVenues());
