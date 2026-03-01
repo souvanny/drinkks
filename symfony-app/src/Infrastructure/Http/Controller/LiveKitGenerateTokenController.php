@@ -12,9 +12,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/sfu/generate-token')]
+#[Route('/api/sfu')]
 #[OA\Tag(name: 'sfu')]
-class GenerateLiveKitController extends AbstractController
+class LiveKitGenerateTokenController extends AbstractController
 {
     public function __construct(
         private readonly string $livekitApiKey,
@@ -23,7 +23,7 @@ class GenerateLiveKitController extends AbstractController
     ) {
     }
 
-    #[Route('', name: 'sfu_generate_token', methods: ['POST'])]
+    #[Route('/generate-token', name: 'sfu_generate_token', methods: ['POST'])]
     #[OA\Post(
         description: 'Génère un token JWT pour LiveKit SFU',
         summary: 'Générer un token d\'accès LiveKit',

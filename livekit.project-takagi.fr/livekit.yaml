@@ -27,3 +27,9 @@ turn:
     external_tls: true
 keys:
     APITCL53pSLyZaR: G2qNPc1PjNjfhdGGzwORQ7v4aLDhsNovnFN36PMXeho
+webhook:
+    # The API key to use in order to sign the message
+    # This must match one of the keys LiveKit is configured with
+    api_key: 'api-key-to-sign-with'
+    urls:
+        - 'https://yourhost'

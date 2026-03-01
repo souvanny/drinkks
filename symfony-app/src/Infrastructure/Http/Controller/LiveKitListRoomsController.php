@@ -11,9 +11,9 @@ use Symfony\Component\Routing\Attribute\Route;
 use Agence104\LiveKit\RoomServiceClient;
 use Agence104\LiveKit\RoomCreateOptions;
 
-#[Route('/api/sfu/rooms')]
+#[Route('/api/sfu')]
 #[OA\Tag(name: 'sfu')]
-class ListLiveKitRoomsController extends AbstractController
+class LiveKitListRoomsController extends AbstractController
 {
     public function __construct(
         private readonly string $livekitApiKey,
@@ -22,7 +22,7 @@ class ListLiveKitRoomsController extends AbstractController
     ) {
     }
 
-    #[Route('', name: 'sfu_list_rooms', methods: ['GET'])]
+    #[Route('/rooms/list', name: 'sfu_list_rooms', methods: ['GET'])]
     public function listRooms(): JsonResponse
     {
 

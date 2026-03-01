@@ -23,13 +23,13 @@ services:
     # please note that last definitions always *replace* previous ones
 
 
-    App\Infrastructure\Http\Controller\GenerateLiveKitController:
+    App\Infrastructure\Http\Controller\LiveKitGenerateTokenController:
         arguments:
             $livekitApiKey: '%env(LIVEKIT_API_KEY)%'
             $livekitApiSecret: '%env(LIVEKIT_API_SECRET)%'
             $livekitUrl: '%env(LIVEKIT_URL)%'
 
-    App\Infrastructure\Http\Controller\ListLiveKitRoomsController:
+    App\Infrastructure\Http\Controller\LiveKitListRoomsController:
         arguments:
             $livekitApiKey: '%env(LIVEKIT_API_KEY)%'
             $livekitApiSecret: '%env(LIVEKIT_API_SECRET)%'
