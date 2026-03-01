@@ -30,6 +30,6 @@ keys:
 webhook:
     # The API key to use in order to sign the message
     # This must match one of the keys LiveKit is configured with
-    api_key: 'api-key-to-sign-with'
+    api_key: 'APIWJUYhiWkieei'
     urls:
-        - 'https://yourhost'
+        - 'https://188.165.212.127:8101/api/sfu/webhook1'

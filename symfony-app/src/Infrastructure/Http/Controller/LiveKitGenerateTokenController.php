@@ -5,6 +5,7 @@ namespace App\Infrastructure\Http\Controller;
 use Agence104\LiveKit\AccessToken;
 use Agence104\LiveKit\AccessTokenOptions;
 use Agence104\LiveKit\VideoGrant;
+use App\Infrastructure\Service\SfuService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,9 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class LiveKitGenerateTokenController extends AbstractController
 {
     public function __construct(
-        private readonly string $livekitApiKey,
-        private readonly string $livekitApiSecret,
-        private readonly string $livekitUrl,
+        private readonly SfuService $sfuService,
     ) {
     }
 
@@ -100,7 +99,7 @@ class LiveKitGenerateTokenController extends AbstractController
                 ->setRoomName($roomName);
 
             // Créer le token
-            $token = (new AccessToken($this->livekitApiKey, $this->livekitApiSecret))
+            $token = (new AccessToken($this->sfuService->getLivekitApiKey(), $this->sfuService->getLivekitApiSecret()))
                 ->init($tokenOptions)
                 ->setGrant($videoGrant);
 
@@ -111,7 +110,7 @@ class LiveKitGenerateTokenController extends AbstractController
 
             // Retourner la réponse JSON
             return $this->json([
-                'server_url' => $this->livekitUrl,
+                'server_url' => $this->sfuService->getLivekitUrlWss(),
                 'participant_token' => $token->toJwt(),
                 'participant_identity' => $body['participant_identity'],
                 'participant_name' => $body['participant_name'],

@@ -14,14 +14,14 @@ use Agence104\LiveKit\RoomCreateOptions;
 
 #[Route('/api/sfu')]
 #[OA\Tag(name: 'sfu')]
-class LiveKitListRoomsController extends AbstractController
+class LiveKitWebhook1Controller extends AbstractController
 {
     public function __construct(
         private readonly SfuService $sfuService,
     ) {
     }
 
-    #[Route('/rooms/list', name: 'sfu_list_rooms', methods: ['GET'])]
+    #[Route('/webhook1', name: 'sfu_webhook1', methods: ['GET'])]
     public function listRooms(): JsonResponse
     {
 

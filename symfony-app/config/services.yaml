@@ -23,17 +23,32 @@ services:
     # please note that last definitions always *replace* previous ones
 
 
-    App\Infrastructure\Http\Controller\LiveKitGenerateTokenController:
-        arguments:
-            $livekitApiKey: '%env(LIVEKIT_API_KEY)%'
-            $livekitApiSecret: '%env(LIVEKIT_API_SECRET)%'
-            $livekitUrl: '%env(LIVEKIT_URL)%'
+#    App\Infrastructure\Http\Controller\LiveKitGenerateTokenController:
+#        arguments:
+#            $livekitApiKey: '%env(LIVEKIT_API_KEY)%'
+#            $livekitApiSecret: '%env(LIVEKIT_API_SECRET)%'
+#            $livekitUrlWss: '%env(LIVEKIT_URL_WSS)%'
+#
+#    App\Infrastructure\Http\Controller\LiveKitListRoomsController:
+#        arguments:
+#            $livekitApiKey: '%env(LIVEKIT_API_KEY)%'
+#            $livekitApiSecret: '%env(LIVEKIT_API_SECRET)%'
+#            $livekitUrlWss: '%env(LIVEKIT_URL_WSS)%'
+#
+#
+#    App\Infrastructure\Http\Controller\LiveKitWebhook1Controller:
+#        arguments:
+#            $livekitApiKey: '%env(LIVEKIT_API_KEY)%'
+#            $livekitApiSecret: '%env(LIVEKIT_API_SECRET)%'
+#            $livekitUrlWss: '%env(LIVEKIT_URL_WSS)%'
 
-    App\Infrastructure\Http\Controller\LiveKitListRoomsController:
+
+    App\Infrastructure\Service\SfuService:
         arguments:
             $livekitApiKey: '%env(LIVEKIT_API_KEY)%'
             $livekitApiSecret: '%env(LIVEKIT_API_SECRET)%'
-            $livekitUrl: '%env(LIVEKIT_URL)%'
+            $livekitUrlWss: '%env(LIVEKIT_URL_WSS)%'
+            $livekitUrlHttp: '%env(LIVEKIT_URL_HTTP)%'
 
 
     _instanceof:
