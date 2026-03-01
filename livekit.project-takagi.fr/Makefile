@@ -25,3 +25,18 @@ up:
 
 down:
 	${DOCKER_COMPOSE} down
+
+restart: stop start
+
+ps:
+	${DOCKER_COMPOSE} ps
+
+logs:
+	${DOCKER_COMPOSE} logs -f
+
+dc_down:
+	${DOCKER_COMPOSE} down -v --rmi=all --remove-orphans
+
+restart:
+	make dc_stop dc_start
+
