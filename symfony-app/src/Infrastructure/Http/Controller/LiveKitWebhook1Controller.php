@@ -46,48 +46,32 @@ class LiveKitWebhook1Controller extends AbstractController
     public function listRooms(): JsonResponse
     {
         try {
-            // Vérifier la connexion Redis
-            if (!$this->liveKitRoomService->isRedisConnected()) {
+            // Utiliser la méthode factorisée
+            $roomsData = $this->liveKitRoomService->getRoomsData();
+
+            if (!$roomsData['success']) {
                 return $this->json([
                     'success' => false,
-                    'error' => 'Impossible de se connecter à Redis',
-                    'redis_status' => 'disconnected'
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
-            }
-
-            // Récupérer toutes les rooms avec le nouveau service
-            $rooms = $this->liveKitRoomService->getAllRoomsWithParticipants();
-
-            // Récupérer les stats Redis
-            $redisStats = $this->liveKitRoomService->getRedisStats();
-
-            // Construire la réponse
-            $participantsByRoom = [];
-            foreach ($rooms as $room) {
-                $participantsByRoom[$room['name']] = [
-                    'count' => $room['participants_count'],
-                    'participants' => $room['participants'],
-                ];
+                    'error' => $roomsData['error'],
+                    'redis_status' => $roomsData['redis_status']
+                ], $roomsData['http_status']);
             }
 
             return $this->json([
                 'success' => true,
                 'data' => [
-                    'rooms' => $rooms,
-                    'participants_by_room' => $participantsByRoom,
-                    'summary' => [
-                        'total_rooms' => count($rooms),
-                        'total_participants' => array_sum(array_column($rooms, 'participants_count')),
-                    ],
+                    'rooms' => $roomsData['rooms'],
+                    'participants_by_room' => $roomsData['participants_by_room'],
+                    'summary' => $roomsData['stats']['summary'],
                 ],
                 'meta' => [
                     'redis' => [
                         'status' => 'connected',
-                        'stats' => $redisStats,
+                        'stats' => $roomsData['redis_stats'],
                     ],
                     'timestamp' => time(),
                 ],
-            ], Response::HTTP_OK);
+            ], $roomsData['http_status']);
 
         } catch (\Exception $e) {
             return $this->json([
@@ -96,7 +80,6 @@ class LiveKitWebhook1Controller extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
 
 
     /**

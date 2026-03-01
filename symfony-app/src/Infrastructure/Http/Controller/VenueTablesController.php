@@ -51,6 +51,7 @@ class VenueTablesController extends AbstractController
             new OA\Response(response: 404, description: 'Lieu non trouvé')
         ]
     )]
+    #[Route('/list', name: 'venue_tables_list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
         $venueUuid = $request->query->get('venue');
@@ -65,48 +66,15 @@ class VenueTablesController extends AbstractController
             return $this->json(['error' => 'Lieu non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
-
-
-        //
-
-
-        // Vérifier la connexion Redis
-        if (!$this->liveKitRoomService->isRedisConnected()) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Impossible de se connecter à Redis',
-                'redis_status' => 'disconnected'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        // Récupérer toutes les rooms avec le nouveau service
-        $rooms = $this->liveKitRoomService->getAllRoomsWithParticipants();
-
-        // Récupérer les stats Redis
-        $redisStats = $this->liveKitRoomService->getRedisStats();
-
-        // Construire la réponse
-        $participantsByRoom = [];
-        foreach ($rooms as $room) {
-            $participantsByRoom[$room['name']] = [
-                'count' => $room['participants_count'],
-                'participants' => $room['participants'],
-            ];
-        }
-
+        // Récupérer les données des rooms de manière factorisée
+        $roomsStats = $this->liveKitRoomService->getRoomsStats();
 
         return $this->json([
             'venue_uuid' => $venue->getUuid(),
             'venue_name' => $venue->getName(),
             'nb_seats' => $venue->getNbSeat(),
-            'stats' => [
-                'rooms' => $rooms,
-                'participants_by_room' => $participantsByRoom,
-                'summary' => [
-                    'total_rooms' => count($rooms),
-                    'total_participants' => array_sum(array_column($rooms, 'participants_count')),
-                ],
-            ],
+            'stats' => $roomsStats,
         ]);
     }
+
 }

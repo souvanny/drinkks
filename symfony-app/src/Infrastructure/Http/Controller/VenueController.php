@@ -65,6 +65,7 @@ class VenueController extends AbstractController
             )
         ]
     )]
+    #[Route('/list', name: 'venue_list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
         $search = $request->query->get('search');
@@ -72,9 +73,8 @@ class VenueController extends AbstractController
 
         // Récupérer toutes les venues avec filtres optionnels
         $qb = $this->venueRepository->createQueryBuilder('v')
-            ->orderBy('v.rank', 'ASC'); // Tri par rank croissant
+            ->orderBy('v.rank', 'ASC');
 
-        // Appliquer les filtres
         if ($search !== null && !empty($search)) {
             $qb->andWhere('v.name LIKE :search OR v.description LIKE :search')
                 ->setParameter('search', '%' . $search . '%');
@@ -99,50 +99,14 @@ class VenueController extends AbstractController
             ];
         }, $venues);
 
+        // Récupérer les données des rooms de manière factorisée
+        $roomsStats = $this->liveKitRoomService->getRoomsStats();
 
-        //
-
-
-        // Vérifier la connexion Redis
-        if (!$this->liveKitRoomService->isRedisConnected()) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Impossible de se connecter à Redis',
-                'redis_status' => 'disconnected'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        // Récupérer toutes les rooms avec le nouveau service
-        $rooms = $this->liveKitRoomService->getAllRoomsWithParticipants();
-
-        // Récupérer les stats Redis
-        $redisStats = $this->liveKitRoomService->getRedisStats();
-
-        // Construire la réponse
-        $participantsByRoom = [];
-        foreach ($rooms as $room) {
-            $participantsByRoom[$room['name']] = [
-                'count' => $room['participants_count'],
-                'participants' => $room['participants'],
-            ];
-        }
-
-        return $this->json(
-            [
-                'venues' => $items,
-                'stats' => [
-                    'rooms' => $rooms,
-                    'participants_by_room' => $participantsByRoom,
-                    'summary' => [
-                        'total_rooms' => count($rooms),
-                        'total_participants' => array_sum(array_column($rooms, 'participants_count')),
-                    ],
-                ],
-
-            ]
-        );
+        return $this->json([
+            'venues' => $items,
+            'stats' => $roomsStats,
+        ]);
     }
-
     // Les autres méthodes restent inchangées...
     #[Route('/{uuid}', name: 'venue_get', methods: ['GET'])]
     #[OA\Get(
