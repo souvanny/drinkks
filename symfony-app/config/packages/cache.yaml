@@ -22,4 +22,4 @@ framework:
         pools:
             redis.livekit.pool:
                 adapter: cache.adapter.redis
-                provider: 'redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%'
+                provider: 'redis://%env(REDIS_PASSWORD)%@%env(REDIS_HOST)%:%env(REDIS_PORT)%'

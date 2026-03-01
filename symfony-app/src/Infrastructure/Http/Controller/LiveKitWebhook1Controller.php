@@ -250,4 +250,38 @@ class LiveKitWebhook1Controller extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    #[Route('/redis-env-debug', name: 'sfu_redis_env_debug', methods: ['GET'])]
+    public function debugRedisEnv(): JsonResponse
+    {
+        // Récupérer les variables d'environnement
+        $envVars = [
+            'REDIS_HOST' => $_ENV['REDIS_HOST'] ?? getenv('REDIS_HOST'),
+            'REDIS_PORT' => $_ENV['REDIS_PORT'] ?? getenv('REDIS_PORT'),
+            'REDIS_PASSWORD' => isset($_ENV['REDIS_PASSWORD']) ? '***présent***' : (getenv('REDIS_PASSWORD') ? '***présent***' : 'non défini'),
+            'env_file_exists' => file_exists(__DIR__ . '/../../../.env'),
+            'env_local_exists' => file_exists(__DIR__ . '/../../../.env.local'),
+        ];
+
+        // Tester la connexion manuellement
+        try {
+            $testClient = new \Predis\Client([
+                'scheme' => 'tcp',
+                'host' => $_ENV['REDIS_HOST'] ?? '188.165.212.127',
+                'port' => $_ENV['REDIS_PORT'] ?? 6379,
+                'password' => $_ENV['REDIS_PASSWORD'] ?? '',
+            ]);
+            $ping = $testClient->ping();
+            $connectionTest = 'Succès: ' . $ping;
+        } catch (\Exception $e) {
+            $connectionTest = 'Échec: ' . $e->getMessage();
+        }
+
+        return $this->json([
+            'env_vars' => $envVars,
+            'connection_test' => $connectionTest,
+            'dsn_used' => 'redis://' . ($_ENV['REDIS_PASSWORD'] ? '***' : 'PASSWORD_MANQUANT') . '@' . ($_ENV['REDIS_HOST'] ?? '?') . ':' . ($_ENV['REDIS_PORT'] ?? '?') . '/0',
+        ]);
+    }
 }
