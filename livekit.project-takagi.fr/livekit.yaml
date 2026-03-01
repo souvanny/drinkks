@@ -10,7 +10,7 @@ rtc:
 redis:
     address: localhost:6379
     username: ""
-    password: ""
+    password: "TropFortLeMotDePasse789!"
     db: 0
     use_tls: false
     sentinel_master_name: ""
