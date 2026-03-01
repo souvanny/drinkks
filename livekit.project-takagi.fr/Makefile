@@ -25,4 +25,3 @@ up:
 
 down:
 	${DOCKER_COMPOSE} down
-h
