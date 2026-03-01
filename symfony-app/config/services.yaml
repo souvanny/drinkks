@@ -24,12 +24,12 @@ services:
 
 
     # Pool Redis pour LiveKit
-    redis.livekit.pool:
-        parent: 'cache.adapter.redis'
-        arguments:
-            - 'redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%'
-        tags:
-            - { name: 'cache.pool', namespace: 'livekit_' }
+#    redis.livekit.pool:
+#        parent: 'cache.adapter.redis'
+#        arguments:
+#            - 'redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%'
+#        tags:
+#            - { name: 'cache.pool', namespace: 'livekit_' }
 
     Predis\Client:
         arguments:

@@ -7,24 +7,38 @@ use Psr\Log\LoggerInterface;
 
 class RedisLiveKitService
 {
-    public function __construct(
-        private RedisClient $redisClient,
-        private LoggerInterface $logger,
-    ) {
-    }
-
     /**
      * Teste la connexion Redis
      */
+    public function __construct(
+        ?RedisClient $redisClient = null,
+        private LoggerInterface $logger,
+    ) {
+        // Si aucun client n'est injecté, on le crée manuellement avec les variables d'env
+        if ($redisClient === null) {
+            $this->redisClient = new \Predis\Client([
+                'scheme' => 'tcp',
+                'host' => $_ENV['REDIS_HOST'] ?? '188.165.212.127',
+                'port' => $_ENV['REDIS_PORT'] ?? 6379,
+                'password' => $_ENV['REDIS_PASSWORD'] ?? '',
+                'timeout' => 5.0,
+            ]);
+        } else {
+            $this->redisClient = $redisClient;
+        }
+    }
+
+    // Le reste de votre code reste identique
     public function testConnection(): bool
     {
         try {
-            return $this->redisClient->ping() === 'PONG';
+            return $this->redisClient->ping() == 'PONG';
         } catch (\Exception $e) {
             $this->logger->error('Erreur de connexion Redis: ' . $e->getMessage());
             return false;
         }
     }
+
 
     /**
      * Récupère la liste de toutes les rooms

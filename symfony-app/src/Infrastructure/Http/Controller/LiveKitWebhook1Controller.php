@@ -252,8 +252,8 @@ class LiveKitWebhook1Controller extends AbstractController
     }
 
 
-    #[Route('/redis-env-debug', name: 'sfu_redis_env_debug', methods: ['GET'])]
-    public function debugRedisEnv(): JsonResponse
+    #[Route('/redis-debug-env1', name: 'sfu_redis_debug_env1', methods: ['GET'])]
+    public function debugRedisEnv1(): JsonResponse
     {
         // Récupérer les variables d'environnement
         $envVars = [
@@ -282,6 +282,49 @@ class LiveKitWebhook1Controller extends AbstractController
             'env_vars' => $envVars,
             'connection_test' => $connectionTest,
             'dsn_used' => 'redis://' . ($_ENV['REDIS_PASSWORD'] ? '***' : 'PASSWORD_MANQUANT') . '@' . ($_ENV['REDIS_HOST'] ?? '?') . ':' . ($_ENV['REDIS_PORT'] ?? '?') . '/0',
+        ]);
+    }
+
+    #[Route('/redis-debug-env2', name: 'sfu_redis_debug_env2', methods: ['GET'])]
+    public function debugRedisEnv2(): JsonResponse
+    {
+        // Récupérer les variables d'environnement
+        $envVars = [
+            'REDIS_HOST' => $_ENV['REDIS_HOST'] ?? getenv('REDIS_HOST'),
+            'REDIS_PORT' => $_ENV['REDIS_PORT'] ?? getenv('REDIS_PORT'),
+            'REDIS_PASSWORD' => isset($_ENV['REDIS_PASSWORD']) ? '***présent***' : (getenv('REDIS_PASSWORD') ? '***présent***' : 'non défini'),
+            'REDIS_PASSWORD_LENGTH' => strlen($_ENV['REDIS_PASSWORD'] ?? getenv('REDIS_PASSWORD') ?? ''),
+            'env_file_exists' => file_exists(__DIR__ . '/../../../.env'),
+            'env_local_exists' => file_exists(__DIR__ . '/../../../.env.local'),
+        ];
+
+        // Tester la connexion manuelle
+        try {
+            $testClient = new \Predis\Client([
+                'scheme' => 'tcp',
+                'host' => $_ENV['REDIS_HOST'] ?? getenv('REDIS_HOST') ?? '188.165.212.127',
+                'port' => $_ENV['REDIS_PORT'] ?? getenv('REDIS_PORT') ?? 6379,
+                'password' => $_ENV['REDIS_PASSWORD'] ?? getenv('REDIS_PASSWORD') ?? '',
+            ]);
+            $ping = $testClient->ping();
+            $connectionTest = 'Succès: ' . $ping;
+        } catch (\Exception $e) {
+            $connectionTest = 'Échec: ' . $e->getMessage();
+        }
+
+        // Tester le service injecté
+        try {
+            $serviceTest = $this->redisLiveKitService->testConnection();
+            $injectedTest = $serviceTest ? 'Succès' : 'Échec (testConnection retourne false)';
+        } catch (\Exception $e) {
+            $injectedTest = 'Exception: ' . $e->getMessage();
+        }
+
+        return $this->json([
+            'env_vars' => $envVars,
+            'manual_connection' => $connectionTest,
+            'injected_service' => $injectedTest,
+            'dsn_used' => 'redis://' . (($envVars['REDIS_PASSWORD'] === '***présent***') ? '***' : 'PASSWORD_MANQUANT') . '@' . ($envVars['REDIS_HOST'] ?? '?') . ':' . ($envVars['REDIS_PORT'] ?? '?') . '/0',
         ]);
     }
 }
