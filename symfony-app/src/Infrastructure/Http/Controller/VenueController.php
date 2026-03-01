@@ -34,14 +34,14 @@ class VenueController extends AbstractController
         parameters: [
             new OA\Parameter(
                 name: 'search',
-                in: 'query',
                 description: 'Terme de recherche (nom ou description)',
+                in: 'query',
                 schema: new OA\Schema(type: 'string')
             ),
             new OA\Parameter(
                 name: 'type',
-                in: 'query',
                 description: 'Filtre par type',
+                in: 'query',
                 schema: new OA\Schema(type: 'integer')
             ),
         ],
@@ -107,7 +107,7 @@ class VenueController extends AbstractController
             'stats' => $roomsStats,
         ]);
     }
-    // Les autres méthodes restent inchangées...
+
     #[Route('/{uuid}', name: 'venue_get', methods: ['GET'])]
     #[OA\Get(
         summary: 'Récupère un venue par son UUID',

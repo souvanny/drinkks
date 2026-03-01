@@ -29,9 +29,9 @@ class VenueTablesController extends AbstractController
         parameters: [
             new OA\Parameter(
                 name: 'venue',
+                description: 'UUID du lieu',
                 in: 'query',
                 required: true,
-                description: 'UUID du lieu',
                 schema: new OA\Schema(type: 'string', format: 'uuid')
             )
         ],
