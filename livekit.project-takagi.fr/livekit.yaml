@@ -25,11 +25,20 @@ turn:
     tls_port: 5349
     udp_port: 3478
     external_tls: true
+#keys:
+#    APITCL53pSLyZaR: G2qNPc1PjNjfhdGGzwORQ7v4aLDhsNovnFN36PMXeho
+#webhook:
+#    # The API key to use in order to sign the message
+#    # This must match one of the keys LiveKit is configured with
+#    api_key: 'APIWJUYhiWkieei'
+#    urls:
+#        - 'https://188.165.212.127:8101/api/sfu/webhook1'
 keys:
     APITCL53pSLyZaR: G2qNPc1PjNjfhdGGzwORQ7v4aLDhsNovnFN36PMXeho
+    APIWJUYhiWkieei: "UnBonSecretQueVousChoisissez123!"
 webhook:
     # The API key to use in order to sign the message
     # This must match one of the keys LiveKit is configured with
-    api_key: 'APIWJUYhiWkieei'
+    api_key: 'APIWJUYhiWkieei'  # inchangé
     urls:
         - 'https://188.165.212.127:8101/api/sfu/webhook1'
