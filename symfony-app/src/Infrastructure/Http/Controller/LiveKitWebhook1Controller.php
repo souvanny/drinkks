@@ -3,15 +3,13 @@
 namespace App\Infrastructure\Http\Controller;
 
 use App\Infrastructure\Service\SfuService;
+use App\Infrastructure\Service\RedisLiveKitService;
 use Exception;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\Cache\CacheInterface;
-use Agence104\LiveKit\RoomServiceClient;
-use Agence104\LiveKit\RoomCreateOptions;
 
 #[Route('/api/sfu')]
 #[OA\Tag(name: 'sfu')]
@@ -19,192 +17,237 @@ class LiveKitWebhook1Controller extends AbstractController
 {
     public function __construct(
         private readonly SfuService $sfuService,
-        private readonly CacheInterface $redisLivekitPool,
+        private readonly RedisLiveKitService $redisLiveKitService,
     ) {
     }
 
+    /**
+     * Récupère la liste des rooms et participants depuis Redis
+     */
     #[Route('/webhook1', name: 'sfu_webhook1', methods: ['GET'])]
+    #[OA\Get(
+        path: '/api/sfu/webhook1',
+        summary: 'Liste toutes les rooms et participants',
+        tags: ['sfu'],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Liste des rooms récupérée avec succès'
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Erreur serveur'
+            )
+        ]
+    )]
     public function listRooms(): JsonResponse
     {
         try {
-            // Connexion directe à Redis (alternative si le pool ne suffit pas)
-            $redis = new \Predis\Client([
-                'scheme' => 'tcp',
-                'host'   => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
-                'port'   => $_ENV['REDIS_PORT'] ?? 6379,
-            ]);
+            // Vérifier la connexion Redis
+            $redisConnected = $this->redisLiveKitService->testConnection();
 
-            // 1. Récupérer toutes les rooms depuis Redis
-            $roomsData = $redis->hgetall('rooms');
-            $roomNodeMap = $redis->hgetall('room_node_map');
+            if (!$redisConnected) {
+                return $this->json([
+                    'success' => false,
+                    'error' => 'Impossible de se connecter à Redis',
+                    'redis_status' => 'disconnected'
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
 
-            $rooms = [];
-            $allParticipants = [];
+            // Récupérer toutes les rooms
+            $rooms = $this->redisLiveKitService->getAllRooms();
 
-            foreach ($roomsData as $roomName => $roomProto) {
-                // Désérialiser le protobuf Room (si nécessaire)
-                // Note: Les données sont stockées en protobuf, pas directement lisibles
-                $rooms[$roomName] = [
-                    'name' => $roomName,
-                    'sid' => $this->extractSidFromProto($roomProto), // Méthode à implémenter
-                    'node' => $roomNodeMap[$roomName] ?? null,
-                    'num_participants' => 0, // Sera mis à jour
+            // Construire la structure de réponse
+            $roomsList = [];
+            $participantsByRoom = [];
+
+            foreach ($rooms as $room) {
+                $roomsList[] = [
+                    'name' => $room['name'],
+                    'node' => $room['node'],
+                    'participants_count' => $room['participants_count'],
                 ];
 
-                // 2. Récupérer les participants pour cette room
-                $participantsKey = "room_participants:{$roomName}";
-                $participantsData = $redis->hgetall($participantsKey);
+                // Récupérer les détails des participants pour cette room
+                $participants = $room['participants'];
 
-                $participants = [];
-                foreach ($participantsData as $identity => $participantProto) {
-                    // Extraire les infos de base du participant
-                    $participants[$identity] = [
+                // Pour chaque participant, on pourrait récupérer plus d'infos
+                $participantsDetails = [];
+                foreach ($participants as $identity) {
+                    $participantsDetails[] = [
                         'identity' => $identity,
-                        // D'autres champs nécessitent désérialisation protobuf
+                        // D'autres infos pourraient être ajoutées ici
+                        // comme l'état, les métadonnées, etc.
                     ];
-
-                    // Optionnel: compter les pistes (audio/video/data)
-                    $tracksKey = "room_tracks:{$roomName}:{$identity}";
-                    $participants[$identity]['track_count'] = $redis->hlen($tracksKey);
                 }
 
-                $rooms[$roomName]['num_participants'] = count($participants);
-                $rooms[$roomName]['participants'] = $participants;
-
-                $allParticipants[$roomName] = $participants;
+                $participantsByRoom[$room['name']] = [
+                    'count' => $room['participants_count'],
+                    'participants' => $participantsDetails,
+                ];
             }
+
+            // Récupérer les stats Redis
+            $redisStats = $this->redisLiveKitService->getStats();
 
             return $this->json([
                 'success' => true,
-                'rooms' => $rooms,
-                'participants_by_room' => $allParticipants,
-                'total_rooms' => count($rooms),
+                'data' => [
+                    'rooms' => $roomsList,
+                    'participants_by_room' => $participantsByRoom,
+                    'summary' => [
+                        'total_rooms' => count($roomsList),
+                        'total_participants' => array_sum(array_column($rooms, 'participants_count')),
+                    ],
+                ],
+                'meta' => [
+                    'redis' => [
+                        'status' => 'connected',
+                        'stats' => $redisStats,
+                    ],
+                    'timestamp' => time(),
+                ],
             ], Response::HTTP_OK);
 
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
-                'error' => 'Erreur Redis: ' . $e->getMessage(),
+                'error' => 'Erreur lors de la récupération des données: ' . $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Version simplifiée avec l'API Redis et utilisation des commandes brutes
+     * Récupère les détails d'une room spécifique
      */
-    #[Route('/webhook2/redis-direct', name: 'sfu_webhook_redis_direct', methods: ['GET'])]
-    public function listRoomsDirect(): JsonResponse
+    #[Route('/webhook1/room/{roomName}', name: 'sfu_webhook1_room', methods: ['GET'])]
+    public function getRoomDetails(string $roomName): JsonResponse
     {
         try {
-            $redis = new \Predis\Client([
-                'scheme' => 'tcp',
-                'host'   => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
-                'port'   => $_ENV['REDIS_PORT'] ?? 6379,
-            ]);
+            if (!$this->redisLiveKitService->testConnection()) {
+                return $this->json([
+                    'success' => false,
+                    'error' => 'Redis non disponible'
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
 
-            // Récupérer toutes les clés de rooms
-            $roomNames = $redis->hkeys('rooms');
+            $participantsCount = $this->redisLiveKitService->getParticipantsCount($roomName);
+            $participants = $this->redisLiveKitService->getParticipantsIdentities($roomName);
+            $metadata = $this->redisLiveKitService->getRoomMetadata($roomName);
 
-            $result = [];
-
-            foreach ($roomNames as $roomName) {
-                // Compter les participants avec HLEN
-                $participantsCount = $redis->hlen("room_participants:{$roomName}");
-
-                // Récupérer les identités des participants
-                $participants = $redis->hkeys("room_participants:{$roomName}");
-
-                // Récupérer le node qui gère cette room
-                $node = $redis->hget('room_node_map', $roomName);
-
-                $result[] = [
+            return $this->json([
+                'success' => true,
+                'data' => [
                     'name' => $roomName,
                     'participants_count' => $participantsCount,
                     'participants' => $participants,
-                    'node' => $node,
+                    'metadata' => $metadata,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Endpoint de test pour Redis
+     */
+    #[Route('/redis-test', name: 'sfu_redis_test', methods: ['GET'])]
+    public function testRedis(): JsonResponse
+    {
+        try {
+            $connected = $this->redisLiveKitService->testConnection();
+
+            if (!$connected) {
+                return $this->json([
+                    'success' => false,
+                    'status' => 'disconnected',
+                    'message' => 'Impossible de se connecter à Redis'
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            $stats = $this->redisLiveKitService->getStats();
+            $nodes = $this->redisLiveKitService->getActiveNodes();
+
+            return $this->json([
+                'success' => true,
+                'status' => 'connected',
+                'redis' => $stats,
+                'nodes' => $nodes,
+                'config' => [
+                    'host' => $_ENV['REDIS_HOST'] ?? 'non défini',
+                    'port' => $_ENV['REDIS_PORT'] ?? 'non défini',
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Version alternative avec plus de détails sur les participants
+     */
+    #[Route('/webhook1/detailed', name: 'sfu_webhook1_detailed', methods: ['GET'])]
+    public function listRoomsDetailed(): JsonResponse
+    {
+        try {
+            if (!$this->redisLiveKitService->testConnection()) {
+                throw new \Exception('Redis non disponible');
+            }
+
+            $rooms = $this->redisLiveKitService->getAllRooms();
+            $nodes = $this->redisLiveKitService->getActiveNodes();
+
+            $detailedRooms = [];
+
+            foreach ($rooms as $room) {
+                // Récupérer les données brutes des participants
+                $rawParticipants = $this->redisLiveKitService->getParticipantsRaw($room['name']);
+
+                $participantsDetailed = [];
+                foreach ($rawParticipants as $identity => $protoData) {
+                    // Ici vous pourriez désérialiser le protobuf si nécessaire
+                    $participantsDetailed[] = [
+                        'identity' => $identity,
+                        'data_length' => strlen($protoData),
+                        'has_data' => !empty($protoData),
+                    ];
+                }
+
+                $detailedRooms[] = [
+                    'name' => $room['name'],
+                    'node' => $room['node'],
+                    'node_info' => $nodes[$room['node']] ?? null,
+                    'participants' => [
+                        'count' => $room['participants_count'],
+                        'list' => $participantsDetailed,
+                    ],
                 ];
             }
 
             return $this->json([
                 'success' => true,
-                'data' => $result,
-                'total' => count($result),
+                'data' => $detailedRooms,
+                'meta' => [
+                    'total_rooms' => count($detailedRooms),
+                    'total_participants' => array_sum(array_column($detailedRooms, 'participants.count')),
+                    'active_nodes' => count($nodes),
+                ],
             ]);
 
         } catch (\Exception $e) {
             return $this->json([
                 'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-    }
-
-    /**
-     * Version avec CacheInterface de Symfony
-     */
-    #[Route('/webhook3/cache', name: 'sfu_webhook_cache', methods: ['GET'])]
-    public function listRoomsWithCache(): JsonResponse
-    {
-        try {
-            // Utiliser le cache Symfony pour interagir avec Redis
-            $cacheItem = $this->redisLivekitPool->getItem('livekit_rooms_snapshot');
-
-            // Mettre en cache le résultat pendant 5 secondes pour éviter de surcharger Redis
-            if (!$cacheItem->isHit()) {
-                $redis = new \Predis\Client([
-                    'scheme' => 'tcp',
-                    'host'   => $_ENV['REDIS_HOST'] ?? '127.0.0.1',
-                    'port'   => $_ENV['REDIS_PORT'] ?? 6379,
-                ]);
-
-                $roomNames = $redis->hkeys('rooms');
-                $data = [];
-
-                foreach ($roomNames as $roomName) {
-                    $participantsCount = $redis->hlen("room_participants:{$roomName}");
-                    $participants = $redis->hkeys("room_participants:{$roomName}");
-                    $node = $redis->hget('room_node_map', $roomName);
-
-                    $data[] = [
-                        'name' => $roomName,
-                        'participants_count' => $participantsCount,
-                        'participants' => $participants,
-                        'node' => $node,
-                    ];
-                }
-
-                $cacheItem->set($data);
-                $cacheItem->expiresAfter(5); // Cache pendant 5 secondes
-                $this->redisLivekitPool->save($cacheItem);
-            }
-
-            return $this->json([
-                'success' => true,
-                'data' => $cacheItem->get(),
-                'cached' => !$cacheItem->isHit(),
-            ]);
-
-        } catch (\Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    /**
-     * Méthode utilitaire pour extraire le SID d'un protobuf Room
-     * Note: À améliorer avec la vraie désérialisation protobuf
-     */
-    private function extractSidFromProto(string $proto): string
-    {
-        // Tentative d'extraction basique - À remplacer par une vraie désérialisation
-        // avec la bibliothèque protobuf de LiveKit
-        if (preg_match('/sid:"([^"]+)"/', $proto, $matches)) {
-            return $matches[1];
-        }
-
-        // Fallback: utiliser un hash du nom
-        return md5($proto);
     }
 }

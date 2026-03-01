@@ -24,7 +24,9 @@ services:
       LIVEKIT_URL_HTTP: ${LIVEKIT_URL_HTTP}
       LIVEKIT_API_KEY: ${LIVEKIT_API_KEY}
       LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET}
+      REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - ../symfony-app:/var/www/html
       - ../app/lib:/var/www/html/flutter_lib

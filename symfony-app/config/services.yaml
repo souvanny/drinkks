@@ -22,12 +22,6 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    # Configuration du client Redis
-    Predis\Client:
-        arguments:
-            - scheme: tcp
-              host: '%env(REDIS_HOST)%'
-              port: '%env(REDIS_PORT)%'
 
     # Pool Redis pour LiveKit
     redis.livekit.pool:
@@ -36,6 +30,23 @@ services:
             - 'redis://%env(REDIS_HOST)%:%env(REDIS_PORT)%'
         tags:
             - { name: 'cache.pool', namespace: 'livekit_' }
+
+    Predis\Client:
+        arguments:
+            - scheme: tcp
+              host: '%env(REDIS_HOST)%'
+              port: '%env(REDIS_PORT)%'
+              password: '%env(REDIS_PASSWORD)%'
+              timeout: 5
+              read_write_timeout: 10
+
+    App\Infrastructure\Service\RedisLiveKitService:
+        arguments:
+            - '@Predis\Client'
+            - '@logger'
+        tags:
+            - { name: monolog.logger, channel: redis }
+
 
 #    App\Infrastructure\Http\Controller\LiveKitGenerateTokenController:
 #        arguments:
