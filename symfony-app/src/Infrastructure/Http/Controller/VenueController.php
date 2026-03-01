@@ -5,6 +5,7 @@ namespace App\Infrastructure\Http\Controller;
 
 use App\Infrastructure\Persistence\Doctrine\Entity\VenueEntity;
 use App\Infrastructure\Persistence\Doctrine\Repository\VenueRepository;
+use App\Infrastructure\Service\LiveKitRoomService;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -23,6 +24,8 @@ class VenueController extends AbstractController
         private readonly VenueRepository $venueRepository,
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
+        private readonly LiveKitRoomService $liveKitRoomService,
+
     ) {}
 
     #[Route('/list', name: 'venue_list', methods: ['GET'])]
@@ -96,7 +99,48 @@ class VenueController extends AbstractController
             ];
         }, $venues);
 
-        return $this->json($items);
+
+        //
+
+
+        // Vérifier la connexion Redis
+        if (!$this->liveKitRoomService->isRedisConnected()) {
+            return $this->json([
+                'success' => false,
+                'error' => 'Impossible de se connecter à Redis',
+                'redis_status' => 'disconnected'
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        // Récupérer toutes les rooms avec le nouveau service
+        $rooms = $this->liveKitRoomService->getAllRoomsWithParticipants();
+
+        // Récupérer les stats Redis
+        $redisStats = $this->liveKitRoomService->getRedisStats();
+
+        // Construire la réponse
+        $participantsByRoom = [];
+        foreach ($rooms as $room) {
+            $participantsByRoom[$room['name']] = [
+                'count' => $room['participants_count'],
+                'participants' => $room['participants'],
+            ];
+        }
+
+        return $this->json(
+            [
+                'venues' => $items,
+                'stats' => [
+                    'rooms' => $rooms,
+                    'participants_by_room' => $participantsByRoom,
+                    'summary' => [
+                        'total_rooms' => count($rooms),
+                        'total_participants' => array_sum(array_column($rooms, 'participants_count')),
+                    ],
+                ],
+
+            ]
+        );
     }
 
     // Les autres méthodes restent inchangées...

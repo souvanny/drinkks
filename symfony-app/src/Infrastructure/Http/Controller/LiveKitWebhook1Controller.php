@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Http\Controller;
 
+use App\Infrastructure\Service\LiveKitRoomService;
 use App\Infrastructure\Service\SfuService;
 use App\Infrastructure\Service\RedisLiveKitService;
 use Exception;
@@ -15,9 +16,11 @@ use Symfony\Component\Routing\Attribute\Route;
 #[OA\Tag(name: 'sfu')]
 class LiveKitWebhook1Controller extends AbstractController
 {
+
     public function __construct(
         private readonly SfuService $sfuService,
         private readonly RedisLiveKitService $redisLiveKitService,
+        private readonly LiveKitRoomService $liveKitRoomService,
     ) {
     }
 
@@ -44,9 +47,7 @@ class LiveKitWebhook1Controller extends AbstractController
     {
         try {
             // Vérifier la connexion Redis
-            $redisConnected = $this->redisLiveKitService->testConnection();
-
-            if (!$redisConnected) {
+            if (!$this->liveKitRoomService->isRedisConnected()) {
                 return $this->json([
                     'success' => false,
                     'error' => 'Impossible de se connecter à Redis',
@@ -54,49 +55,28 @@ class LiveKitWebhook1Controller extends AbstractController
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
-            // Récupérer toutes les rooms
-            $rooms = $this->redisLiveKitService->getAllRooms();
-
-            // Construire la structure de réponse
-            $roomsList = [];
-            $participantsByRoom = [];
-
-            foreach ($rooms as $room) {
-                $roomsList[] = [
-                    'name' => $room['name'],
-                    'node' => $room['node'],
-                    'participants_count' => $room['participants_count'],
-                ];
-
-                // Récupérer les détails des participants pour cette room
-                $participants = $room['participants'];
-
-                // Pour chaque participant, on pourrait récupérer plus d'infos
-                $participantsDetails = [];
-                foreach ($participants as $identity) {
-                    $participantsDetails[] = [
-                        'identity' => $identity,
-                        // D'autres infos pourraient être ajoutées ici
-                        // comme l'état, les métadonnées, etc.
-                    ];
-                }
-
-                $participantsByRoom[$room['name']] = [
-                    'count' => $room['participants_count'],
-                    'participants' => $participantsDetails,
-                ];
-            }
+            // Récupérer toutes les rooms avec le nouveau service
+            $rooms = $this->liveKitRoomService->getAllRoomsWithParticipants();
 
             // Récupérer les stats Redis
-            $redisStats = $this->redisLiveKitService->getStats();
+            $redisStats = $this->liveKitRoomService->getRedisStats();
+
+            // Construire la réponse
+            $participantsByRoom = [];
+            foreach ($rooms as $room) {
+                $participantsByRoom[$room['name']] = [
+                    'count' => $room['participants_count'],
+                    'participants' => $room['participants'],
+                ];
+            }
 
             return $this->json([
                 'success' => true,
                 'data' => [
-                    'rooms' => $roomsList,
+                    'rooms' => $rooms,
                     'participants_by_room' => $participantsByRoom,
                     'summary' => [
-                        'total_rooms' => count($roomsList),
+                        'total_rooms' => count($rooms),
                         'total_participants' => array_sum(array_column($rooms, 'participants_count')),
                     ],
                 ],
@@ -116,6 +96,8 @@ class LiveKitWebhook1Controller extends AbstractController
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
     /**
      * Récupère les détails d'une room spécifique
