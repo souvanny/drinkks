@@ -8,4 +8,5 @@ abstract class VenuesRepository {
     int? type,
   });
   Future<VenuesEntity> getVenue(String uuid);
+  Future<Map<String, dynamic>> getVenuesStats(); // Nouvelle méthode
 }

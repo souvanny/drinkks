@@ -74,7 +74,7 @@ class LiveKitRoomService
         if (!$data['success']) {
             return [
                 'rooms' => [],
-                'participants_by_room' => [],
+                'participants_by_room' => ['test' => 'test1'],
                 'summary' => [
                     'total_rooms' => 0,
                     'total_participants' => 0,

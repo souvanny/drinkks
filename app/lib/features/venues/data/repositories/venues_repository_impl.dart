@@ -39,4 +39,9 @@ class VenuesRepositoryImpl implements VenuesRepository {
     final model = await _remoteDataSource.getVenue(uuid);
     return model.toEntity();
   }
+
+  @override
+  Future<Map<String, dynamic>> getVenuesStats() async {
+    return await _remoteDataSource.getVenuesStats();
+  }
 }

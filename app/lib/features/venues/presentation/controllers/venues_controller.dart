@@ -44,6 +44,9 @@ class VenuesController extends _$VenuesController {
   // Venues paginées pour la page courante
   List<VenuesEntity> _paginatedVenues = [];
 
+  // Stats des rooms
+  Map<String, dynamic> _stats = {};
+
   @override
   FutureOr<List<VenuesEntity>> build() {
     return _fetchAllVenues();
@@ -60,10 +63,21 @@ class VenuesController extends _$VenuesController {
       ).future,
     );
 
+    // Récupérer les stats
+    try {
+      _stats = await ref.read(getVenuesStatsProvider.future);
+    } catch (e) {
+      print('Erreur lors de la récupération des stats: $e');
+      _stats = {};
+    }
+
     // Appliquer les filtres en mémoire
     _applyFilters();
     return _paginatedVenues;
   }
+
+  // Getter pour les stats
+  Map<String, dynamic> get stats => _stats;
 
   // Applique la recherche et les filtres en mémoire, puis met à jour la pagination
   void _applyFilters() {

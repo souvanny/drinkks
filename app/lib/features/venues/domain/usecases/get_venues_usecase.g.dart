@@ -89,3 +89,44 @@ final class GetVenuesFamily extends $Family
   @override
   String toString() => r'getVenuesProvider';
 }
+
+@ProviderFor(getVenuesStats)
+final getVenuesStatsProvider = GetVenuesStatsProvider._();
+
+final class GetVenuesStatsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Map<String, dynamic>>,
+          Map<String, dynamic>,
+          FutureOr<Map<String, dynamic>>
+        >
+    with
+        $FutureModifier<Map<String, dynamic>>,
+        $FutureProvider<Map<String, dynamic>> {
+  GetVenuesStatsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'getVenuesStatsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$getVenuesStatsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<Map<String, dynamic>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Map<String, dynamic>> create(Ref ref) {
+    return getVenuesStats(ref);
+  }
+}
+
+String _$getVenuesStatsHash() => r'519388b7e8d9608017d762b2a0bfefd734f44324';

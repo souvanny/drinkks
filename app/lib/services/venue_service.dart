@@ -10,8 +10,8 @@ class VenueService {
 
   VenueService({required ApiService apiService}) : _apiService = apiService;
 
-  /// Récupère toutes les venues (sans pagination serveur)
-  Future<List<dynamic>> getAllVenues({
+  /// Récupère toutes les venues (avec la nouvelle structure de réponse)
+  Future<Map<String, dynamic>> getAllVenues({
     String? search,
     int? type,
   }) async {
@@ -30,8 +30,8 @@ class VenueService {
       queryParameters: queryParams,
     );
 
-    // La réponse est maintenant directement une liste
-    return response.data as List<dynamic>;
+    // La réponse est maintenant un objet avec 'venues' et 'stats'
+    return response.data as Map<String, dynamic>;
   }
 
   /// Récupère un venue par son UUID

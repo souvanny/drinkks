@@ -8,16 +8,90 @@ import '../../../../services/tables_service.dart';
 import '../controllers/tables_controller.dart';
 import 'prejoin.dart';
 
+// Modèle pour les stats (à partager avec VenuesScreen)
+class TableRoomStats {
+  final String name;
+  final int participantsCount;
+  final List<Map<String, dynamic>> participants;
+
+  TableRoomStats({
+    required this.name,
+    required this.participantsCount,
+    required this.participants,
+  });
+
+  factory TableRoomStats.fromJson(Map<String, dynamic> json) {
+    return TableRoomStats(
+      name: json['name'] ?? '',
+      participantsCount: json['participants_count'] ?? 0,
+      participants: List<Map<String, dynamic>>.from(json['participants'] ?? []),
+    );
+  }
+}
+
+class TablesStats {
+  final List<TableRoomStats> rooms;
+  final Map<String, dynamic> participantsByRoom;
+  final Map<String, dynamic> summary;
+
+  TablesStats({
+    required this.rooms,
+    required this.participantsByRoom,
+    required this.summary,
+  });
+
+  factory TablesStats.fromJson(Map<String, dynamic> json) {
+    final roomsList = <TableRoomStats>[];
+    if (json['rooms'] != null) {
+      for (final room in json['rooms'] as List) {
+        roomsList.add(TableRoomStats.fromJson(room as Map<String, dynamic>));
+      }
+    }
+
+    return TablesStats(
+      rooms: roomsList,
+      participantsByRoom: json['participants_by_room'] as Map<String, dynamic>? ?? {},
+      summary: json['summary'] as Map<String, dynamic>? ?? {},
+    );
+  }
+
+  // Récupérer les participants pour une table spécifique
+  List<Map<String, dynamic>> getParticipantsForTable(String tableName) {
+    final fullTableName = tableName.contains(':') ? tableName : ' : $tableName';
+    for (final room in rooms) {
+      if (room.name.contains(fullTableName)) {
+        return room.participants;
+      }
+    }
+    return participantsByRoom[fullTableName]?['participants'] as List<Map<String, dynamic>>? ?? [];
+  }
+
+  // Récupérer le nombre de participants pour une table spécifique
+  int getParticipantsCountForTable(String tableName) {
+    final fullTableName = tableName.contains(':') ? tableName : ' : $tableName';
+    for (final room in rooms) {
+      if (room.name.contains(fullTableName)) {
+        return room.participantsCount;
+      }
+    }
+    return participantsByRoom[fullTableName]?['count'] as int? ?? 0;
+  }
+
+  // Obtenir les identités des participants pour une table
+  List<String> getParticipantIdentitiesForTable(String tableName) {
+    final participants = getParticipantsForTable(tableName);
+    return participants.map((p) => p['identity'] as String).toList();
+  }
+}
+
 class TablesScreen extends ConsumerStatefulWidget {
   final String venueId;
-
-  // On garde venueName optionnel pour la compatibilité, mais on ne l'utilisera plus
-  final String? venueName;
+  final String? venueName; // Optionnel, sera utilisé comme fallback
 
   const TablesScreen({
     super.key,
     required this.venueId,
-    this.venueName, // Optionnel, ne sera pas utilisé
+    this.venueName,
   });
 
   @override
@@ -29,6 +103,9 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
   String _venueName = ''; // Sera rempli par l'API
   bool _isLoading = true;
   String? _error;
+
+  // Données des stats reçues de l'écran précédent ou à charger
+  TablesStats? _stats;
 
   // Palette de couleurs fixes pour les tables
   static const List<Color> _tableColors = [
@@ -49,6 +126,19 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
   @override
   void initState() {
     super.initState();
+
+    // Récupérer les stats passées en extra
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   final extra = GoRouterState.of(context).extra;
+    //   if (extra != null && extra is Map<String, dynamic>) {
+    //     if (extra.containsKey('stats')) {
+    //       setState(() {
+    //         _stats = TablesStats.fromJson(extra['stats'] as Map<String, dynamic>);
+    //       });
+    //     }
+    //   }
+    // });
+
     _loadVenueTables();
   }
 
@@ -66,6 +156,12 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
         setState(() {
           _nbSeats = response['nb_seats'] as int;
           _venueName = response['venue_name'] as String; // Récupération du nom depuis l'API
+
+          // Mettre à jour les stats avec la réponse si disponibles
+          if (response.containsKey('stats')) {
+            _stats = TablesStats.fromJson(response['stats'] as Map<String, dynamic>);
+          }
+
           _isLoading = false;
         });
       }
@@ -133,6 +229,11 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
     return _tableColors[index % _tableColors.length];
   }
 
+  // Construire le nom complet de la table
+  String _buildFullTableName(String venueName, String tableName) {
+    return '$venueName : $tableName';
+  }
+
   @override
   Widget build(BuildContext context) {
     const backgroundColor = Color(0xFF0F0F23);
@@ -189,7 +290,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _venueName, // Nom du lieu depuis l'API
+                                _venueName.isNotEmpty ? _venueName : (widget.venueName ?? 'Chargement...'),
                                 style: const TextStyle(
                                   color: textPrimary,
                                   fontSize: 20,
@@ -320,13 +421,21 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
       ) {
     // Générer les tables avec des sièges vides pour l'instant
     final tables = List.generate(nbSeats, (index) {
+      final tableName = 'Table ${index + 1}';
+      final fullTableName = _buildFullTableName(_venueName, tableName);
+
+      // Récupérer le nombre de participants pour cette table depuis les stats
+      final participantsCount = _stats?.getParticipantsCountForTable(fullTableName) ?? 0;
       final tableColor = _getTableColor(index);
+
       return {
         'id': (index + 1).toString(),
-        'name': 'Table ${index + 1}',
-        'occupiedSeats': 0, // Tous vides pour l'instant
+        'name': tableName,
+        'fullName': fullTableName,
+        'occupiedSeats': participantsCount, // Utiliser le nombre réel de participants
         'totalSeats': 4, // 4 sièges par table
         'color': tableColor,
+        'participants': _stats?.getParticipantsForTable(fullTableName) ?? [],
       };
     });
 
@@ -369,6 +478,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
     final isFull = occupiedSeats == totalSeats;
     final availableSeats = totalSeats - occupiedSeats;
     final tableColor = table['color'] as Color;
+    final participants = table['participants'] as List<dynamic>;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -486,10 +596,34 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                             color: Colors.amber.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
-                            Icons.local_drink,
-                            color: Colors.amber,
-                            size: 16,
+                          child: Stack(
+                            children: [
+                              const Icon(
+                                Icons.local_drink,
+                                color: Colors.amber,
+                                size: 16,
+                              ),
+                              if (occupiedSeats > 1)
+                                Positioned(
+                                  right: -2,
+                                  bottom: -2,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      '$occupiedSeats',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ),
@@ -517,6 +651,28 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // Liste des participants (au survol ou en overlay)
+                    if (occupiedSeats > 0)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Tooltip(
+                            message: participants.map((p) => p['identity']).join('\n'),
+                            child: const Icon(
+                              Icons.info_outline,
+                              color: Colors.white,
+                              size: 14,
                             ),
                           ),
                         ),

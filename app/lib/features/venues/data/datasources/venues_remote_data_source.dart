@@ -12,6 +12,7 @@ abstract class VenuesRemoteDataSource {
     int? type,
   });
   Future<VenuesModel> getVenue(String uuid);
+  Future<Map<String, dynamic>> getVenuesStats(); // Nouvelle méthode
 }
 
 @riverpod
@@ -35,8 +36,8 @@ class VenuesRemoteDataSourceImpl implements VenuesRemoteDataSource {
       type: type,
     );
 
-    // La réponse contient directement la liste des items
-    final List<dynamic> items = response ?? [];
+    // La réponse contient maintenant 'venues' (liste) et 'stats'
+    final List<dynamic> items = response['venues'] ?? [];
     return items.map((json) => VenuesModel.fromJson(json)).toList();
   }
 
@@ -44,5 +45,11 @@ class VenuesRemoteDataSourceImpl implements VenuesRemoteDataSource {
   Future<VenuesModel> getVenue(String uuid) async {
     final response = await _venueService.getVenue(uuid);
     return VenuesModel.fromJson(response);
+  }
+
+  @override
+  Future<Map<String, dynamic>> getVenuesStats() async {
+    final response = await _venueService.getAllVenues();
+    return response['stats'] as Map<String, dynamic>;
   }
 }

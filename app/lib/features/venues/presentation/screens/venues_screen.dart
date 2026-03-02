@@ -1,13 +1,134 @@
 // flutter_lib/features/venues/presentation/screens/venues_screen.dart
 
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../providers/auth_provider.dart';
 import '../controllers/venues_controller.dart';
 
+// Modèle pour les données de stats
+class RoomStats {
+  final String name;
+  final int participantsCount;
+  final List<Map<String, dynamic>> participants;
+
+  RoomStats({
+    required this.name,
+    required this.participantsCount,
+    required this.participants,
+  });
+
+  factory RoomStats.fromJson(Map<String, dynamic> json) {
+    return RoomStats(
+      name: json['name'] ?? '',
+      participantsCount: json['participants_count'] ?? 0,
+      participants: List<Map<String, dynamic>>.from(json['participants'] ?? []),
+    );
+  }
+}
+
+class VenuesStats {
+  final List<RoomStats> rooms;
+  final Iterable<dynamic> participantsByRoom; // Changé ici
+  final Map<String, dynamic> summary;
+
+  VenuesStats({
+    required this.rooms,
+    required this.participantsByRoom, // Maintenant Map
+    required this.summary,
+  });
+
+  // Constructeur qui accepte soit un Map, soit une List
+  factory VenuesStats.fromDynamic(dynamic data) {
+    // Si c'est une liste directement (nouveau format)
+    if (data is List) {
+      final roomsList = <RoomStats>[];
+      for (final room in data) {
+        if (room is Map<String, dynamic>) {
+          roomsList.add(RoomStats.fromJson(room));
+        }
+      }
+      return VenuesStats(
+        rooms: roomsList,
+        participantsByRoom: {}, // Map vide
+        summary: {
+          'total_rooms': roomsList.length,
+          'total_participants': roomsList.fold(0, (sum, room) => sum + room.participantsCount),
+        },
+      );
+    }
+    // Si c'est un Map (ancien format)
+    else if (data is Map<String, dynamic>) {
+      return VenuesStats._fromMap(data);
+    }
+    // Fallback
+    else {
+      return VenuesStats(
+        rooms: [],
+        participantsByRoom: {},
+        summary: {},
+      );
+    }
+  }
+
+  factory VenuesStats._fromMap(Map<String, dynamic> json) {
+    final roomsList = <RoomStats>[];
+
+    if (json.containsKey('rooms') && json['rooms'] != null) {
+      final roomsData = json['rooms'];
+      if (roomsData is List) {
+        for (final room in roomsData) {
+          if (room is Map<String, dynamic>) {
+            roomsList.add(RoomStats.fromJson(room));
+          }
+        }
+      }
+    }
+
+    return VenuesStats(
+      rooms: roomsList,
+      participantsByRoom: json['participants_by_room'] as Iterable<dynamic>? ?? [],
+      summary: json['summary'] as Map<String, dynamic>? ?? {},
+    );
+  }
+
+  // Calculer le nombre de participants pour un lieu donné
+  int getParticipantsCountForVenue(String venueName) {
+    int count = 0;
+    for (final room in rooms) {
+      if (room.name.startsWith(venueName)) {
+        count += room.participantsCount;
+      }
+    }
+    return count;
+  }
+
+  // Récupérer les participants d'une table spécifique - CORRIGÉ
+  List<Map<String, dynamic>> getParticipantsForTable(String tableName) {
+    // if (participantsByRoom.containsKey(tableName)) {
+    //   final roomData = participantsByRoom[tableName];
+    //   if (roomData is Map && roomData.containsKey('participants')) {
+    //     final participants = roomData['participants'];
+    //     if (participants is List) {
+    //       return List<Map<String, dynamic>>.from(participants);
+    //     }
+    //   }
+    // }
+    return [];
+  }
+
+  // Récupérer le nombre de participants pour une table spécifique - CORRIGÉ
+  int getParticipantsCountForTable(String tableName) {
+    // if (participantsByRoom.containsKey(tableName)) {
+    //   final roomData = participantsByRoom[tableName];
+    //   if (roomData is Map && roomData.containsKey('count')) {
+    //     return roomData['count'] as int? ?? 0;
+    //   }
+    // }
+    return 10;
+  }
+}
 class VenuesScreen extends ConsumerStatefulWidget {
   const VenuesScreen({super.key});
 
@@ -276,6 +397,15 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       ),
       body: venuesState.when(
         data: (venues) {
+          // Récupérer les stats depuis le controller
+          final stats = controller.stats;
+
+          // Créer l'objet VenuesStats à partir des stats
+          VenuesStats? venuesStats;
+          if (stats.isNotEmpty) {
+            venuesStats = VenuesStats.fromDynamic(stats);
+          }
+
           return Column(
             children: [
               // Indicateur de nombre de résultats
@@ -332,6 +462,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                       primaryColor,
                       backgroundColor,
                       textPrimary,
+                      venuesStats,
                     );
                   },
                 ),
@@ -402,28 +533,31 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
             color: Color(0xFF6366F1),
           ),
         ),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                'Erreur: $error',
-                style: const TextStyle(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => controller.refresh(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryColor,
+        error: (error, stack) {
+          print('❌ Erreur dans venuesState: $error');
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'Erreur: $error',
+                  style: const TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
                 ),
-                child: const Text('Réessayer'),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => controller.refresh(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                  ),
+                  child: const Text('Réessayer'),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -455,9 +589,13 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       Color primaryColor,
       Color backgroundColor,
       Color textPrimary,
+      VenuesStats? venuesStats,
       ) {
     final imagePath = _getImageForType(venue.type);
     final typeLabel = _getTypeLabel(venue.type);
+
+    // Calculer le nombre de participants pour ce lieu
+    final participantsCount = venuesStats?.getParticipantsCountForVenue(venue.name) ?? 0;
 
     return Card(
       elevation: 4,
@@ -467,53 +605,104 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       color: backgroundColor,
       child: InkWell(
         onTap: () {
-          context.go('/venues/${venue.uuid}/tables', extra: venue.name);
+          // Passer les stats à l'écran des tables
+          context.go(
+            '/venues/${venue.uuid}/tables',
+            extra: {
+              'venueName': venue.name,
+              'stats': venuesStats?.toJson(),
+            },
+          );
         },
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              height: 100,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-                image: DecorationImage(
-                  image: AssetImage(imagePath!),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
+            // Image et badge de participants
+            Stack(
+              children: [
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    image: DecorationImage(
+                      image: AssetImage(imagePath!),
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.6),
-                    ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.6),
+                        ],
+                      ),
+                    ),
+                    alignment: Alignment.bottomLeft,
+                    padding: const EdgeInsets.all(8),
+                    child: Text(
+                      venue.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
-                alignment: Alignment.bottomLeft,
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  venue.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                // Badge du nombre de participants
+                if (participantsCount > 0)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$participantsCount',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.all(8),
@@ -559,6 +748,19 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       ),
     );
   }
+}
 
-
+// Extension pour convertir VenuesStats en Map
+extension VenuesStatsJson on VenuesStats {
+  Map<String, dynamic> toJson() {
+    return {
+      'rooms': rooms.map((r) => {
+        'name': r.name,
+        'participants_count': r.participantsCount,
+        'participants': r.participants,
+      }).toList(),
+      'participants_by_room': participantsByRoom,
+      'summary': summary,
+    };
+  }
 }

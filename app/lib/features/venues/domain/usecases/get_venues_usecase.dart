@@ -18,3 +18,9 @@ Future<List<VenuesEntity>> getVenues(
     type: type,
   );
 }
+
+// Nouveau provider pour les stats
+@riverpod
+Future<Map<String, dynamic>> getVenuesStats(Ref ref) {
+  return ref.watch(venuesRepositoryProvider).getVenuesStats();
+}
