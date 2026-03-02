@@ -31,7 +31,7 @@ class VenueService {
     );
 
     // La réponse est maintenant directement une liste
-    return response.data as List<dynamic>;
+    return response.data['venues'] as List<dynamic>;
   }
 
   /// Récupère un venue par son UUID
