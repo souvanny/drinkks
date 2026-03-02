@@ -3,14 +3,15 @@
 
 namespace App\Infrastructure\Service;
 
+use App\Infrastructure\Persistence\Doctrine\Repository\VenueRepository;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class LiveKitRoomService
 {
     public function __construct(
         private readonly RedisLiveKitService $redisLiveKitService,
+        private readonly VenueRepository $venueRepository,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -38,6 +39,19 @@ class LiveKitRoomService
         // Récupérer les stats Redis
         $redisStats = $this->getRedisStats();
 
+        // Récupérer toutes les venues pour avoir les informations sur les places
+        $venues = $this->venueRepository->findAll();
+
+        // Créer un mapping venue_name => nbSeat total
+        $venueTotalSeatsMap = [];
+        foreach ($venues as $venue) {
+            $venueTotalSeatsMap[$venue->getName()] = $venue->getNbSeat();
+        }
+
+        // Initialiser les compteurs de places occupées
+        $nbSeatsOccupiedByVenue = [];
+        $nbSeatsOccupiedByRoom = [];
+
         // Construire les participants par room
         $participantsByRoom = [];
         foreach ($rooms as $room) {
@@ -45,15 +59,32 @@ class LiveKitRoomService
                 'count' => $room['participants_count'],
                 'participants' => $room['participants'],
             ];
+
+            // Nombre de places occupées dans cette room = nombre de participants
+            $nbSeatsOccupiedByRoom[$room['name']] = $room['participants_count'];
+
+            // Décomposer le nom de la room pour extraire le nom du venue
+            $roomNameParts = explode(' : ', $room['name']);
+            $venueName = $roomNameParts[0]; // "Le 7ème Ciel"
+
+            // Ajouter aux places occupées par venue
+            if (!isset($nbSeatsOccupiedByVenue[$venueName])) {
+                $nbSeatsOccupiedByVenue[$venueName] = 0;
+            }
+            $nbSeatsOccupiedByVenue[$venueName] += $room['participants_count'];
         }
 
         return [
             'success' => true,
             'rooms' => $rooms,
             'participants_by_room' => $participantsByRoom,
+            'nb_seats_by_venues' => $nbSeatsOccupiedByVenue, // Places OCCUPÉES par venue
+            'nb_seats_by_room' => $nbSeatsOccupiedByRoom,    // Places OCCUPÉES par room
             'stats' => [
                 'rooms' => $rooms,
                 'participants_by_room' => $participantsByRoom,
+                'nb_seats_by_venues' => $nbSeatsOccupiedByVenue,
+                'nb_seats_by_room' => $nbSeatsOccupiedByRoom,
                 'summary' => [
                     'total_rooms' => count($rooms),
                     'total_participants' => array_sum(array_column($rooms, 'participants_count')),
@@ -75,6 +106,8 @@ class LiveKitRoomService
             return [
                 'rooms' => [],
                 'participants_by_room' => [],
+                'nb_seats_by_venues' => [],
+                'nb_seats_by_room' => [],
                 'summary' => [
                     'total_rooms' => 0,
                     'total_participants' => 0,
@@ -101,8 +134,6 @@ class LiveKitRoomService
         }
         return null;
     }
-
-    // Les méthodes existantes restent inchangées...
 
     /**
      * Récupère toutes les rooms avec leurs participants depuis Redis
