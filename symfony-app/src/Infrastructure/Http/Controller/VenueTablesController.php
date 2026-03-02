@@ -73,17 +73,20 @@ class VenueTablesController extends AbstractController
         $roomsStats = $this->liveKitRoomService->getRoomsStats();
 
         $venueData = [
-            'venue_uuid' => $venue->getUuid(),
-            'venue_name' => $venue->getName(),
-            'nb_tables' => $venue->getNbTables(),
-            'seats_per_table' => $venue->getSeatsPerTable(),
-            'total_capacity' => $venue->getTotalCapacity(),
+            'venueUuid' => $venue->getUuid(),
+            'venueName' => $venue->getName(),
+            'nbTables' => $venue->getNbTables(),
+            'seatsPerTable' => $venue->getSeatsPerTable(),
+            'totalCapacity' => $venue->getTotalCapacity(),
         ];
 
         $enrichedVenueData = $this->liveKitRoomService->aggregateVenueTables($venueData, $roomsStats);
+
 
         return $this->json(array_merge($enrichedVenueData, [
             'stats' => $roomsStats,
         ]));
     }
+
+
 }

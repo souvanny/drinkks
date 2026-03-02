@@ -72,13 +72,13 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
 
       if (mounted) {
         setState(() {
-          _venueUuid = response['venue_uuid'] as String;
-          _seatsPerTable = response['seats_per_table'] as int;
-          _totalCapacity = response['total_capacity'] as int;
-          _nbParticipantsByTable = Map<String, int>.from(response['nb_participants_by_table'] ?? {});
-          _nbSeatsByTable = Map<String, int>.from(response['nb_seats_by_table'] ?? {});
-          _activeTables = response['active_tables'] as int;
-          _availableTables = response['available_tables'] as int;
+          _venueUuid = response['venueUuid'] as String;
+          _seatsPerTable = response['seatsPerTable'] as int;
+          _totalCapacity = response['totalCapacity'] as int;
+          _nbParticipantsByTable = Map<String, int>.from(response['nbParticipantsByTable'] ?? {});
+          _nbSeatsByTable = Map<String, int>.from(response['nbSeatsByTable'] ?? {});
+          _activeTables = response['activeTables'] as int;
+          _availableTables = response['availableTables'] as int;
           _totalParticipants = _nbParticipantsByTable.values.fold(0, (sum, count) => sum + count);
           _isLoading = false;
         });
@@ -233,6 +233,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                         ),
 
                         // Barre de stats
+                        if (false)
                         if (!_isLoading && _totalCapacity > 0) ...[
                           const SizedBox(height: 12),
                           Row(

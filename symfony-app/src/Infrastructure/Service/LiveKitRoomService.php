@@ -43,17 +43,17 @@ class LiveKitRoomService
 
                     $totalParticipants += $participantsCount;
                     $nbParticipantsByTable[$tableNumber] = $participantsCount;
-                    $nbSeatsByTable[$tableNumber] = $venue['seats_per_table'];
+                    $nbSeatsByTable[$tableNumber] = $venue['seatsPerTable'];
                 }
             }
 
             $enrichedVenues[] = array_merge($venue, [
-                'total_participants' => $totalParticipants,
-                'nb_participants_by_table' => $nbParticipantsByTable,
-                'nb_seats_by_table' => $nbSeatsByTable,
-                'tables_available' => $venue['nb_tables'] - count($nbParticipantsByTable),
-                'occupancy_rate' => $venue['total_capacity'] > 0
-                    ? round(($totalParticipants / $venue['total_capacity']) * 100, 1)
+                'totalParticipants' => $totalParticipants,
+                'nbParticipantsByTable' => $nbParticipantsByTable,
+                'nbSeatsByTable' => $nbSeatsByTable,
+                'tablesAvailable' => $venue['nbTables'] - count($nbParticipantsByTable),
+                'occupancyRate' => $venue['totalCapacity'] > 0
+                    ? round(($totalParticipants / $venue['totalCapacity']) * 100, 1)
                     : 0,
             ]);
         }
@@ -64,14 +64,14 @@ class LiveKitRoomService
     /**
      * Agrège les données d'un venue spécifique avec les statistiques des rooms
      *
-     * @param array $venueData Données du venue (uuid, name, nb_tables, seats_per_table, total_capacity)
+     * @param array $venueData Données du venue (uuid, name, nbTables, seatsPerTable, totalCapacity)
      * @param array $roomsStats Statistiques des rooms
      * @return array Données enrichies du venue
      */
     public function aggregateVenueTables(array $venueData, array $roomsStats): array
     {
-        $venueUuid = $venueData['venue_uuid'];
-        $seatsPerTable = $venueData['seats_per_table'] ?? 4;
+        $venueUuid = $venueData['venueUuid'];
+        $seatsPerTable = $venueData['seatsPerTable'] ?? 4;
 
         $nbParticipantsByTable = [];
         $nbSeatsByTable = [];
@@ -87,10 +87,10 @@ class LiveKitRoomService
         }
 
         return array_merge($venueData, [
-            'nb_participants_by_table' => $nbParticipantsByTable,
-            'nb_seats_by_table' => $nbSeatsByTable,
-            'active_tables' => count($nbParticipantsByTable),
-            'available_tables' => $venueData['nb_tables'] - count($nbParticipantsByTable),
+            'nbParticipantsByTable' => $nbParticipantsByTable,
+            'nbSeatsByTable' => $nbSeatsByTable,
+            'activeTables' => count($nbParticipantsByTable),
+            'availableTables' => $venueData['nbTables'] - count($nbParticipantsByTable),
         ]);
     }
 
@@ -143,21 +143,21 @@ class LiveKitRoomService
         return [
             'success' => true,
             'rooms' => $rooms,
-            'participants_by_room' => $participantsByRoom,
-            'nb_seats_by_venues' => $nbSeatsOccupiedByVenue,
-            'nb_seats_by_room' => $nbSeatsOccupiedByRoom,
+            'participantsByRoom' => $participantsByRoom,
+            'nbSeatsByVenues' => $nbSeatsOccupiedByVenue,
+            'nbSeatsByRoom' => $nbSeatsOccupiedByRoom,
             'stats' => [
                 'rooms' => $rooms,
-                'participants_by_room' => $participantsByRoom,
-                'nb_seats_by_venues' => $nbSeatsOccupiedByVenue,
-                'nb_seats_by_room' => $nbSeatsOccupiedByRoom,
+                'participantsByRoom' => $participantsByRoom,
+                'nbSeatsByVenues' => $nbSeatsOccupiedByVenue,
+                'nbSeatsByRoom' => $nbSeatsOccupiedByRoom,
                 'summary' => [
-                    'total_rooms' => count($rooms),
-                    'total_participants' => array_sum(array_column($rooms, 'participants_count')),
+                    'totalRooms' => count($rooms),
+                    'totalParticipants' => array_sum(array_column($rooms, 'participants_count')),
                 ],
             ],
-            'redis_stats' => $redisStats,
-            'http_status' => Response::HTTP_OK
+            'redisStats' => $redisStats,
+            'httpStatus' => Response::HTTP_OK
         ];
     }
 
