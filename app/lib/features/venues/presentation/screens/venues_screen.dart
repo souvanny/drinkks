@@ -465,8 +465,14 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       ),
       color: backgroundColor,
       child: InkWell(
+        // onTap: () {
+        //   context.go('/tables/${venue.uuid}');
+        // },
+        // onTap: () {
+        //   context.go('/venues/${venue.uuid}/tables');
+        // },
         onTap: () {
-          context.go('/tables/${venue.uuid}/${venue.name}/${venue.nbTables ?? 0}');
+          context.go('/venues/${venue.uuid}/tables/${venue.name}/${venue.nbTables ?? 0}');
         },
         borderRadius: BorderRadius.circular(16),
         child: Column(
