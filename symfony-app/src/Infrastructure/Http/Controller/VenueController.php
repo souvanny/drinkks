@@ -25,7 +25,6 @@ class VenueController extends AbstractController
         private readonly SerializerInterface $serializer,
         private readonly ValidatorInterface $validator,
         private readonly LiveKitRoomService $liveKitRoomService,
-
     ) {}
 
     #[Route('/list', name: 'venue_list', methods: ['GET'])]
@@ -56,22 +55,28 @@ class VenueController extends AbstractController
                             new OA\Property(property: 'id', type: 'integer'),
                             new OA\Property(property: 'uuid', type: 'string'),
                             new OA\Property(property: 'name', type: 'string'),
+                            new OA\Property(property: 'nb_tables', type: 'integer'),
+                            new OA\Property(property: 'seats_per_table', type: 'integer'),
+                            new OA\Property(property: 'total_capacity', type: 'integer'),
+                            new OA\Property(property: 'total_participants', type: 'integer'),
                             new OA\Property(property: 'description', type: 'string', nullable: true),
                             new OA\Property(property: 'type', type: 'integer', nullable: true),
                             new OA\Property(property: 'rank', type: 'integer', nullable: true),
+                            new OA\Property(property: 'nb_participants_by_table', type: 'object'),
+                            new OA\Property(property: 'nb_seats_by_table', type: 'object'),
+                            new OA\Property(property: 'tables_available', type: 'integer'),
+                            new OA\Property(property: 'occupancy_rate', type: 'number', format: 'float'),
                         ]
                     )
                 )
             )
         ]
     )]
-    #[Route('/list', name: 'venue_list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
         $search = $request->query->get('search');
         $type = $request->query->has('type') ? (int) $request->query->get('type') : null;
 
-        // Récupérer toutes les venues avec filtres optionnels
         $qb = $this->venueRepository->createQueryBuilder('v')
             ->orderBy('v.rank', 'ASC');
 
@@ -87,24 +92,25 @@ class VenueController extends AbstractController
 
         $venues = $qb->getQuery()->getResult();
 
-        // Formater les données pour la réponse
         $items = array_map(function (VenueEntity $venue) {
             return [
                 'id' => $venue->getId(),
                 'uuid' => $venue->getUuid(),
                 'name' => $venue->getName(),
-                'nb_seats' => $venue->getNbSeat(),
+                'nb_tables' => $venue->getNbTables(),
+                'seats_per_table' => $venue->getSeatsPerTable(),
+                'total_capacity' => $venue->getTotalCapacity(),
                 'description' => $venue->getDescription(),
                 'type' => $venue->getType(),
                 'rank' => $venue->getRank(),
             ];
         }, $venues);
 
-        // Récupérer les données des rooms de manière factorisée
         $roomsStats = $this->liveKitRoomService->getRoomsStats();
+        $enrichedVenues = $this->liveKitRoomService->aggregateVenuesAndStats($items, $roomsStats);
 
         return $this->json([
-            'venues' => $items,
+            'venues' => $enrichedVenues,
             'stats' => $roomsStats,
         ]);
     }
@@ -129,6 +135,9 @@ class VenueController extends AbstractController
                         new OA\Property(property: 'id', type: 'integer'),
                         new OA\Property(property: 'uuid', type: 'string'),
                         new OA\Property(property: 'name', type: 'string'),
+                        new OA\Property(property: 'nb_tables', type: 'integer'),
+                        new OA\Property(property: 'seats_per_table', type: 'integer'),
+                        new OA\Property(property: 'total_capacity', type: 'integer'),
                         new OA\Property(property: 'description', type: 'string', nullable: true),
                         new OA\Property(property: 'type', type: 'integer', nullable: true),
                         new OA\Property(property: 'rank', type: 'integer', nullable: true),
@@ -150,6 +159,9 @@ class VenueController extends AbstractController
             'id' => $venue->getId(),
             'uuid' => $venue->getUuid(),
             'name' => $venue->getName(),
+            'nb_tables' => $venue->getNbTables(),
+            'seats_per_table' => $venue->getSeatsPerTable(),
+            'total_capacity' => $venue->getTotalCapacity(),
             'description' => $venue->getDescription(),
             'type' => $venue->getType(),
             'rank' => $venue->getRank(),
@@ -165,6 +177,8 @@ class VenueController extends AbstractController
                 required: ['name'],
                 properties: [
                     new OA\Property(property: 'name', type: 'string', maxLength: 50),
+                    new OA\Property(property: 'nb_tables', type: 'integer', default: 0),
+                    new OA\Property(property: 'seats_per_table', type: 'integer', default: 4),
                     new OA\Property(property: 'description', type: 'string', maxLength: 200, nullable: true),
                     new OA\Property(property: 'type', type: 'integer', nullable: true),
                     new OA\Property(property: 'rank', type: 'integer', nullable: true),
@@ -180,6 +194,9 @@ class VenueController extends AbstractController
                         new OA\Property(property: 'id', type: 'integer'),
                         new OA\Property(property: 'uuid', type: 'string'),
                         new OA\Property(property: 'name', type: 'string'),
+                        new OA\Property(property: 'nb_tables', type: 'integer'),
+                        new OA\Property(property: 'seats_per_table', type: 'integer'),
+                        new OA\Property(property: 'total_capacity', type: 'integer'),
                         new OA\Property(property: 'description', type: 'string', nullable: true),
                         new OA\Property(property: 'type', type: 'integer', nullable: true),
                         new OA\Property(property: 'rank', type: 'integer', nullable: true),
@@ -200,6 +217,8 @@ class VenueController extends AbstractController
         $venue = new VenueEntity();
         $venue->setUuid(Uuid::v4()->toString());
         $venue->setName($data['name']);
+        $venue->setNbTables($data['nb_tables'] ?? 0);
+        $venue->setSeatsPerTable($data['seats_per_table'] ?? 4);
         $venue->setDescription($data['description'] ?? null);
         $venue->setType($data['type'] ?? null);
         $venue->setRank($data['rank'] ?? null);
@@ -215,6 +234,9 @@ class VenueController extends AbstractController
             'id' => $venue->getId(),
             'uuid' => $venue->getUuid(),
             'name' => $venue->getName(),
+            'nb_tables' => $venue->getNbTables(),
+            'seats_per_table' => $venue->getSeatsPerTable(),
+            'total_capacity' => $venue->getTotalCapacity(),
             'description' => $venue->getDescription(),
             'type' => $venue->getType(),
             'rank' => $venue->getRank(),
@@ -237,6 +259,8 @@ class VenueController extends AbstractController
             content: new OA\JsonContent(
                 properties: [
                     new OA\Property(property: 'name', type: 'string', maxLength: 50),
+                    new OA\Property(property: 'nb_tables', type: 'integer'),
+                    new OA\Property(property: 'seats_per_table', type: 'integer'),
                     new OA\Property(property: 'description', type: 'string', maxLength: 200, nullable: true),
                     new OA\Property(property: 'type', type: 'integer', nullable: true),
                     new OA\Property(property: 'rank', type: 'integer', nullable: true),
@@ -252,6 +276,9 @@ class VenueController extends AbstractController
                         new OA\Property(property: 'id', type: 'integer'),
                         new OA\Property(property: 'uuid', type: 'string'),
                         new OA\Property(property: 'name', type: 'string'),
+                        new OA\Property(property: 'nb_tables', type: 'integer'),
+                        new OA\Property(property: 'seats_per_table', type: 'integer'),
+                        new OA\Property(property: 'total_capacity', type: 'integer'),
                         new OA\Property(property: 'description', type: 'string', nullable: true),
                         new OA\Property(property: 'type', type: 'integer', nullable: true),
                         new OA\Property(property: 'rank', type: 'integer', nullable: true),
@@ -274,6 +301,14 @@ class VenueController extends AbstractController
 
         if (isset($data['name']) && !empty($data['name'])) {
             $venue->setName($data['name']);
+        }
+
+        if (isset($data['nb_tables'])) {
+            $venue->setNbTables((int) $data['nb_tables']);
+        }
+
+        if (isset($data['seats_per_table'])) {
+            $venue->setSeatsPerTable((int) $data['seats_per_table']);
         }
 
         if (array_key_exists('description', $data)) {
@@ -299,6 +334,9 @@ class VenueController extends AbstractController
             'id' => $venue->getId(),
             'uuid' => $venue->getUuid(),
             'name' => $venue->getName(),
+            'nb_tables' => $venue->getNbTables(),
+            'seats_per_table' => $venue->getSeatsPerTable(),
+            'total_capacity' => $venue->getTotalCapacity(),
             'description' => $venue->getDescription(),
             'type' => $venue->getType(),
             'rank' => $venue->getRank(),
@@ -356,6 +394,9 @@ class VenueController extends AbstractController
                             new OA\Property(property: 'id', type: 'integer'),
                             new OA\Property(property: 'uuid', type: 'string'),
                             new OA\Property(property: 'name', type: 'string'),
+                            new OA\Property(property: 'nb_tables', type: 'integer'),
+                            new OA\Property(property: 'seats_per_table', type: 'integer'),
+                            new OA\Property(property: 'total_capacity', type: 'integer'),
                             new OA\Property(property: 'description', type: 'string', nullable: true),
                             new OA\Property(property: 'type', type: 'integer', nullable: true),
                             new OA\Property(property: 'rank', type: 'integer', nullable: true),
@@ -374,6 +415,9 @@ class VenueController extends AbstractController
                 'id' => $venue->getId(),
                 'uuid' => $venue->getUuid(),
                 'name' => $venue->getName(),
+                'nb_tables' => $venue->getNbTables(),
+                'seats_per_table' => $venue->getSeatsPerTable(),
+                'total_capacity' => $venue->getTotalCapacity(),
                 'description' => $venue->getDescription(),
                 'type' => $venue->getType(),
                 'rank' => $venue->getRank(),
@@ -405,6 +449,9 @@ class VenueController extends AbstractController
                             new OA\Property(property: 'id', type: 'integer'),
                             new OA\Property(property: 'uuid', type: 'string'),
                             new OA\Property(property: 'name', type: 'string'),
+                            new OA\Property(property: 'nb_tables', type: 'integer'),
+                            new OA\Property(property: 'seats_per_table', type: 'integer'),
+                            new OA\Property(property: 'total_capacity', type: 'integer'),
                             new OA\Property(property: 'description', type: 'string', nullable: true),
                             new OA\Property(property: 'type', type: 'integer', nullable: true),
                             new OA\Property(property: 'rank', type: 'integer', nullable: true),
@@ -424,6 +471,9 @@ class VenueController extends AbstractController
                 'id' => $venue->getId(),
                 'uuid' => $venue->getUuid(),
                 'name' => $venue->getName(),
+                'nb_tables' => $venue->getNbTables(),
+                'seats_per_table' => $venue->getSeatsPerTable(),
+                'total_capacity' => $venue->getTotalCapacity(),
                 'description' => $venue->getDescription(),
                 'type' => $venue->getType(),
                 'rank' => $venue->getRank(),

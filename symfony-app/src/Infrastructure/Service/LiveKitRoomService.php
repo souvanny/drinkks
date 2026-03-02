@@ -17,13 +17,90 @@ class LiveKitRoomService
     }
 
     /**
+     * Agrège les données des venues avec les statistiques des rooms
+     *
+     * @param array $venues Liste des venues formatées
+     * @param array $roomsStats Statistiques des rooms
+     * @return array Venues enrichies avec les nouvelles propriétés
+     */
+    public function aggregateVenuesAndStats(array $venues, array $roomsStats): array
+    {
+        $enrichedVenues = [];
+
+        foreach ($venues as $venue) {
+            $venueUuid = $venue['uuid'];
+
+            $totalParticipants = 0;
+            $nbParticipantsByTable = [];
+            $nbSeatsByTable = [];
+
+            foreach ($roomsStats['rooms'] as $room) {
+                $roomNameParts = explode(' : ', $room['name']);
+
+                if (count($roomNameParts) === 2 && $roomNameParts[0] === $venueUuid) {
+                    $tableNumber = $roomNameParts[1];
+                    $participantsCount = $room['participants_count'];
+
+                    $totalParticipants += $participantsCount;
+                    $nbParticipantsByTable[$tableNumber] = $participantsCount;
+                    $nbSeatsByTable[$tableNumber] = $venue['seats_per_table'];
+                }
+            }
+
+            $enrichedVenues[] = array_merge($venue, [
+                'total_participants' => $totalParticipants,
+                'nb_participants_by_table' => $nbParticipantsByTable,
+                'nb_seats_by_table' => $nbSeatsByTable,
+                'tables_available' => $venue['nb_tables'] - count($nbParticipantsByTable),
+                'occupancy_rate' => $venue['total_capacity'] > 0
+                    ? round(($totalParticipants / $venue['total_capacity']) * 100, 1)
+                    : 0,
+            ]);
+        }
+
+        return $enrichedVenues;
+    }
+
+    /**
+     * Agrège les données d'un venue spécifique avec les statistiques des rooms
+     *
+     * @param array $venueData Données du venue (uuid, name, nb_tables, seats_per_table, total_capacity)
+     * @param array $roomsStats Statistiques des rooms
+     * @return array Données enrichies du venue
+     */
+    public function aggregateVenueTables(array $venueData, array $roomsStats): array
+    {
+        $venueUuid = $venueData['venue_uuid'];
+        $seatsPerTable = $venueData['seats_per_table'] ?? 4;
+
+        $nbParticipantsByTable = [];
+        $nbSeatsByTable = [];
+
+        foreach ($roomsStats['rooms'] as $room) {
+            $roomNameParts = explode(' : ', $room['name']);
+
+            if (count($roomNameParts) === 2 && $roomNameParts[0] === $venueUuid) {
+                $tableNumber = $roomNameParts[1];
+                $nbParticipantsByTable[$tableNumber] = $room['participants_count'];
+                $nbSeatsByTable[$tableNumber] = $seatsPerTable;
+            }
+        }
+
+        return array_merge($venueData, [
+            'nb_participants_by_table' => $nbParticipantsByTable,
+            'nb_seats_by_table' => $nbSeatsByTable,
+            'active_tables' => count($nbParticipantsByTable),
+            'available_tables' => $venueData['nb_tables'] - count($nbParticipantsByTable),
+        ]);
+    }
+
+    /**
      * Récupère toutes les données des rooms (vérification connexion + rooms + stats)
      *
      * @return array Tableau avec 'success', 'rooms', 'participants_by_room', 'stats', 'http_status'
      */
     public function getRoomsData(): array
     {
-        // Vérifier la connexion Redis
         if (!$this->isRedisConnected()) {
             return [
                 'success' => false,
@@ -33,53 +110,42 @@ class LiveKitRoomService
             ];
         }
 
-        // Récupérer toutes les rooms
         $rooms = $this->getAllRoomsWithParticipants();
-
-        // Récupérer les stats Redis
         $redisStats = $this->getRedisStats();
-
-        // Récupérer toutes les venues pour avoir les informations sur les places
         $venues = $this->venueRepository->findAll();
 
-        // Créer un mapping venue_name => nbSeat total
         $venueTotalSeatsMap = [];
         foreach ($venues as $venue) {
-            $venueTotalSeatsMap[$venue->getName()] = $venue->getNbSeat();
+            $venueTotalSeatsMap[$venue->getName()] = $venue->getNbTables() * $venue->getSeatsPerTable();
         }
 
-        // Initialiser les compteurs de places occupées
         $nbSeatsOccupiedByVenue = [];
         $nbSeatsOccupiedByRoom = [];
-
-        // Construire les participants par room
         $participantsByRoom = [];
+
         foreach ($rooms as $room) {
             $participantsByRoom[$room['name']] = [
                 'count' => $room['participants_count'],
                 'participants' => $room['participants'],
             ];
 
-            // Nombre de places occupées dans cette room = nombre de participants
             $nbSeatsOccupiedByRoom[$room['name']] = $room['participants_count'];
 
-            // Décomposer le nom de la room pour extraire le nom du venue
             $roomNameParts = explode(' : ', $room['name']);
-            $venueName = $roomNameParts[0]; // "Le 7ème Ciel"
+            $venueUuid = $roomNameParts[0];
 
-            // Ajouter aux places occupées par venue
-            if (!isset($nbSeatsOccupiedByVenue[$venueName])) {
-                $nbSeatsOccupiedByVenue[$venueName] = 0;
+            if (!isset($nbSeatsOccupiedByVenue[$venueUuid])) {
+                $nbSeatsOccupiedByVenue[$venueUuid] = 0;
             }
-            $nbSeatsOccupiedByVenue[$venueName] += $room['participants_count'];
+            $nbSeatsOccupiedByVenue[$venueUuid] += $room['participants_count'];
         }
 
         return [
             'success' => true,
             'rooms' => $rooms,
             'participants_by_room' => $participantsByRoom,
-            'nb_seats_by_venues' => $nbSeatsOccupiedByVenue, // Places OCCUPÉES par venue
-            'nb_seats_by_room' => $nbSeatsOccupiedByRoom,    // Places OCCUPÉES par room
+            'nb_seats_by_venues' => $nbSeatsOccupiedByVenue,
+            'nb_seats_by_room' => $nbSeatsOccupiedByRoom,
             'stats' => [
                 'rooms' => $rooms,
                 'participants_by_room' => $participantsByRoom,
@@ -143,15 +209,12 @@ class LiveKitRoomService
     public function getAllRoomsWithParticipants(): array
     {
         try {
-            // Vérifier la connexion Redis
             if (!$this->redisLiveKitService->testConnection()) {
                 $this->logger->warning('Redis non disponible pour récupérer les rooms');
                 return [];
             }
 
-            // Récupérer toutes les rooms
             $rooms = $this->redisLiveKitService->getAllRooms();
-
             $roomsList = [];
 
             foreach ($rooms as $room) {
@@ -160,9 +223,7 @@ class LiveKitRoomService
                     'node' => $room['node'] ?? null,
                     'participants_count' => $room['participants_count'] ?? 0,
                     'participants' => array_map(function($identity) {
-                        return [
-                            'identity' => $identity,
-                        ];
+                        return ['identity' => $identity];
                     }, $room['participants'] ?? []),
                 ];
             }
