@@ -1,3 +1,4 @@
+// flutter_lib/features/venues/data/models/venues_model.dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/venues_entity.dart';
 
@@ -15,6 +16,15 @@ abstract class VenuesModel with _$VenuesModel {
     String? description,
     int? type,
     int? rank,
+    // Nouveaux champs
+    int? nbTables,
+    int? seatsPerTable,
+    int? totalCapacity,
+    int? totalParticipants,
+    Map<String, int>? nbParticipantsByTable,
+    Map<String, int>? nbSeatsByTable,
+    int? tablesAvailable,
+    double? occupancyRate,
   }) = _VenuesModel;
 
   factory VenuesModel.fromJson(Map<String, dynamic> json) =>
@@ -27,5 +37,13 @@ abstract class VenuesModel with _$VenuesModel {
     description: description,
     type: type,
     rank: rank,
+    nbTables: nbTables,
+    seatsPerTable: seatsPerTable,
+    totalCapacity: totalCapacity,
+    totalParticipants: totalParticipants,
+    nbParticipantsByTable: nbParticipantsByTable,
+    nbSeatsByTable: nbSeatsByTable,
+    tablesAvailable: tablesAvailable,
+    occupancyRate: occupancyRate,
   );
 }

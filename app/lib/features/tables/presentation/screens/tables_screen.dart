@@ -10,14 +10,14 @@ import 'prejoin.dart';
 
 class TablesScreen extends ConsumerStatefulWidget {
   final String venueId;
-
-  // On garde venueName optionnel pour la compatibilité, mais on ne l'utilisera plus
-  final String? venueName;
+  final String venueName;
+  final int nbTables;
 
   const TablesScreen({
     super.key,
     required this.venueId,
-    this.venueName, // Optionnel, ne sera pas utilisé
+    required this.venueName,
+    required this.nbTables,
   });
 
   @override
@@ -25,11 +25,18 @@ class TablesScreen extends ConsumerStatefulWidget {
 }
 
 class _TablesScreenState extends ConsumerState<TablesScreen> {
-  int _nbSeats = 0;
-  String _venueName = '';
+  int _seatsPerTable = 4;
+  int _totalCapacity = 0;
   String _venueUuid = '';
   bool _isLoading = true;
   String? _error;
+
+  // Données des tables
+  Map<String, int> _nbParticipantsByTable = {};
+  Map<String, int> _nbSeatsByTable = {};
+  int _activeTables = 0;
+  int _availableTables = 0;
+  int _totalParticipants = 0;
 
   // Palette de couleurs fixes pour les tables
   static const List<Color> _tableColors = [
@@ -65,9 +72,14 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
 
       if (mounted) {
         setState(() {
-          _nbSeats = response['nb_seats'] as int;
-          _venueName = response['venue_name'] as String;
           _venueUuid = response['venue_uuid'] as String;
+          _seatsPerTable = response['seats_per_table'] as int;
+          _totalCapacity = response['total_capacity'] as int;
+          _nbParticipantsByTable = Map<String, int>.from(response['nb_participants_by_table'] ?? {});
+          _nbSeatsByTable = Map<String, int>.from(response['nb_seats_by_table'] ?? {});
+          _activeTables = response['active_tables'] as int;
+          _availableTables = response['available_tables'] as int;
+          _totalParticipants = _nbParticipantsByTable.values.fold(0, (sum, count) => sum + count);
           _isLoading = false;
         });
       }
@@ -82,9 +94,13 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
   }
 
   // Méthode pour générer le token LiveKit
-  Future<void> _generateLiveKitToken(BuildContext context, WidgetRef ref, Map<String, dynamic> table, int index, String venueUuid) async {
+  Future<void> _generateLiveKitToken(BuildContext context, WidgetRef ref, int tableNumber, String venueUuid) async {
     try {
-      final tokenData = await ref.read(tablesControllerProvider.notifier).generateTokenForTable(table, index, venueUuid);
+      final tokenData = await ref.read(tablesControllerProvider.notifier).generateTokenForTable(
+          {'name': 'Table $tableNumber'},
+          tableNumber - 1,
+          venueUuid
+      );
 
       if (tokenData == null) {
         if (context.mounted) {
@@ -168,7 +184,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
 
               Column(
                 children: [
-                  // AppBar personnalisée avec le nom du lieu (depuis l'API)
+                  // AppBar personnalisée avec stats
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
@@ -177,63 +193,76 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                         bottom: BorderSide(color: Colors.white.withOpacity(0.1)),
                       ),
                     ),
-                    child: Row(
+                    child: Column(
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.arrow_back, color: textPrimary),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _venueName, // Nom du lieu depuis l'API
-                                style: const TextStyle(
-                                  color: textPrimary,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back, color: textPrimary),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.venueName,
+                                    style: const TextStyle(
+                                      color: textPrimary,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  if (!_isLoading)
+                                    Text(
+                                      '${widget.nbTables} table${widget.nbTables > 1 ? 's' : ''} · $_totalParticipants participant${_totalParticipants > 1 ? 's' : ''}',
+                                      style: TextStyle(
+                                        color: textPrimary.withOpacity(0.6),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                ],
                               ),
-                              Text(
-                                _isLoading
-                                    ? 'Chargement des tables...'
-                                    : '${_nbSeats} table${_nbSeats > 1 ? 's' : ''} disponible${_nbSeats > 1 ? 's' : ''}',
-                                style: TextStyle(
-                                  color: textPrimary.withOpacity(0.6),
-                                  fontSize: 12,
-                                ),
+                            ),
+                          ],
+                        ),
+
+                        // Barre de stats
+                        if (!_isLoading && _totalCapacity > 0) ...[
+                          const SizedBox(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _buildStatItem(
+                                icon: Icons.people,
+                                value: _totalParticipants,
+                                label: 'Présents',
+                                color: Colors.green,
+                              ),
+                              _buildStatItem(
+                                icon: Icons.event_seat,
+                                value: _activeTables,
+                                label: 'Tables actives',
+                                color: Colors.orange,
+                              ),
+                              _buildStatItem(
+                                icon: Icons.chair,
+                                value: _availableTables,
+                                label: 'Tables libres',
+                                color: Colors.blue,
                               ),
                             ],
                           ),
-                        ),
-                        if (!_isLoading)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: primaryColor.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: primaryColor.withOpacity(0.3)),
-                            ),
-                            child: Text(
-                              '$_nbSeats',
-                              style: const TextStyle(
-                                color: textPrimary,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
+                        ],
                       ],
                     ),
                   ),
 
-                  // Espacement après l'appbar
                   const SizedBox(height: 16),
 
                   if (_isLoading)
@@ -273,7 +302,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                         ),
                       ),
                     )
-                  else if (_nbSeats == 0)
+                  else if (widget.nbTables == 0)
                       const Expanded(
                         child: Center(
                           child: Column(
@@ -299,7 +328,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                     else
                       Expanded(
                         child: _buildTablesGrid(
-                          _nbSeats,
+                          widget.nbTables,
                           occupiedColor,
                           emptyColor,
                           textPrimary,
@@ -314,44 +343,78 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
     );
   }
 
+  Widget _buildStatItem({
+    required IconData icon,
+    required int value,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 16),
+          const SizedBox(width: 4),
+          Text(
+            '$value',
+            style: TextStyle(
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color.withOpacity(0.8),
+              fontSize: 10,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTablesGrid(
-      int nbSeats,
+      int nbTables,
       Color occupiedColor,
       Color emptyColor,
       Color textPrimary,
       ) {
-    // Générer les tables avec des sièges vides pour l'instant
-    final tables = List.generate(nbSeats, (index) {
-      final tableColor = _getTableColor(index);
-      return {
-        'id': (index + 1).toString(),
-        'name': 'Table ${index + 1}',
-        'occupiedSeats': 0, // Tous vides pour l'instant
-        'totalSeats': 4, // 4 sièges par table
-        'color': tableColor,
-      };
-    });
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: GridView.builder(
-        padding: const EdgeInsets.only(bottom: 24), // Espacement en bas
+        padding: const EdgeInsets.only(bottom: 24),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 16,
-          mainAxisSpacing: 24, // Espacement vertical entre les lignes
+          mainAxisSpacing: 24,
           childAspectRatio: 1,
         ),
-        itemCount: tables.length,
+        itemCount: nbTables,
         itemBuilder: (context, index) {
-          final table = tables[index];
+          final tableNumber = (index + 1).toString();
+          final occupiedSeats = _nbParticipantsByTable[tableNumber] ?? 0;
+          final totalSeats = _nbSeatsByTable[tableNumber] ?? _seatsPerTable;
+          final tableColor = _getTableColor(index);
+
           return _buildTableCard(
-            table,
-            occupiedColor,
-            emptyColor,
-            textPrimary,
+            tableNumber: tableNumber,
+            occupiedSeats: occupiedSeats,
+            totalSeats: totalSeats,
+            tableColor: tableColor,
+            occupiedColor: occupiedColor,
+            emptyColor: emptyColor,
+            textPrimary: textPrimary,
             onTap: () {
-              _generateLiveKitToken(context, ref, table, index, _venueUuid);
+              _generateLiveKitToken(context, ref, index + 1, _venueUuid);
             },
           );
         },
@@ -359,18 +422,18 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
     );
   }
 
-  Widget _buildTableCard(
-      Map<String, dynamic> table,
-      Color occupiedColor,
-      Color emptyColor,
-      Color textPrimary, {
-        required VoidCallback onTap,
-      }) {
-    final occupiedSeats = table['occupiedSeats'] as int;
-    final totalSeats = table['totalSeats'] as int;
+  Widget _buildTableCard({
+    required String tableNumber,
+    required int occupiedSeats,
+    required int totalSeats,
+    required Color tableColor,
+    required Color occupiedColor,
+    required Color emptyColor,
+    required Color textPrimary,
+    required VoidCallback onTap,
+  }) {
     final isFull = occupiedSeats == totalSeats;
     final availableSeats = totalSeats - occupiedSeats;
-    final tableColor = table['color'] as Color;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -414,7 +477,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                 ),
                 child: Stack(
                   children: [
-                    // SVG de la table au centre avec la couleur
+                    // SVG de la table au centre
                     Center(
                       child: SvgPicture.string(
                         '''
@@ -439,7 +502,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                       ),
                     ),
 
-                    // Badge des places disponibles (en bas à droite)
+                    // Badge des places disponibles
                     Positioned(
                       bottom: 8,
                       right: 8,
@@ -465,10 +528,10 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              '$availableSeats',
+                              '$occupiedSeats/$totalSeats',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
+                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -477,7 +540,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                       ),
                     ),
 
-                    // Icône de verre (si occupé) - en haut à gauche
+                    // Icône de participants
                     if (occupiedSeats > 0)
                       Positioned(
                         top: 8,
@@ -485,18 +548,34 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: Colors.amber.withOpacity(0.2),
+                            color: occupiedSeats == totalSeats
+                                ? Colors.red.withOpacity(0.2)
+                                : Colors.green.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
-                            Icons.local_drink,
-                            color: Colors.amber,
-                            size: 16,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.people,
+                                color: occupiedSeats == totalSeats ? Colors.red : Colors.green,
+                                size: 12,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '$occupiedSeats',
+                                style: TextStyle(
+                                  color: occupiedSeats == totalSeats ? Colors.red : Colors.green,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
 
-                    // Indicateur "COMPLET" au centre
+                    // Indicateur "COMPLET"
                     if (isFull)
                       Center(
                         child: Container(
@@ -530,7 +609,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
           ),
         ),
 
-        // Nom de la table en dehors du cadre (en bas)
+        // Nom de la table
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -547,7 +626,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
               ),
               const SizedBox(width: 6),
               Text(
-                table['name'],
+                'Table $tableNumber',
                 style: TextStyle(
                   color: textPrimary,
                   fontSize: 14,
@@ -572,7 +651,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
 
         return Stack(
           children: List.generate(total, (index) {
-            final angle = (2 * 3.14159 * index / total) - (3.14159 / 2);
+            final angle = (2 * pi * index / total) - (pi / 2);
             final x = centerX + radius * cos(angle);
             final y = centerY + radius * sin(angle);
             final isOccupied = index < occupied;

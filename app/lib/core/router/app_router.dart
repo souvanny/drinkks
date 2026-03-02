@@ -140,11 +140,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           // Sous-route pour les tables d'un bar spécifique
           GoRoute(
-            path: ':venueId/tables',
+            path: ':venueId/tables/:venueName/:nbTables',
             name: 'tables',
             builder: (context, state) {
               final venueId = state.pathParameters['venueId']!;
-              return TablesScreen(venueId: venueId, venueName: '',);
+              final venueName = state.pathParameters['venueName']!;
+              final nbTables = int.parse(state.pathParameters['nbTables'] ?? '0');
+
+              return TablesScreen(
+                venueId: venueId,
+                venueName: venueName,
+                nbTables: nbTables,
+              );
             },
           ),
         ],

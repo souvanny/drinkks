@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$VenuesModel {
 
- int get id; String get uuid; String get name; String? get description; int? get type; int? get rank;
+ int get id; String get uuid; String get name; String? get description; int? get type; int? get rank;// Nouveaux champs
+ int? get nbTables; int? get seatsPerTable; int? get totalCapacity; int? get totalParticipants; Map<String, int>? get nbParticipantsByTable; Map<String, int>? get nbSeatsByTable; int? get tablesAvailable; double? get occupancyRate;
 /// Create a copy of VenuesModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +29,16 @@ $VenuesModelCopyWith<VenuesModel> get copyWith => _$VenuesModelCopyWithImpl<Venu
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.rank, rank) || other.rank == rank));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.rank, rank) || other.rank == rank)&&(identical(other.nbTables, nbTables) || other.nbTables == nbTables)&&(identical(other.seatsPerTable, seatsPerTable) || other.seatsPerTable == seatsPerTable)&&(identical(other.totalCapacity, totalCapacity) || other.totalCapacity == totalCapacity)&&(identical(other.totalParticipants, totalParticipants) || other.totalParticipants == totalParticipants)&&const DeepCollectionEquality().equals(other.nbParticipantsByTable, nbParticipantsByTable)&&const DeepCollectionEquality().equals(other.nbSeatsByTable, nbSeatsByTable)&&(identical(other.tablesAvailable, tablesAvailable) || other.tablesAvailable == tablesAvailable)&&(identical(other.occupancyRate, occupancyRate) || other.occupancyRate == occupancyRate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,uuid,name,description,type,rank);
+int get hashCode => Object.hash(runtimeType,id,uuid,name,description,type,rank,nbTables,seatsPerTable,totalCapacity,totalParticipants,const DeepCollectionEquality().hash(nbParticipantsByTable),const DeepCollectionEquality().hash(nbSeatsByTable),tablesAvailable,occupancyRate);
 
 @override
 String toString() {
-  return 'VenuesModel(id: $id, uuid: $uuid, name: $name, description: $description, type: $type, rank: $rank)';
+  return 'VenuesModel(id: $id, uuid: $uuid, name: $name, description: $description, type: $type, rank: $rank, nbTables: $nbTables, seatsPerTable: $seatsPerTable, totalCapacity: $totalCapacity, totalParticipants: $totalParticipants, nbParticipantsByTable: $nbParticipantsByTable, nbSeatsByTable: $nbSeatsByTable, tablesAvailable: $tablesAvailable, occupancyRate: $occupancyRate)';
 }
 
 
@@ -48,7 +49,7 @@ abstract mixin class $VenuesModelCopyWith<$Res>  {
   factory $VenuesModelCopyWith(VenuesModel value, $Res Function(VenuesModel) _then) = _$VenuesModelCopyWithImpl;
 @useResult
 $Res call({
- int id, String uuid, String name, String? description, int? type, int? rank
+ int id, String uuid, String name, String? description, int? type, int? rank, int? nbTables, int? seatsPerTable, int? totalCapacity, int? totalParticipants, Map<String, int>? nbParticipantsByTable, Map<String, int>? nbSeatsByTable, int? tablesAvailable, double? occupancyRate
 });
 
 
@@ -65,7 +66,7 @@ class _$VenuesModelCopyWithImpl<$Res>
 
 /// Create a copy of VenuesModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? uuid = null,Object? name = null,Object? description = freezed,Object? type = freezed,Object? rank = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? uuid = null,Object? name = null,Object? description = freezed,Object? type = freezed,Object? rank = freezed,Object? nbTables = freezed,Object? seatsPerTable = freezed,Object? totalCapacity = freezed,Object? totalParticipants = freezed,Object? nbParticipantsByTable = freezed,Object? nbSeatsByTable = freezed,Object? tablesAvailable = freezed,Object? occupancyRate = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
@@ -73,7 +74,15 @@ as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non
 as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as int?,rank: freezed == rank ? _self.rank : rank // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,nbTables: freezed == nbTables ? _self.nbTables : nbTables // ignore: cast_nullable_to_non_nullable
+as int?,seatsPerTable: freezed == seatsPerTable ? _self.seatsPerTable : seatsPerTable // ignore: cast_nullable_to_non_nullable
+as int?,totalCapacity: freezed == totalCapacity ? _self.totalCapacity : totalCapacity // ignore: cast_nullable_to_non_nullable
+as int?,totalParticipants: freezed == totalParticipants ? _self.totalParticipants : totalParticipants // ignore: cast_nullable_to_non_nullable
+as int?,nbParticipantsByTable: freezed == nbParticipantsByTable ? _self.nbParticipantsByTable : nbParticipantsByTable // ignore: cast_nullable_to_non_nullable
+as Map<String, int>?,nbSeatsByTable: freezed == nbSeatsByTable ? _self.nbSeatsByTable : nbSeatsByTable // ignore: cast_nullable_to_non_nullable
+as Map<String, int>?,tablesAvailable: freezed == tablesAvailable ? _self.tablesAvailable : tablesAvailable // ignore: cast_nullable_to_non_nullable
+as int?,occupancyRate: freezed == occupancyRate ? _self.occupancyRate : occupancyRate // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
@@ -158,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String uuid,  String name,  String? description,  int? type,  int? rank)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  String uuid,  String name,  String? description,  int? type,  int? rank,  int? nbTables,  int? seatsPerTable,  int? totalCapacity,  int? totalParticipants,  Map<String, int>? nbParticipantsByTable,  Map<String, int>? nbSeatsByTable,  int? tablesAvailable,  double? occupancyRate)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VenuesModel() when $default != null:
-return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_that.rank);case _:
+return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_that.rank,_that.nbTables,_that.seatsPerTable,_that.totalCapacity,_that.totalParticipants,_that.nbParticipantsByTable,_that.nbSeatsByTable,_that.tablesAvailable,_that.occupancyRate);case _:
   return orElse();
 
 }
@@ -179,10 +188,10 @@ return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String uuid,  String name,  String? description,  int? type,  int? rank)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  String uuid,  String name,  String? description,  int? type,  int? rank,  int? nbTables,  int? seatsPerTable,  int? totalCapacity,  int? totalParticipants,  Map<String, int>? nbParticipantsByTable,  Map<String, int>? nbSeatsByTable,  int? tablesAvailable,  double? occupancyRate)  $default,) {final _that = this;
 switch (_that) {
 case _VenuesModel():
-return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_that.rank);case _:
+return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_that.rank,_that.nbTables,_that.seatsPerTable,_that.totalCapacity,_that.totalParticipants,_that.nbParticipantsByTable,_that.nbSeatsByTable,_that.tablesAvailable,_that.occupancyRate);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +208,10 @@ return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String uuid,  String name,  String? description,  int? type,  int? rank)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  String uuid,  String name,  String? description,  int? type,  int? rank,  int? nbTables,  int? seatsPerTable,  int? totalCapacity,  int? totalParticipants,  Map<String, int>? nbParticipantsByTable,  Map<String, int>? nbSeatsByTable,  int? tablesAvailable,  double? occupancyRate)?  $default,) {final _that = this;
 switch (_that) {
 case _VenuesModel() when $default != null:
-return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_that.rank);case _:
+return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_that.rank,_that.nbTables,_that.seatsPerTable,_that.totalCapacity,_that.totalParticipants,_that.nbParticipantsByTable,_that.nbSeatsByTable,_that.tablesAvailable,_that.occupancyRate);case _:
   return null;
 
 }
@@ -214,7 +223,7 @@ return $default(_that.id,_that.uuid,_that.name,_that.description,_that.type,_tha
 @JsonSerializable()
 
 class _VenuesModel extends VenuesModel {
-  const _VenuesModel({required this.id, required this.uuid, required this.name, this.description, this.type, this.rank}): super._();
+  const _VenuesModel({required this.id, required this.uuid, required this.name, this.description, this.type, this.rank, this.nbTables, this.seatsPerTable, this.totalCapacity, this.totalParticipants, final  Map<String, int>? nbParticipantsByTable, final  Map<String, int>? nbSeatsByTable, this.tablesAvailable, this.occupancyRate}): _nbParticipantsByTable = nbParticipantsByTable,_nbSeatsByTable = nbSeatsByTable,super._();
   factory _VenuesModel.fromJson(Map<String, dynamic> json) => _$VenuesModelFromJson(json);
 
 @override final  int id;
@@ -223,6 +232,31 @@ class _VenuesModel extends VenuesModel {
 @override final  String? description;
 @override final  int? type;
 @override final  int? rank;
+// Nouveaux champs
+@override final  int? nbTables;
+@override final  int? seatsPerTable;
+@override final  int? totalCapacity;
+@override final  int? totalParticipants;
+ final  Map<String, int>? _nbParticipantsByTable;
+@override Map<String, int>? get nbParticipantsByTable {
+  final value = _nbParticipantsByTable;
+  if (value == null) return null;
+  if (_nbParticipantsByTable is EqualUnmodifiableMapView) return _nbParticipantsByTable;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
+ final  Map<String, int>? _nbSeatsByTable;
+@override Map<String, int>? get nbSeatsByTable {
+  final value = _nbSeatsByTable;
+  if (value == null) return null;
+  if (_nbSeatsByTable is EqualUnmodifiableMapView) return _nbSeatsByTable;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
+}
+
+@override final  int? tablesAvailable;
+@override final  double? occupancyRate;
 
 /// Create a copy of VenuesModel
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +271,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.rank, rank) || other.rank == rank));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _VenuesModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.type, type) || other.type == type)&&(identical(other.rank, rank) || other.rank == rank)&&(identical(other.nbTables, nbTables) || other.nbTables == nbTables)&&(identical(other.seatsPerTable, seatsPerTable) || other.seatsPerTable == seatsPerTable)&&(identical(other.totalCapacity, totalCapacity) || other.totalCapacity == totalCapacity)&&(identical(other.totalParticipants, totalParticipants) || other.totalParticipants == totalParticipants)&&const DeepCollectionEquality().equals(other._nbParticipantsByTable, _nbParticipantsByTable)&&const DeepCollectionEquality().equals(other._nbSeatsByTable, _nbSeatsByTable)&&(identical(other.tablesAvailable, tablesAvailable) || other.tablesAvailable == tablesAvailable)&&(identical(other.occupancyRate, occupancyRate) || other.occupancyRate == occupancyRate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,uuid,name,description,type,rank);
+int get hashCode => Object.hash(runtimeType,id,uuid,name,description,type,rank,nbTables,seatsPerTable,totalCapacity,totalParticipants,const DeepCollectionEquality().hash(_nbParticipantsByTable),const DeepCollectionEquality().hash(_nbSeatsByTable),tablesAvailable,occupancyRate);
 
 @override
 String toString() {
-  return 'VenuesModel(id: $id, uuid: $uuid, name: $name, description: $description, type: $type, rank: $rank)';
+  return 'VenuesModel(id: $id, uuid: $uuid, name: $name, description: $description, type: $type, rank: $rank, nbTables: $nbTables, seatsPerTable: $seatsPerTable, totalCapacity: $totalCapacity, totalParticipants: $totalParticipants, nbParticipantsByTable: $nbParticipantsByTable, nbSeatsByTable: $nbSeatsByTable, tablesAvailable: $tablesAvailable, occupancyRate: $occupancyRate)';
 }
 
 
@@ -257,7 +291,7 @@ abstract mixin class _$VenuesModelCopyWith<$Res> implements $VenuesModelCopyWith
   factory _$VenuesModelCopyWith(_VenuesModel value, $Res Function(_VenuesModel) _then) = __$VenuesModelCopyWithImpl;
 @override @useResult
 $Res call({
- int id, String uuid, String name, String? description, int? type, int? rank
+ int id, String uuid, String name, String? description, int? type, int? rank, int? nbTables, int? seatsPerTable, int? totalCapacity, int? totalParticipants, Map<String, int>? nbParticipantsByTable, Map<String, int>? nbSeatsByTable, int? tablesAvailable, double? occupancyRate
 });
 
 
@@ -274,7 +308,7 @@ class __$VenuesModelCopyWithImpl<$Res>
 
 /// Create a copy of VenuesModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? uuid = null,Object? name = null,Object? description = freezed,Object? type = freezed,Object? rank = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? uuid = null,Object? name = null,Object? description = freezed,Object? type = freezed,Object? rank = freezed,Object? nbTables = freezed,Object? seatsPerTable = freezed,Object? totalCapacity = freezed,Object? totalParticipants = freezed,Object? nbParticipantsByTable = freezed,Object? nbSeatsByTable = freezed,Object? tablesAvailable = freezed,Object? occupancyRate = freezed,}) {
   return _then(_VenuesModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
@@ -282,7 +316,15 @@ as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non
 as String,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as int?,rank: freezed == rank ? _self.rank : rank // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,nbTables: freezed == nbTables ? _self.nbTables : nbTables // ignore: cast_nullable_to_non_nullable
+as int?,seatsPerTable: freezed == seatsPerTable ? _self.seatsPerTable : seatsPerTable // ignore: cast_nullable_to_non_nullable
+as int?,totalCapacity: freezed == totalCapacity ? _self.totalCapacity : totalCapacity // ignore: cast_nullable_to_non_nullable
+as int?,totalParticipants: freezed == totalParticipants ? _self.totalParticipants : totalParticipants // ignore: cast_nullable_to_non_nullable
+as int?,nbParticipantsByTable: freezed == nbParticipantsByTable ? _self._nbParticipantsByTable : nbParticipantsByTable // ignore: cast_nullable_to_non_nullable
+as Map<String, int>?,nbSeatsByTable: freezed == nbSeatsByTable ? _self._nbSeatsByTable : nbSeatsByTable // ignore: cast_nullable_to_non_nullable
+as Map<String, int>?,tablesAvailable: freezed == tablesAvailable ? _self.tablesAvailable : tablesAvailable // ignore: cast_nullable_to_non_nullable
+as int?,occupancyRate: freezed == occupancyRate ? _self.occupancyRate : occupancyRate // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
