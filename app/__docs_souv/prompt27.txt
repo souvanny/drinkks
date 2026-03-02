@@ -1,0 +1,68 @@
+Voilà maintenant à quoi ressemble la réponse de api/venue/list
+
+{
+    "venues": [...],
+    "stats": {
+        "rooms": [...],
+        "participants_by_room": {...},
+        "nb_seats_by_venues": {
+            "Le 7ème Ciel": 4,
+            "La Casa": 2
+        },
+        "nb_seats_by_room": {
+            "Le 7ème Ciel : Table 1": 3,
+            "Le 7ème Ciel : Table 2": 1,
+            "La Casa : Table 1": 2
+        },
+        "summary": {
+            "total_rooms": 3,
+            "total_participants": 6
+        }
+    }
+}
+
+Et /api/venue/tables/list?venue=137d3e07-1266-11f1-bbbb-0242ac1a0002
+
+{
+    "venue_uuid": "137d3e07-1266-11f1-bbbb-0242ac1a0002",
+    "venue_name": "Le 7ème Ciel",
+    "nb_seats": 5,
+    "stats": {
+        "rooms": [
+            {
+                "name": "Le Rétro : Table 3",
+                "node": "ND_mtBuhmBKuh7b",
+                "participants_count": 1,
+                "participants": [
+                    {
+                        "identity": "AtJbLX0UgIcpiaWCZNnc9JdLzff1"
+                    }
+                ]
+            }
+        ],
+        "participants_by_room": {
+            "Le Rétro : Table 3": {
+                "count": 1,
+                "participants": [
+                    {
+                        "identity": "AtJbLX0UgIcpiaWCZNnc9JdLzff1"
+                    }
+                ]
+            }
+        },
+        "nb_seats_by_venues": {
+            "Le Rétro": 1
+        },
+        "nb_seats_by_room": {
+            "Le Rétro : Table 3": 1
+        },
+        "summary": {
+            "total_rooms": 1,
+            "total_participants": 1
+        }
+    }
+}
+
+
+Je voudrais intégrer dans les modèles flutter summary, nb_seats_by_venues et nb_seats_by_room.
+Et pouvoir utiliser ces données dans VenuesScreen et TablesScreen.

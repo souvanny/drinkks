@@ -26,7 +26,8 @@ class TablesScreen extends ConsumerStatefulWidget {
 
 class _TablesScreenState extends ConsumerState<TablesScreen> {
   int _nbSeats = 0;
-  String _venueName = ''; // Sera rempli par l'API
+  String _venueName = '';
+  String _venueUuid = '';
   bool _isLoading = true;
   String? _error;
 
@@ -65,7 +66,8 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
       if (mounted) {
         setState(() {
           _nbSeats = response['nb_seats'] as int;
-          _venueName = response['venue_name'] as String; // Récupération du nom depuis l'API
+          _venueName = response['venue_name'] as String;
+          _venueUuid = response['venue_uuid'] as String;
           _isLoading = false;
         });
       }
@@ -80,9 +82,9 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
   }
 
   // Méthode pour générer le token LiveKit
-  Future<void> _generateLiveKitToken(BuildContext context, WidgetRef ref, Map<String, dynamic> table, String venueName) async {
+  Future<void> _generateLiveKitToken(BuildContext context, WidgetRef ref, Map<String, dynamic> table, int index, String venueUuid) async {
     try {
-      final tokenData = await ref.read(tablesControllerProvider.notifier).generateTokenForTable(table, venueName);
+      final tokenData = await ref.read(tablesControllerProvider.notifier).generateTokenForTable(table, index, venueUuid);
 
       if (tokenData == null) {
         if (context.mounted) {
@@ -349,7 +351,7 @@ class _TablesScreenState extends ConsumerState<TablesScreen> {
             emptyColor,
             textPrimary,
             onTap: () {
-              _generateLiveKitToken(context, ref, table, _venueName);
+              _generateLiveKitToken(context, ref, table, index, _venueUuid);
             },
           );
         },

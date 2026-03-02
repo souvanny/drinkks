@@ -93,6 +93,7 @@ class VenueController extends AbstractController
                 'id' => $venue->getId(),
                 'uuid' => $venue->getUuid(),
                 'name' => $venue->getName(),
+                'nb_seats' => $venue->getNbSeat(),
                 'description' => $venue->getDescription(),
                 'type' => $venue->getType(),
                 'rank' => $venue->getRank(),
