@@ -30,8 +30,11 @@ class VenueEntity
     #[ORM\Column(name: '`rank`', type: 'integer', nullable: true)]
     private ?int $rank = null;
 
-    #[ORM\Column(name: 'nb_seat', type: 'integer', nullable: false, options: ['default' => 0])]
-    private int $nbSeat = 0;
+    #[ORM\Column(name: 'nb_tables', type: 'integer', nullable: false, options: ['default' => 0])]
+    private int $nbTables = 0;
+
+    #[ORM\Column(name: 'seats_per_table', type: 'integer', nullable: false, options: ['default' => 4])]
+    private int $seatsPerTable = 4;
 
     #[ORM\Column(name: 'created_at', type: 'datetime')]
     private \DateTimeInterface $createdAt;
@@ -57,8 +60,6 @@ class VenueEntity
     {
         $this->updatedAt = new \DateTime();
     }
-
-    // Getters and Setters
 
     public function getId(): ?int
     {
@@ -126,15 +127,31 @@ class VenueEntity
         return $this;
     }
 
-    public function getNbSeat(): int
+    public function getNbTables(): int
     {
-        return $this->nbSeat;
+        return $this->nbTables;
     }
 
-    public function setNbSeat(int $nbSeat): self
+    public function setNbTables(int $nbTables): self
     {
-        $this->nbSeat = $nbSeat;
+        $this->nbTables = $nbTables;
         return $this;
+    }
+
+    public function getSeatsPerTable(): int
+    {
+        return $this->seatsPerTable;
+    }
+
+    public function setSeatsPerTable(int $seatsPerTable): self
+    {
+        $this->seatsPerTable = $seatsPerTable;
+        return $this;
+    }
+
+    public function getTotalCapacity(): int
+    {
+        return $this->nbTables * $this->seatsPerTable;
     }
 
     public function getCreatedAt(): \DateTimeInterface

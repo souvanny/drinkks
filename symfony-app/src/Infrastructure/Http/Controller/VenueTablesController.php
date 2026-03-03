@@ -19,13 +19,11 @@ class VenueTablesController extends AbstractController
     public function __construct(
         private readonly VenueRepository $venueRepository,
         private readonly LiveKitRoomService $liveKitRoomService,
-
-
     ) {}
 
     #[Route('/list', name: 'venue_tables_list', methods: ['GET'])]
     #[OA\Get(
-        summary: 'Récupère le nombre de tables disponibles pour un lieu',
+        summary: 'Récupère les tables actives pour un lieu',
         parameters: [
             new OA\Parameter(
                 name: 'venue',
@@ -38,12 +36,19 @@ class VenueTablesController extends AbstractController
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Informations sur le nombre de tables',
+                description: 'Informations sur les tables du lieu',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'venue_uuid', type: 'string'),
                         new OA\Property(property: 'venue_name', type: 'string'),
-                        new OA\Property(property: 'nb_seats', type: 'integer'),
+                        new OA\Property(property: 'nb_tables', type: 'integer'),
+                        new OA\Property(property: 'seats_per_table', type: 'integer'),
+                        new OA\Property(property: 'total_capacity', type: 'integer'),
+                        new OA\Property(property: 'nb_participants_by_table', type: 'object'),
+                        new OA\Property(property: 'nb_seats_by_table', type: 'object'),
+                        new OA\Property(property: 'active_tables', type: 'integer'),
+                        new OA\Property(property: 'available_tables', type: 'integer'),
+                        new OA\Property(property: 'stats', type: 'object'),
                     ]
                 )
             ),
@@ -51,7 +56,6 @@ class VenueTablesController extends AbstractController
             new OA\Response(response: 404, description: 'Lieu non trouvé')
         ]
     )]
-    #[Route('/list', name: 'venue_tables_list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
         $venueUuid = $request->query->get('venue');
@@ -66,15 +70,23 @@ class VenueTablesController extends AbstractController
             return $this->json(['error' => 'Lieu non trouvé'], Response::HTTP_NOT_FOUND);
         }
 
-        // Récupérer les données des rooms de manière factorisée
         $roomsStats = $this->liveKitRoomService->getRoomsStats();
 
-        return $this->json([
-            'venue_uuid' => $venue->getUuid(),
-            'venue_name' => $venue->getName(),
-            'nb_seats' => $venue->getNbSeat(),
+        $venueData = [
+            'venueUuid' => $venue->getUuid(),
+            'venueName' => $venue->getName(),
+            'nbTables' => $venue->getNbTables(),
+            'seatsPerTable' => $venue->getSeatsPerTable(),
+            'totalCapacity' => $venue->getTotalCapacity(),
+        ];
+
+        $enrichedVenueData = $this->liveKitRoomService->aggregateVenueTables($venueData, $roomsStats);
+
+
+        return $this->json(array_merge($enrichedVenueData, [
             'stats' => $roomsStats,
-        ]);
+        ]));
     }
+
 
 }

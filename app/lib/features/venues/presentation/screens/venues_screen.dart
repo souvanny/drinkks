@@ -1,7 +1,6 @@
 // flutter_lib/features/venues/presentation/screens/venues_screen.dart
 
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -135,7 +134,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
 
   void _clearSearch() {
     _searchController.clear();
-    // Le listener va automatiquement déclencher la mise à jour
   }
 
   void _selectType(int? type) {
@@ -222,7 +220,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
           preferredSize: const Size.fromHeight(100),
           child: Column(
             children: [
-              // Barre de recherche
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: TextField(
@@ -248,7 +245,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                   ),
                 ),
               ),
-              // Filtres par type
               if (_showFilters) ...[
                 const SizedBox(height: 8),
                 SizedBox(
@@ -278,7 +274,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
         data: (venues) {
           return Column(
             children: [
-              // Indicateur de nombre de résultats
               if (controller.totalItems > 0)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -322,7 +317,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    childAspectRatio: 0.8,
+                    mainAxisExtent: 210,
                   ),
                   itemCount: venues.length,
                   itemBuilder: (context, index) {
@@ -336,7 +331,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                   },
                 ),
               ),
-              // Pagination
               if (controller.totalItems > 0)
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -382,7 +376,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                             : null,
                       ),
                       const SizedBox(width: 8),
-                      // Bouton de rafraîchissement
                       IconButton(
                         icon: const Icon(Icons.refresh),
                         color: primaryColor,
@@ -459,6 +452,12 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
     final imagePath = _getImageForType(venue.type);
     final typeLabel = _getTypeLabel(venue.type);
 
+    // Données de participants
+    final totalParticipants = venue.totalParticipants ?? 0;
+    final totalCapacity = venue.totalCapacity ?? 0;
+    final tablesAvailable = venue.tablesAvailable ?? 0;
+    final occupancyRate = venue.occupancyRate ?? 0.0;
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -466,82 +465,177 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       ),
       color: backgroundColor,
       child: InkWell(
+        // onTap: () {
+        //   context.go('/tables/${venue.uuid}');
+        // },
+        // onTap: () {
+        //   context.go('/venues/${venue.uuid}/tables');
+        // },
         onTap: () {
-          context.go('/venues/${venue.uuid}/tables', extra: venue.name);
+          context.go('/venues/${venue.uuid}/tables/${venue.name}/${venue.nbTables ?? 0}');
         },
         borderRadius: BorderRadius.circular(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              height: 100,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-                image: DecorationImage(
-                  image: AssetImage(imagePath!),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  ),
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.6),
-                    ],
+            // Image avec stats superposées
+            Stack(
+              children: [
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    image: DecorationImage(
+                      image: AssetImage(imagePath!),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-                alignment: Alignment.bottomLeft,
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  venue.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
+                // Gradient overlay pour lisibilité
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.7),
+                      ],
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
+                // Nom du lieu
+                Positioned(
+                  bottom: 8,
+                  left: 8,
+                  right: 8,
+                  child: Text(
+                    venue.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                // Badge participants
+                if (totalParticipants > 0)
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.people,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$totalParticipants',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
+
             Padding(
               padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: primaryColor.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      typeLabel,
-                      style: TextStyle(
-                        color: primaryColor,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
+                  // Type et disponibilité
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: primaryColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          typeLabel,
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      const Spacer(),
+                      // Indicateur de capacité
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: totalParticipants > 0
+                              ? Colors.green.withOpacity(0.2)
+                              : Colors.grey.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.event_seat,
+                              size: 8,
+                              color: totalParticipants > 0 ? Colors.green : Colors.grey,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              '$tablesAvailable/${venue.nbTables ?? 0}',
+                              style: TextStyle(
+                                color: totalParticipants > 0 ? Colors.green : Colors.grey,
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
+
+                  const SizedBox(height: 6),
+
+                  // Description
                   Text(
                     venue.description ?? 'Aucune description',
                     style: TextStyle(
@@ -551,6 +645,38 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+
+                  // Barre de progression de l'occupation
+                  if (totalCapacity > 0) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(2),
+                            child: LinearProgressIndicator(
+                              value: totalParticipants / totalCapacity,
+                              backgroundColor: Colors.grey.withOpacity(0.3),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                occupancyRate > 80 ? Colors.red :
+                                occupancyRate > 50 ? Colors.orange :
+                                Colors.green,
+                              ),
+                              minHeight: 3,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${occupancyRate.toStringAsFixed(0)}%',
+                          style: TextStyle(
+                            color: textPrimary.withOpacity(0.5),
+                            fontSize: 8,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -559,6 +685,4 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
       ),
     );
   }
-
-
 }
