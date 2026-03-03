@@ -317,7 +317,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
                     crossAxisCount: 2,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    mainAxisExtent: 190,
+                    mainAxisExtent: 210,
                   ),
                   itemCount: venues.length,
                   itemBuilder: (context, index) {
